@@ -1,0 +1,320 @@
+{
+  "module": "ActuationPass",
+  "structure": "ActuationPass",
+  "kind": "abstraction-primitive",
+  "property_classes": ["safety"],
+  "state_fields": ["allocation", "effects", "complete"],
+  "observation_fields": ["allocation", "effects", "complete"],
+  "implementation_state_fields": ["allocation", "effects", "complete"],
+  "implementation_state_map": {
+    "allocation": "allocation",
+    "effects": "effects",
+    "complete": "complete"
+  },
+  "observation_map": {
+    "allocation": "allocation",
+    "effects": "effects",
+    "complete": "complete"
+  },
+  "canonical_actions": ["Actuate", "Allocate", "Deallocate", "Finish"],
+  "system_actions": ["Actuate", "Finish"],
+  "environment_actions": ["Allocate", "Deallocate"],
+  "failure_actions": [],
+  "commit_actions": ["Actuate", "Finish"],
+  "executable_actions": ["actuate", "allocate", "deallocate", "finish"],
+  "action_map": {
+    "Actuate": ["actuate"],
+    "Allocate": ["allocate"],
+    "Deallocate": ["deallocate"],
+    "Finish": ["finish"]
+  },
+  "obligations": ["EffectFidelity", "PassCompleteness", "ActuationScope"],
+  "violations": ["EffectAllocationMismatch", "IncompleteClosure", "ActuatedWithoutAllocation"],
+  "violation_of": {
+    "EffectFidelity": "EffectAllocationMismatch",
+    "PassCompleteness": "IncompleteClosure",
+    "ActuationScope": "ActuatedWithoutAllocation"
+  },
+  "actors": ["effect-requester", "actuation-owner", "allocation-provider"],
+  "claimant": "effect-requester",
+  "owner_of": {
+    "Actuate": "actuation-owner",
+    "Allocate": "allocation-provider",
+    "Deallocate": "allocation-provider",
+    "Finish": "actuation-owner"
+  },
+  "delegate_of": {
+    "Actuate": ["actuation-owner"],
+    "Allocate": ["allocation-provider"],
+    "Deallocate": ["allocation-provider"],
+    "Finish": ["actuation-owner"]
+  },
+  "assurance_at": {
+    "Actuate": "at-commit",
+    "Finish": "at-commit"
+  },
+  "relies": [
+    "allocation-provider-respects-no-withdraw-after-effect",
+    "atomic-allocation-read-and-effect-record",
+    "atomic-completeness-check-and-finish",
+    "serialized-pass-state-mutation",
+    "complete-effect-and-allocation-writer-tcb"
+  ],
+  "guarantees": [
+    {
+      "id": "actuationpass-written-profile-refinement",
+      "statement": "Mechanized refinement maps the written executable contract profile to the canonical ActuationPass machine under the named state, action, and premise map.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "refinement",
+      "local_theorem": "ActuationPassImplRefinesSpec_Proof!RefinementThm"
+    },
+    {
+      "id": "effect-fidelity",
+      "statement": "Every recorded effect names the live allocated resource at the governed actuation commit.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "obligation",
+      "local_theorem": "ActuationPass_Proof!EffectFidelitySafety"
+    },
+    {
+      "id": "truthful-pass-closure",
+      "statement": "Finish records closure only when every currently allocated seat has a recorded effect; ActuationScope follows from fidelity.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "obligation",
+      "local_theorem": "ActuationPass_Proof!PassCompletenessSafety and ActuationScopeSafety"
+    },
+    {
+      "id": "fused-actuation-and-finish-license",
+      "statement": "The allocation read/effect record and the completeness check/finish flag are each fused at their governed commit.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "check-act",
+      "local_theorem": "TheoryKernel_Proof!CheckActStability"
+    },
+    {
+      "id": "actuation-owner-ceiling",
+      "statement": "Prevention applies only to the recorded effect and closure commits controlled by the actuation owner under the named allocation rely.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "ownership-assurance",
+      "local_theorem": "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
+    },
+    {
+      "id": "actuation-executable-transfer",
+      "statement": "The mechanized implementation relation transfers mapped state-record fidelity and truthful closure for the written four-action profile.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "refinement",
+      "local_theorem": "ActuationPassImplRefinesSpec_Proof!RefinementThm"
+    }
+  ],
+  "runtime_providers": ["actuation-owner", "allocation-provider", "exclusive-mutation-provider", "external-effect-provider"],
+  "failure_ceilings": [
+    "the-model-records-an-effect-but-does-not-prove-an-external-effect-succeeded",
+    "no-exactly-once-idempotence-compensation-or-recovery-result",
+    "no-modeled-crash-torn-write-or-allocation-provider-failure",
+    "concurrent-mutation-outside-the-serialized-boundary"
+  ],
+  "execution_carriers": ["Sequential"],
+  "local_theorems": [
+    "ActuationPassImplRefinesSpec_Proof!RefinementThm",
+    "ActuationPass_Proof!EffectFidelitySafety",
+    "ActuationPass_Proof!PassCompletenessSafety",
+    "ActuationPass_Proof!ActuationScopeSafety",
+    "TheoryKernel_Proof!ObligationPreservation",
+    "TheoryKernel_Proof!CheckActStability",
+    "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
+  ],
+  "executable_pointers": [
+    "formal/structures/ActuationPass/refinement/ActuationPassImplRefinesSpec.tla",
+    "formal/structures/ActuationPass/refinement/ActuationPassImplRefinesSpec_Proof.tla",
+    "crate://automation-structures/0.2.3/src/primitives/actuation_pass.rs",
+    "formal/structures/ActuationPass/ActuationPass.tla",
+    "formal/structures/ActuationPass/ActuationPass_Proof.tla"
+  ],
+  "library_premises": [
+    "ActuationPass-written-contract-refinement-profile",
+    "canonical-four-action-actuation-machine",
+    "EffectFidelitySafety",
+    "PassCompletenessSafety",
+    "ActuationScopeSafety",
+    "ObligationPreservation",
+    "CheckActStability",
+    "OwnershipAssuranceClassification"
+  ],
+  "deployment_premises": [
+    "Seats-and-Resources-instantiated-by-finite-executable-indices-and-u64-values",
+    "allocation-provider-respects-no-withdraw-after-effect",
+    "atomic-allocation-read-and-effect-record",
+    "atomic-completeness-check-and-finish",
+    "serialized-pass-state-mutation",
+    "complete-effect-and-allocation-writer-tcb"
+  ],
+  "residuals": [
+    "formal-correspondence-is-limited-to-the-written-state-action-and-premise-map",
+    "effect-record-fidelity-is-not-proof-of-external-side-effect-success",
+    "no-exactly-once-effect-claim",
+    "allocation-lifecycle-after-pass-closure-is-outside-the-machine",
+    "no-crash-retry-compensation-or-durable-effect-evidence-result"
+  ],
+  "evidence_ceilings": [
+    "implementation-refinement-covers-only-the-written-bounded-contract-profile",
+    "TLAPS-proves-the-three-written-state-obligations-with-no-module-level-assumption",
+    "ActuationScope-is-a-derived-corollary-not-an-independent-effect-success-result",
+    "Verus-proves-state-and-frame-contracts-under-exclusive-mutation",
+    "executable-transfer-is-limited-to-the-mapped-state-record-and-closure-semantics"
+  ],
+  "cases": {
+    "valid": [
+      {
+        "id": "fused-actuation",
+        "description": "Actuate reads a non-NULL allocation and records that same resource in one pass-owned commit."
+      },
+      {
+        "id": "truthful-finish",
+        "description": "Finish sets complete only after every currently allocated seat has a non-NULL effect record."
+      }
+    ],
+    "boundary": [
+      {
+        "id": "empty-pass-finish",
+        "description": "A pass with no allocated seats may finish because the completeness condition is vacuous over seats, not over obligations."
+      },
+      {
+        "id": "unapplied-deallocation",
+        "description": "The allocation provider may withdraw only a seat whose effect is still NULL before closure."
+      }
+    ],
+    "misuse": [
+      {
+        "id": "split-allocation-read-effect-write",
+        "description": "Separating the allocation read from the effect record admits a deallocation race and loses fidelity."
+      },
+      {
+        "id": "finish-with-pending-seat",
+        "description": "Setting complete while an allocated seat remains unapplied violates PassCompleteness."
+      }
+    ],
+    "failure": [
+      {
+        "id": "external-effect-fails-after-record",
+        "description": "A recorded effect with a failed external side effect remains possible outside the model and transfers no effect-success claim."
+      },
+      {
+        "id": "withdraw-after-effect",
+        "description": "Allocation withdrawal after actuation but before closure violates the named environment rely and ActuationScope."
+      }
+    ]
+  },
+  "applicable_families": ["obligation", "check-act", "ownership-assurance", "refinement"],
+  "discharged_families": ["obligation", "check-act", "ownership-assurance", "refinement"],
+  "transfer_classes": ["safety", "observation"],
+  "refinement_status": "mechanized",
+  "conformance_details": {
+    "initialization": "ActuationPass::new maps the supplied allocation, all-None effects, and complete = false to canonical Init.",
+    "step-simulation": "Accepted allocate, deallocate, actuate, and finish calls map to their named canonical actions; disabled admission wrappers stutter.",
+    "observation-agreement": "allocation, effects, and complete agree exactly; Some(resource) maps the non-NULL resource value and None maps NULL.",
+    "commit-agreement": "Actuate and Finish are actuation-owner commits; Allocate and Deallocate are environment-owned allocation-provider transitions and cannot be silently promoted to pass commits.",
+    "failure-persistence-agreement": "No crash, external-effect failure, retry, compensation, or recovery action is modeled; each must be added before any such path transfers.",
+    "rely-discharge": "Deployment supplies serialized mutation, fused reads/writes, the allocation-provider guard, and complete inventory of allocation/effect writers.",
+    "liveness-preservation": "No eventual actuation or finish guarantee is transferred by this record.",
+    "tcb-closure": "Every allocation, effects, complete, and external-effect path is inventoried as a mapped method, named provider transition, or explicit residual."
+  },
+  "source_checks": [
+    {
+      "path": "formal/structures/ActuationPass/refinement/ActuationPassImplRefinesSpec_Proof.tla",
+      "contains": ["THEOREM", "Refinement"]
+    },
+    {
+      "path": "formal/structures/ActuationPass/ActuationPass.tla",
+      "contains": ["VARIABLES allocation", "Actuate(s) ==", "Allocate(s, r) ==", "Deallocate(s) ==", "Finish ==", "EffectFidelity ==", "PassCompleteness =="]
+    },
+    {
+      "path": "formal/structures/ActuationPass/ActuationPass_Proof.tla",
+      "contains": ["THEOREM EffectFidelitySafety", "THEOREM PassCompletenessSafety", "THEOREM ActuationScopeSafety"]
+    },
+    {
+      "path": "crate://automation-structures/0.2.3/src/primitives/actuation_pass.rs",
+      "contains": ["pub struct ActuationPass", "pub fn allocate", "pub fn deallocate", "pub fn actuate", "pub fn finish"]
+    }
+  ],
+  "witness": {
+    "states": ["idle", "allocated", "actuated", "complete", "wrong-effect", "incomplete-closed"],
+    "initial": ["idle"],
+    "obligation_states": ["idle", "allocated", "actuated", "complete"],
+    "violation_states": ["wrong-effect", "incomplete-closed"],
+    "system_steps": [
+      ["allocated", "actuated"],
+      ["actuated", "complete"],
+      ["idle", "complete"]
+    ],
+    "environment_steps": [
+      ["idle", "allocated"],
+      ["allocated", "idle"]
+    ],
+    "action_steps": {
+      "Actuate": [["allocated", "actuated"]],
+      "Allocate": [["idle", "allocated"]],
+      "Deallocate": [["allocated", "idle"]],
+      "Finish": [
+        ["actuated", "complete"],
+        ["idle", "complete"]
+      ]
+    },
+    "rely_steps": [
+      ["idle", "allocated"],
+      ["allocated", "idle"]
+    ],
+    "commit_steps": [
+      ["allocated", "actuated"],
+      ["actuated", "complete"],
+      ["idle", "complete"]
+    ],
+    "failure_steps": [],
+    "interference_steps": [
+      ["idle", "allocated"],
+      ["allocated", "idle"]
+    ],
+    "check_mode": "atomic",
+    "check_result_states": ["idle", "allocated", "actuated"],
+    "predicate_states": ["idle", "allocated", "actuated", "complete"],
+    "actors": ["effect-requester", "actuation-owner", "allocation-provider"],
+    "providers": ["actuation-owner", "allocation-provider"],
+    "claimant": "effect-requester",
+    "commit_owner": "actuation-owner",
+    "commit_delegate": "actuation-owner",
+    "assurance_provider": "actuation-owner",
+    "assurance_position": "at-commit",
+    "prevention_controllers": ["actuation-owner"],
+    "unavailable_providers": [],
+    "persistent_observe": {
+      "idle": true,
+      "allocated": true,
+      "actuated": true,
+      "complete": true,
+      "wrong-effect": false,
+      "incomplete-closed": false
+    },
+    "persistent_evidence": true,
+    "recovery_available": false,
+    "active_states": ["idle", "allocated", "actuated"],
+    "closed_states": ["complete", "wrong-effect", "incomplete-closed"],
+    "progress_steps": [],
+    "other_steps": [],
+    "handoff_steps": [],
+    "rank_bound": 0,
+    "rank": {
+      "idle": 0,
+      "allocated": 0,
+      "actuated": 0,
+      "complete": 0,
+      "wrong-effect": 0,
+      "incomplete-closed": 0
+    },
+    "fairness_owners": ["actuation-owner"],
+    "fairness_owner": "actuation-owner",
+    "fairness_owner_of": {}
+  }
+}

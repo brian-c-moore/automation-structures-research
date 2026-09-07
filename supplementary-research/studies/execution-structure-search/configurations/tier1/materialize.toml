@@ -1,0 +1,19 @@
+name = "Materialize"
+tier = 1
+modality = "StreamGraph"
+evidence = "direct_comparison"
+workload = "streaming_sql"
+
+[policies]
+invocation = "Continuous_Differential"
+topology = "Declared_Incremental"
+dependencies = "Fixed"
+lifecycle = "Maintained_Views"
+
+[trace_properties]
+no_record_loss = true
+
+citations = [
+    "Materialize documentation",
+    "McSherry et al. — Differential Dataflow",
+]

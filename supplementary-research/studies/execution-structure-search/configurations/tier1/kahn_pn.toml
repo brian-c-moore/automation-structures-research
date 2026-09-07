@@ -1,0 +1,19 @@
+name = "Kahn_PN"
+tier = 1
+modality = "StreamGraph"
+evidence = "trace_equivalence"
+workload = "data_pipeline"
+
+[policies]
+invocation = "Blocking_Read"
+topology = "Declared_Static"
+dependencies = "Fixed"
+lifecycle = "Continuous"
+
+[trace_properties]
+no_record_loss = true
+
+citations = [
+    "Kahn (1974) — The Semantics of a Simple Language for Parallel Programming. IFIP Congress",
+    "Lee & Parks (1995) — Dataflow Process Networks. Proc. IEEE",
+]

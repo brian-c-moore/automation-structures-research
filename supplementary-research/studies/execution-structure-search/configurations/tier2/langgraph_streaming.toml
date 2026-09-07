@@ -1,0 +1,15 @@
+name = "LangGraph_streaming"
+tier = 2
+modality = "StreamGraph"
+evidence = "direct_comparison"
+workload = "token_stream"
+
+[policies]
+invocation = "PerToken_Or_PerMessage"
+topology = "Declared_Often_Cyclic"
+dependencies = "HotSwappable"
+lifecycle = "Per_Invocation"
+
+citations = [
+    "LangGraph documentation",
+]

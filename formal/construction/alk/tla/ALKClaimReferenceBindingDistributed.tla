@@ -1,0 +1,3 @@
+---- MODULE ALKClaimReferenceBindingDistributed ----
+EXTENDS ALKClaimReferenceBindingWitness
+====

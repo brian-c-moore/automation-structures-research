@@ -1,0 +1,68 @@
+{
+  "controls": {
+    "arrival_order_replay": "valid states diverge",
+    "check_before_candidate": "cycle escapes",
+    "conflicting_identity_content": "rejected",
+    "derive_views_only": "inverse views agree but a cycle remains",
+    "drop_issued_operation": "tree agrees but outcome and input accounting fail",
+    "independent_cached_count": "count differs from collection cardinality",
+    "stale_raw_list_writes": "invalid in both transaction orders"
+  },
+  "enumeration": {
+    "delivery_scenarios": 3312,
+    "locally_valid_operation_pairs": 828,
+    "rejected_operations_in_canonical_pair_runs": 48,
+    "replay_prefix_validity_checks": 6624,
+    "valid_initial_trees": 16
+  },
+  "kind": "finite domain design exploration; no catalog implementation or formal proof",
+  "limits": [
+    "finite enumeration plus named witnesses; no unbounded theorem",
+    "validity reference is separate; replay policy has no independent full semantic oracle",
+    "no memory concurrency, durable storage, transport, reclamation, or external effects",
+    "no Rust structure binding, kernel integration, or implementation conformance"
+  ],
+  "profile": {
+    "edits": "fixed-universe reparent, no create/delete, no semantic prerequisites",
+    "nodes": [
+      "root",
+      "A",
+      "B",
+      "C"
+    ],
+    "operations_per_enumerated_case": 2,
+    "order": "logical counter then replica identity",
+    "policy": "replay from base; reject a move if its candidate is not a rooted tree",
+    "replicas": [
+      "A",
+      "B"
+    ],
+    "root": "root"
+  },
+  "source_list_witness": {
+    "A_then_B": {
+      "end": "null",
+      "path": [
+        1,
+        3
+      ],
+      "valid": false
+    },
+    "B_then_A": {
+      "end": "cycle",
+      "path": [
+        1,
+        3,
+        2,
+        4
+      ],
+      "valid": false
+    }
+  },
+  "source_sha256": "9cbb26d983415f491b1993d8bf9091b5723226008c8a307082cd4a88462631c0",
+  "witnesses": {
+    "late_operation": "B changes from applied to rejected-cycle after earlier A arrives",
+    "missing_dependency": "dependent edit waits, then receives its deterministic outcome",
+    "refusal": "both replicas remain valid but different"
+  }
+}

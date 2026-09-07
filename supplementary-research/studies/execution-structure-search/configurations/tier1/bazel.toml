@@ -1,0 +1,20 @@
+name = "Bazel"
+tier = 1
+modality = "StepGraph"
+evidence = "direct_comparison"
+workload = "build_dag"
+
+[policies]
+invocation = "Demand_Pull"
+topology = "Declared_DAG_ContentHash"
+dependencies = "Fixed"
+lifecycle = "Incremental"
+
+[trace_properties]
+predecessor_before_successor = true
+demand_pull_only_requested = true
+
+citations = [
+    "Bazel project documentation (bazel.build)",
+    "Mokhov, Mitchell & Peyton Jones (2018) — Build Systems à la Carte. ICFP",
+]

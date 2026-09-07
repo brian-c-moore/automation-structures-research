@@ -1,0 +1,281 @@
+{
+  "module": "AuditSink",
+  "structure": "AuditSink",
+  "kind": "abstraction-primitive",
+  "property_classes": ["safety", "evidence"],
+  "state_fields": ["log", "last_hash"],
+  "observation_fields": ["audit-log", "last-hash", "record-event"],
+  "implementation_state_fields": ["log", "last_hash"],
+  "implementation_state_map": {
+    "log": "log",
+    "last_hash": "last_hash"
+  },
+  "observation_map": {
+    "audit-log": "log",
+    "last-hash": "last_hash",
+    "record-event": "log"
+  },
+  "canonical_actions": ["Record"],
+  "system_actions": ["Record"],
+  "environment_actions": [],
+  "failure_actions": [],
+  "commit_actions": ["Record"],
+  "executable_actions": ["record"],
+  "action_map": {
+    "Record": ["record"]
+  },
+  "obligations": ["ChainIntegrity", "HashConsistency", "HashBindsContent", "TamperEvidentInv"],
+  "violations": ["BrokenPredecessorLink", "LastHashMismatch", "StoredHashMismatch", "AmbiguousHashPreimage"],
+  "violation_of": {
+    "ChainIntegrity": "BrokenPredecessorLink",
+    "HashConsistency": "LastHashMismatch",
+    "HashBindsContent": "StoredHashMismatch",
+    "TamperEvidentInv": "AmbiguousHashPreimage"
+  },
+  "actors": ["audit-claimant", "audit-owner", "audit-storage", "hash-provider"],
+  "claimant": "audit-claimant",
+  "owner_of": {
+    "Record": "audit-owner"
+  },
+  "delegate_of": {
+    "Record": ["audit-owner"]
+  },
+  "assurance_at": {
+    "Record": "at-commit"
+  },
+  "relies": [
+    "atomic-log-and-last-hash-append",
+    "HashType",
+    "HashCR-for-TamperEvident-only",
+    "persistent-custody-for-cross-failure-evidence",
+    "complete-audit-writer-tcb-with-no-tamper-transition"
+  ],
+  "guarantees": [
+    {
+      "id": "auditsink-written-profile-refinement",
+      "statement": "Mechanized refinement maps the written executable contract profile to the canonical AuditSink machine under the named state, action, and premise map.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "refinement",
+      "local_theorem": "AuditSinkImplRefinesSpec_Proof!RefinementThm"
+    },
+    {
+      "id": "audit-chain-structure",
+      "statement": "Every admitted Record preserves predecessor linkage, last-hash consistency, and stored hash/content agreement.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "obligation",
+      "local_theorem": "AuditSink_Proof!SafetyOriginal"
+    },
+    {
+      "id": "conditional-tamper-evidence",
+      "statement": "A recorded hash has only its recorded previous-hash/operation preimage under the external injectivity premise HashCR; no concrete collision-resistance theorem follows.",
+      "property_class": "evidence",
+      "kind": "detection",
+      "family": "refinement",
+      "local_theorem": "AuditSink_Proof!TamperEvident"
+    },
+    {
+      "id": "audit-assurance-ceiling",
+      "statement": "At-commit evidence can support detection only while attribution and persistence survive the named failure boundary; the current model names no crash/storage failure.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "ownership-assurance",
+      "local_theorem": "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
+    },
+    {
+      "id": "audit-executable-transfer",
+      "statement": "The mechanized implementation relation transfers structural append evidence for the written record/validate profile; cryptographic tamper evidence still requires a deployment hash satisfying HashCR.",
+      "property_class": "evidence",
+      "kind": "conditional",
+      "family": "refinement",
+      "local_theorem": "AuditSinkImplRefinesSpec_Proof!RefinementThm"
+    }
+  ],
+  "runtime_providers": ["audit-owner", "audit-storage", "hash-provider"],
+  "failure_ceilings": [
+    "canonical-model-has-no-tamper-crash-or-storage-loss-transition",
+    "persistence-across-process-or-storage-failure-is-deployment-supplied",
+    "HashCR-is-external-and-not-discharged-by-the-modulo-100-executable-hash",
+    "postcommit-observation-does-not-prove-prevention-of-an-external-effect"
+  ],
+  "execution_carriers": ["Sequential"],
+  "local_theorems": [
+    "AuditSinkImplRefinesSpec_Proof!RefinementThm",
+    "AuditSink_Proof!SafetyOriginal",
+    "AuditSink_Proof!TamperEvident",
+    "TheoryKernel_Proof!ObligationPreservation",
+    "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
+  ],
+  "executable_pointers": [
+    "formal/structures/AuditSink/refinement/AuditSinkImplRefinesSpec.tla",
+    "formal/structures/AuditSink/refinement/AuditSinkImplRefinesSpec_Proof.tla",
+    "crate://automation-structures/0.2.3/src/primitives/audit_sink.rs",
+    "formal/structures/AuditSink/AuditSink.tla",
+    "formal/structures/AuditSink/AuditSink_Proof.tla"
+  ],
+  "library_premises": [
+    "AuditSink-written-contract-refinement-profile",
+    "canonical-atomic-Record-machine",
+    "SafetyOriginal",
+    "TamperEvident-conditional-theorem",
+    "ObligationPreservation",
+    "OwnershipAssuranceClassification"
+  ],
+  "deployment_premises": [
+    "MaxLogLenType",
+    "HashType",
+    "HashCR",
+    "atomic-log-and-last-hash-append",
+    "persistent-custody-for-cross-failure-evidence",
+    "complete-audit-writer-tcb-with-no-tamper-transition"
+  ],
+  "residuals": [
+    "formal-correspondence-is-limited-to-the-written-state-action-and-premise-map",
+    "the-canonical-state-machine-models-no-adversarial-tamper-action",
+    "the-concrete-modulo-100-hash-intentionally-has-collisions",
+    "durability-freshness-custody-and-external-acceptance-remain-deployment-properties",
+    "no-recovery-result-is-proved"
+  ],
+  "evidence_ceilings": [
+    "implementation-refinement-covers-only-the-written-bounded-contract-profile",
+    "SafetyOriginal-is-structural-append-safety",
+    "TamperEvident-is-conditional-on-HashCR",
+    "Verus-validate-is-exact-for-the-concrete-chain-invariant-not-collision-resistance",
+    "record-observation-is-attributable-only-to-the-mapped-Record-commit",
+    "executable-observation-transfer-is-limited-to-the-mapped-record-and-validate-profile"
+  ],
+  "cases": {
+    "valid": [
+      {
+        "id": "atomic-record-append",
+        "description": "Below MaxLogLen, Record appends operation, prior last_hash, and Hash(last_hash, operation) and advances last_hash atomically."
+      },
+      {
+        "id": "conditional-content-attribution",
+        "description": "Under HashCR, a stored hash is attributable to the record's own previous-hash/operation pair."
+      }
+    ],
+    "boundary": [
+      {
+        "id": "empty-genesis",
+        "description": "The empty log has last_hash zero and vacuously satisfies the three structural invariants."
+      },
+      {
+        "id": "maximum-log-length",
+        "description": "At MaxLogLen the executable try-record rejects and frames log and last_hash; the canonical Record action is disabled."
+      }
+    ],
+    "misuse": [
+      {
+        "id": "claim-concrete-collision-resistance",
+        "description": "The modulo-100 executable hash cannot discharge HashCR and must not advertise cryptographic collision resistance."
+      },
+      {
+        "id": "unlinked-evidence-event",
+        "description": "An observation without the mapped Record commit, claimant, owner, subject, and assurance binding is not attributable audit evidence."
+      }
+    ],
+    "failure": [
+      {
+        "id": "record-loss-after-commit",
+        "description": "If a named crash/storage failure erases the log, persistent evidence is false and detection/recovery cannot be inherited."
+      },
+      {
+        "id": "hash-provider-violates-HashCR",
+        "description": "A collision preserves a stored hash for distinct content and defeats only the conditional TamperEvident result."
+      }
+    ]
+  },
+  "applicable_families": ["obligation", "ownership-assurance", "refinement"],
+  "discharged_families": ["obligation", "ownership-assurance", "refinement"],
+  "transfer_classes": ["safety", "observation"],
+  "refinement_status": "mechanized",
+  "conformance_details": {
+    "initialization": "new maps to the empty sequence and zero last_hash with max_log_len bound to MaxLogLen.",
+    "step-simulation": "Every complete record call maps to Record when below the limit or to formal stutter when rejected; validate is read-only.",
+    "observation-agreement": "The complete ordered log, last_hash, and emitted record attribution agree, including operation, previous hash, and stored hash.",
+    "commit-agreement": "The append and last_hash advance are one audit-owner commit; every successful concrete append is classified as Record and no bypass writer exists.",
+    "failure-persistence-agreement": "The canonical model has no failure action; any crash, storage loss, retry, or recovery step must map explicitly and preserve the evidence observation claimed.",
+    "rely-discharge": "The deployment supplies MaxLogLen/Hash typing, HashCR for cryptographic attribution, atomic mutation, custody, retention, and the complete writer TCB.",
+    "liveness-preservation": "No liveness guarantee is transferred by this record.",
+    "tcb-closure": "Every path that can mutate log, last_hash, stored records, or evidence exposure is inventoried; direct storage tamper is outside the current formal machine unless added as failure."
+  },
+  "source_checks": [
+    {
+      "path": "formal/structures/AuditSink/refinement/AuditSinkImplRefinesSpec_Proof.tla",
+      "contains": ["THEOREM", "Refinement"]
+    },
+    {
+      "path": "formal/structures/AuditSink/AuditSink.tla",
+      "contains": ["VARIABLES log, last_hash", "Record(op) ==", "ChainIntegrity ==", "HashConsistency ==", "HashBindsContent =="]
+    },
+    {
+      "path": "formal/structures/AuditSink/AuditSink_Proof.tla",
+      "contains": ["ASSUME HashCR ==", "THEOREM SafetyOriginal", "THEOREM TamperEvident"]
+    },
+    {
+      "path": "crate://automation-structures/0.2.3/src/primitives/audit_sink.rs",
+      "contains": ["pub struct AuditSink", "pub fn record", "pub fn validate", "pub open spec fn hash_binds_content", "pub struct BoundedHash"]
+    }
+  ],
+  "witness": {
+    "states": ["empty", "recorded", "tampered", "lost"],
+    "initial": ["empty"],
+    "obligation_states": ["empty", "recorded"],
+    "violation_states": ["tampered", "lost"],
+    "system_steps": [
+      ["empty", "recorded"],
+      ["recorded", "recorded"]
+    ],
+    "environment_steps": [],
+    "action_steps": {
+      "Record": [
+        ["empty", "recorded"],
+        ["recorded", "recorded"]
+      ]
+    },
+    "rely_steps": [],
+    "commit_steps": [
+      ["empty", "recorded"],
+      ["recorded", "recorded"]
+    ],
+    "failure_steps": [],
+    "interference_steps": [],
+    "check_mode": "atomic",
+    "check_result_states": [],
+    "predicate_states": [],
+    "actors": ["audit-claimant", "audit-owner", "audit-storage", "hash-provider"],
+    "providers": ["audit-owner", "audit-storage", "hash-provider"],
+    "claimant": "audit-claimant",
+    "commit_owner": "audit-owner",
+    "commit_delegate": "audit-owner",
+    "assurance_provider": "audit-owner",
+    "assurance_position": "at-commit",
+    "prevention_controllers": ["audit-owner"],
+    "unavailable_providers": [],
+    "persistent_observe": {
+      "empty": true,
+      "recorded": true,
+      "tampered": false,
+      "lost": false
+    },
+    "persistent_evidence": true,
+    "recovery_available": false,
+    "active_states": ["empty", "recorded"],
+    "closed_states": ["tampered", "lost"],
+    "progress_steps": [],
+    "other_steps": [],
+    "handoff_steps": [],
+    "rank_bound": 1,
+    "rank": {
+      "empty": 1,
+      "recorded": 1,
+      "tampered": 0,
+      "lost": 0
+    },
+    "fairness_owners": ["audit-owner"],
+    "fairness_owner": "audit-owner",
+    "fairness_owner_of": {}
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "abstract_relation": "formal/construction/governed-commit-bridge/tla/GovernedCommitAbstract.tla",
+  "abstract_relation_sha256": "124f39ab1deaf760bae9da34f653b5ad88a2ec9be1db17ed7c546ce0619b38f8",
+  "cross_logic_model_identity_boundary": [
+    "verification/run_proofs.py exact method-block parser and semantic binding table",
+    "TLA+ SANY parser and TLAPS proof manager/backends for the independent finite mirror"
+  ],
+  "executable_relation": "formal/construction/governed-commit-bridge/tla/GovernedCommitExecutable.tla",
+  "executable_relation_sha256": "9265bb0bef516e790236feb019692cd47c2d18758bdb5bb652ea2d9edeb0f730",
+  "independent_tlaps_model_certificate": "formal/construction/governed-commit-bridge/tla/GovernedCommitBridge_Proof.tla",
+  "independent_tlaps_model_certificate_sha256": "d33656bcc90404e4f09c43c4877fc7bf7ad38ca519898aea14940a57fc6ea236",
+  "method_bindings": {
+    "admit": {
+      "rust_contract_body_sha256": "5b385d780e6e88450ce4d05b504bcdeba75c2d31d0202b2aa0f8b42daf6f5a70",
+      "tla_action_sha256": {
+        "AdmitAccepted": "75da74637c0a48c8b3f502ebdbed59342e35aed950edcfc6fd47b9c98c327377",
+        "AdmitRejected": "2eb2f3537b3ed9da5a3659feea7195a262f1a86d8366f4d23b421343b66b07ce"
+      },
+      "tla_actions": [
+        "AdmitAccepted",
+        "AdmitRejected"
+      ]
+    },
+    "commit_success": {
+      "rust_contract_body_sha256": "ba39c9187f0f9f5f8aba4cb7fb7bd892846ce78411fbbaa614081b828440a02c",
+      "tla_action_sha256": {
+        "CommitSuccess": "ccf3cebbf7dc934777cb672a2357c0e9cad33d88d692fdfd83fa6e65888d57fc"
+      },
+      "tla_actions": [
+        "CommitSuccess"
+      ]
+    },
+    "crash": {
+      "rust_contract_body_sha256": "b5225666aae432189f484ed051e08381162b9ada10b6b2b15a168feda233c530",
+      "tla_action_sha256": {
+        "Crash": "573c38364ddd7197daf74ce3fd517c6aaed79b7534dae0d82b0b210355d38277"
+      },
+      "tla_actions": [
+        "Crash"
+      ]
+    },
+    "fail_after_effect": {
+      "rust_contract_body_sha256": "93fd3fadcf3a4650ef3399373f475607c6a52d66e017ef7adf48d215be57f265",
+      "tla_action_sha256": {
+        "FailAfterEffect": "1bc27ad7949e61abe1a0df49b41559dfdc320847e0f2e4dd31aaeeb7cba17928"
+      },
+      "tla_actions": [
+        "FailAfterEffect"
+      ]
+    },
+    "fail_before_effect": {
+      "rust_contract_body_sha256": "0a2103d5a577b59787f413add5de6a840150e691d4039cee21c6d4802f137bb2",
+      "tla_action_sha256": {
+        "FailBeforeEffect": "253d0863e8af15fcb37094598adad9456e50a3963637908aee3d896e72244db3"
+      },
+      "tla_actions": [
+        "FailBeforeEffect"
+      ]
+    },
+    "new": {
+      "rust_contract_body_sha256": "0f7f50f7bbe4088166aa18ca67ab123da5efde76b1ff8d354d5083feee66c207",
+      "tla_action_sha256": {
+        "Init": "c6ceb7d1e6a934fa7b8782f42eb3477c306daddb0121e825c2de8e4b6c7ee95d"
+      },
+      "tla_actions": [
+        "Init"
+      ]
+    },
+    "propagate": {
+      "rust_contract_body_sha256": "1d2f95129998bcd7c0e505d83a87836643a2ec90c34ff6e6e5ec9b89fd9c2ddc",
+      "tla_action_sha256": {
+        "Propagate": "05f7e913938c3b1809aff065f1b1589f34b6a1c56a361667ac474714c577dacd"
+      },
+      "tla_actions": [
+        "Propagate"
+      ]
+    },
+    "recover": {
+      "rust_contract_body_sha256": "0adc1a4bbe91b6e57726a344f8bcd445767c866f8032638f29544521be73066f",
+      "tla_action_sha256": {
+        "Recover": "76df2b8f697f7cb5c5dcfecd383cd5126e103959c49027c5b188d6bcfc2d48f5"
+      },
+      "tla_actions": [
+        "Recover"
+      ]
+    },
+    "restart": {
+      "rust_contract_body_sha256": "78902d80a6b7540bf17f6a2afccbb2423bfc87d39d48b162b859c11f31ba2c62",
+      "tla_action_sha256": {
+        "Restart": "ce597f7997e286594e66b7c31de41aa4d45eaf0ed511aa8fc9dbdd1dd9310285"
+      },
+      "tla_actions": [
+        "Restart"
+      ]
+    }
+  },
+  "rust_source": "crate://automation-structures/0.2.3/src/integration/governed_commit.rs",
+  "rust_source_sha256": "a3f5874a0d40720c55794e457ec6991e688006620978763bdef150de8e1e45c8",
+  "schema_version": 1,
+  "semantic_bridge_tcb": [
+    "Verus Rust parser, verifier, bundled Z3, and source-level contract semantics"
+  ],
+  "semantic_refinement_logic": "Verus",
+  "semantic_refinement_module": "crate://automation-structures/0.2.3/src/integration/governed_commit.rs",
+  "translation_kind": "direct-verus-proof-and-cross-logic-identity-manifest"
+}

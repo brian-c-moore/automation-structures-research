@@ -1,0 +1,19 @@
+name = "Temporal"
+tier = 1
+modality = "StepGraph_Cyclic"
+evidence = "direct_comparison"
+workload = "scientific_workflow"
+
+[policies]
+invocation = "Programmatic"
+topology = "Workflow_As_Code"
+dependencies = "HotSwappable"
+lifecycle = "Continuation_As_New"
+
+[trace_properties]
+predecessor_before_successor = true
+
+citations = [
+    "Temporal documentation (docs.temporal.io)",
+    "Burckhardt et al. (2021) — Durable Functions: Semantics for Stateful Serverless. OOPSLA",
+]

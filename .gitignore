@@ -1,0 +1,17 @@
+# Rust build output
+target/
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# TLC model-checker output (formal runs belong in the container; see docs/reproducibility.md)
+states/
+*.toolbox/
+*_TTrace_*.tla
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

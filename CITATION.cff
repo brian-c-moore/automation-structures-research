@@ -1,0 +1,10 @@
+# Add version, date-released, and repository-code when the repository is published and tagged.
+cff-version: 1.2.0
+message: "If you reference this research, please cite it as below."
+title: "Automation Structures"
+type: software
+authors:
+  - family-names: Moore
+    given-names: Brian
+    email: brian@bmoore.ninja
+license: MIT

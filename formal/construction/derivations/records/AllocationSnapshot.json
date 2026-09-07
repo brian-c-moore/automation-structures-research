@@ -1,0 +1,195 @@
+{
+  "module": "AllocationSnapshot",
+  "structure": "AllocationSnapshot",
+  "kind": "named-composition",
+  "property_classes": ["safety"],
+  "state_fields": ["accepted", "total_cost", "budget_remaining"],
+  "observation_fields": ["accepted", "total_cost", "budget_remaining"],
+  "implementation_state_fields": ["accepted", "total_cost", "budget_remaining"],
+  "implementation_state_map": {
+    "accepted": "accepted",
+    "total_cost": "total_cost",
+    "budget_remaining": "budget_remaining"
+  },
+  "observation_map": {
+    "accepted": "accepted",
+    "total_cost": "total_cost",
+    "budget_remaining": "budget_remaining"
+  },
+  "canonical_actions": ["AcceptNode"],
+  "system_actions": ["AcceptNode"],
+  "environment_actions": [],
+  "failure_actions": [],
+  "commit_actions": ["AcceptNode"],
+  "executable_actions": ["accept_node"],
+  "action_map": {"AcceptNode": ["accept_node"]},
+  "obligations": ["BudgetConsistency"],
+  "violations": ["SnapshotOverspend"],
+  "violation_of": {"BudgetConsistency": "SnapshotOverspend"},
+  "actors": ["allocation-claimant", "snapshot-authority"],
+  "claimant": "allocation-claimant",
+  "owner_of": {"AcceptNode": "snapshot-authority"},
+  "delegate_of": {"AcceptNode": ["snapshot-authority"]},
+  "assurance_at": {"AcceptNode": "at-commit"},
+  "relies": [
+    "serialized-snapshot-mutation",
+    "atomic-membership-cost-budget-commit",
+    "complete-snapshot-writer-inventory"
+  ],
+  "guarantees": [
+    {
+      "id": "allocationsnapshot-written-profile-refinement",
+      "statement": "Mechanized refinement maps the written executable contract profile to the canonical AllocationSnapshot machine under the named state, action, and premise map.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "refinement",
+      "local_theorem": "AllocationSnapshotImplRefinesSpec_Proof!RefinementThm"
+    },
+    {
+      "id": "snapshot-budget-consistency",
+      "statement": "Every accepted node commit preserves total_cost + budget_remaining <= BudgetCapacity.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "obligation",
+      "local_theorem": "AllocationSnapshot_Proof!BudgetConsistencySafety"
+    },
+    {
+      "id": "snapshot-atomic-admission",
+      "statement": "A node enters the snapshot only through the atomic distinctness and remaining-budget guard.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "check-act",
+      "local_theorem": "TheoryKernel_Proof!CheckActStability"
+    },
+    {
+      "id": "snapshot-owner-ceiling",
+      "statement": "Prevention depends on the snapshot authority owning the complete accepted/cost/budget commit.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "ownership-assurance",
+      "local_theorem": "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
+    }
+  ],
+  "runtime_providers": ["snapshot-authority", "exclusive-mutation-provider", "bounded-integer-provider"],
+  "failure_ceilings": [
+    "no-modeled-crash-or-torn-snapshot",
+    "concurrent-bypass-writers-outside-boundary",
+    "finite-node-and-u64-representation-required"
+  ],
+  "execution_carriers": ["Sequential"],
+  "local_theorems": [
+    "AllocationSnapshotImplRefinesSpec_Proof!RefinementThm",
+    "AllocationSnapshot_Proof!Safety",
+    "AllocationSnapshot_Proof!BudgetConsistencySafety",
+    "TheoryKernel_Proof!ObligationPreservation",
+    "TheoryKernel_Proof!CheckActStability",
+    "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
+  ],
+  "executable_pointers": [
+    "formal/structures/AllocationSnapshot/refinement/AllocationSnapshotImplRefinesSpec.tla",
+    "formal/structures/AllocationSnapshot/refinement/AllocationSnapshotImplRefinesSpec_Proof.tla",
+    "crate://automation-structures/0.2.3/src/compositions/allocation_snapshot.rs",
+    "formal/structures/AllocationSnapshot/AllocationSnapshot.tla",
+    "formal/structures/AllocationSnapshot/AllocationSnapshot_Proof.tla"
+  ],
+  "library_premises": [
+    "AllocationSnapshot-written-contract-refinement-profile",
+    "canonical-AcceptNode-machine",
+    "BudgetConsistencySafety",
+    "ObligationPreservation",
+    "CheckActStability",
+    "OwnershipAssuranceClassification"
+  ],
+  "deployment_premises": [
+    "NodesFinite",
+    "BudgetCapacityType",
+    "serialized-snapshot-mutation",
+    "atomic-membership-cost-budget-commit",
+    "complete-snapshot-writer-inventory"
+  ],
+  "residuals": [
+    "formal-correspondence-is-limited-to-the-written-state-action-and-premise-map",
+    "no-distributed-snapshot-protocol",
+    "no-durability-or-recovery-result",
+    "capture-order-is-not-a-priority-theorem"
+  ],
+  "evidence_ceilings": [
+    "implementation-refinement-covers-only-the-written-bounded-contract-profile",
+    "TLAPS-proves-the-canonical-Nat-budget-equation",
+    "Verus-proves-duplicate-free-finite-vector-representation",
+    "KAT-boundaries-do-not-establish-concurrency-safety"
+  ],
+  "cases": {
+    "valid": [{"id": "accept-within-budget", "description": "A fresh node whose cost fits is added with exact cost and remaining-budget updates."}],
+    "boundary": [{"id": "exact-budget", "description": "A fresh node consuming the last remaining unit is admitted and leaves zero remaining."}],
+    "misuse": [{"id": "duplicate-node", "description": "A duplicate node cannot receive a second cost charge or acceptance record."}],
+    "failure": [{"id": "torn-snapshot", "description": "A partial accepted/cost/budget write lies outside the atomic model and loses prevention."}]
+  },
+  "applicable_families": ["obligation", "check-act", "ownership-assurance", "refinement"],
+  "discharged_families": ["obligation", "check-act", "ownership-assurance", "refinement"],
+  "transfer_classes": ["safety"],
+  "refinement_status": "mechanized",
+  "conformance_details": {
+    "initialization": "AllocationSnapshot::new maps empty accepted, zero total cost, and full remaining capacity to canonical Init.",
+    "step-simulation": "Each enabled accept_node call maps to AcceptNode; rejected duplicate or over-budget wrappers may only stutter.",
+    "observation-agreement": "The duplicate-free accepted vector projects to the accepted set while total_cost and budget_remaining map identically.",
+    "commit-agreement": "Membership, total cost, and remaining budget change in one snapshot-authority commit.",
+    "failure-persistence-agreement": "No crash, torn write, retry, or recovery action is modeled; an implementation exposing one must add its mapping.",
+    "rely-discharge": "Deployment supplies finite nodes, serialized mutation, bounded arithmetic, and the complete writer TCB.",
+    "liveness-preservation": "No eventual capture or admission guarantee is transferred.",
+    "tcb-closure": "Every executable path able to mutate accepted, total_cost, or budget_remaining is inventoried."
+  },
+  "source_checks": [
+    {
+      "path": "formal/structures/AllocationSnapshot/refinement/AllocationSnapshotImplRefinesSpec_Proof.tla",
+      "contains": ["THEOREM", "Refinement"]
+    },
+    {"path": "formal/structures/AllocationSnapshot/AllocationSnapshot.tla", "contains": ["VARIABLES accepted, total_cost, budget_remaining", "AcceptNode(n, node_cost)", "BudgetConsistency"]},
+    {"path": "formal/structures/AllocationSnapshot/AllocationSnapshot_Proof.tla", "contains": ["THEOREM Safety", "THEOREM BudgetConsistencySafety"]},
+    {"path": "crate://automation-structures/0.2.3/src/compositions/allocation_snapshot.rs", "contains": ["pub struct AllocationSnapshot", "pub fn accept_node", "pub open spec fn budget_consistency"]}
+  ],
+  "proof_binding": {
+    "canonical_directory": "formal/structures/AllocationSnapshot",
+    "proof_module": "AllocationSnapshot_Proof",
+    "theorem": "Safety",
+    "statement": "Spec => []Inv"
+  },
+  "witness": {
+    "states": ["empty", "accepted", "overspent"],
+    "initial": ["empty"],
+    "obligation_states": ["empty", "accepted"],
+    "violation_states": ["overspent"],
+    "system_steps": [["empty", "accepted"]],
+    "environment_steps": [],
+    "action_steps": {"AcceptNode": [["empty", "accepted"]]},
+    "rely_steps": [],
+    "commit_steps": [["empty", "accepted"]],
+    "failure_steps": [],
+    "interference_steps": [],
+    "check_mode": "atomic",
+    "check_result_states": ["empty", "accepted"],
+    "predicate_states": ["empty", "accepted"],
+    "actors": ["allocation-claimant", "snapshot-authority"],
+    "providers": ["snapshot-authority"],
+    "claimant": "allocation-claimant",
+    "commit_owner": "snapshot-authority",
+    "commit_delegate": "snapshot-authority",
+    "assurance_provider": "snapshot-authority",
+    "assurance_position": "at-commit",
+    "prevention_controllers": ["snapshot-authority"],
+    "unavailable_providers": [],
+    "persistent_observe": {"empty": true, "accepted": true, "overspent": false},
+    "persistent_evidence": true,
+    "recovery_available": false,
+    "active_states": ["empty", "accepted"],
+    "closed_states": [],
+    "progress_steps": [],
+    "other_steps": [],
+    "handoff_steps": [],
+    "rank_bound": 0,
+    "rank": {"empty": 0, "accepted": 0, "overspent": 0},
+    "fairness_owners": ["snapshot-authority"],
+    "fairness_owner": "snapshot-authority",
+    "fairness_owner_of": {}
+  }
+}

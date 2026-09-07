@@ -1,0 +1,322 @@
+{
+  "module": "Budget",
+  "structure": "Budget",
+  "kind": "abstraction-primitive",
+  "property_classes": ["safety"],
+  "state_fields": ["capacity", "allocated", "reserved", "pending_eviction"],
+  "observation_fields": ["capacity", "allocated", "reserved", "pending_eviction"],
+  "implementation_state_fields": ["capacity", "allocated", "reserved", "pending_eviction"],
+  "implementation_state_map": {
+    "capacity": "capacity",
+    "allocated": "allocated",
+    "reserved": "reserved",
+    "pending_eviction": "pending_eviction"
+  },
+  "observation_map": {
+    "capacity": "capacity",
+    "allocated": "allocated",
+    "reserved": "reserved",
+    "pending_eviction": "pending_eviction"
+  },
+  "canonical_actions": [
+    "TryAllocate",
+    "Reserve",
+    "CommitReservation",
+    "Release",
+    "MarkEviction",
+    "CompleteEviction"
+  ],
+  "system_actions": [
+    "TryAllocate",
+    "Reserve",
+    "CommitReservation",
+    "Release",
+    "MarkEviction",
+    "CompleteEviction"
+  ],
+  "environment_actions": [],
+  "failure_actions": [],
+  "commit_actions": [
+    "TryAllocate",
+    "Reserve",
+    "CommitReservation",
+    "Release",
+    "MarkEviction",
+    "CompleteEviction"
+  ],
+  "executable_actions": [
+    "try_allocate",
+    "reserve",
+    "commit_reservation",
+    "release",
+    "mark_eviction",
+    "complete_eviction"
+  ],
+  "action_map": {
+    "TryAllocate": ["try_allocate"],
+    "Reserve": ["reserve"],
+    "CommitReservation": ["commit_reservation"],
+    "Release": ["release"],
+    "MarkEviction": ["mark_eviction"],
+    "CompleteEviction": ["complete_eviction"]
+  },
+  "obligations": ["SafetyInvariant"],
+  "violations": ["CapacityExceeded"],
+  "violation_of": {
+    "SafetyInvariant": "CapacityExceeded"
+  },
+  "actors": ["budget-claimant", "budget-authority"],
+  "claimant": "budget-claimant",
+  "owner_of": {
+    "TryAllocate": "budget-authority",
+    "Reserve": "budget-authority",
+    "CommitReservation": "budget-authority",
+    "Release": "budget-authority",
+    "MarkEviction": "budget-authority",
+    "CompleteEviction": "budget-authority"
+  },
+  "delegate_of": {
+    "TryAllocate": ["budget-authority"],
+    "Reserve": ["budget-authority"],
+    "CommitReservation": ["budget-authority"],
+    "Release": ["budget-authority"],
+    "MarkEviction": ["budget-authority"],
+    "CompleteEviction": ["budget-authority"]
+  },
+  "assurance_at": {
+    "TryAllocate": "at-commit",
+    "Reserve": "at-commit",
+    "CommitReservation": "at-commit",
+    "Release": "at-commit",
+    "MarkEviction": "at-commit",
+    "CompleteEviction": "at-commit"
+  },
+  "relies": [
+    "serialized-exclusive-ledger-mutation",
+    "atomic-guard-and-update",
+    "complete-ledger-tcb-with-no-bypass"
+  ],
+  "guarantees": [
+    {
+      "id": "capacity-preservation",
+      "statement": "Every admitted ledger action preserves allocated + reserved + pending_eviction <= capacity.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "obligation",
+      "local_theorem": "Budget_Proof!SafetyInvariantSafety"
+    },
+    {
+      "id": "guarded-commit-license",
+      "statement": "An allocating or reserving write is licensed only by the atomic complete-ledger capacity check; rejected calls stutter.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "check-act",
+      "local_theorem": "TheoryKernel_Proof!CheckActStability"
+    },
+    {
+      "id": "budget-owner-ceiling",
+      "statement": "Prevention is conditional on the budget authority owning the atomic ledger commit; an external bypass loses that result.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "ownership-assurance",
+      "local_theorem": "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
+    },
+    {
+      "id": "budget-executable-transfer",
+      "statement": "A conforming executable inherits only capacity preservation for the mapped six-action surface.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "refinement",
+      "local_theorem": "BudgetImplRefinesSpec_Proof!RefinementThm"
+    }
+  ],
+  "runtime_providers": ["budget-authority", "exclusive-mutation-provider", "integer-representation"],
+  "failure_ceilings": [
+    "no-modeled-crash-or-torn-write",
+    "weak-memory-and-nonlinearizable-ledgers-outside-boundary",
+    "u64-call-domain-requires-the-declared-refinement-boundary"
+  ],
+  "execution_carriers": ["Sequential"],
+  "local_theorems": [
+    "Budget_Proof!SafetyInvariantSafety",
+    "BudgetImplRefinesSpec_Proof!RefinementThm",
+    "TheoryKernel_Proof!ObligationPreservation",
+    "TheoryKernel_Proof!CheckActStability",
+    "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
+  ],
+  "executable_pointers": [
+    "crate://automation-structures/0.2.3/src/primitives/budget.rs",
+    "formal/structures/Budget/refinement/BudgetImplRefinesSpec.tla",
+    "formal/structures/Budget/refinement/BudgetImplRefinesSpec_Proof.tla"
+  ],
+  "library_premises": [
+    "canonical-six-action-ledger",
+    "SafetyInvariantSafety",
+    "ObligationPreservation",
+    "CheckActStability",
+    "OwnershipAssuranceClassification",
+    "Budget-contract-refinement"
+  ],
+  "deployment_premises": [
+    "CapacityType",
+    "serialized-exclusive-ledger-mutation",
+    "atomic-guard-and-update",
+    "u64-arithmetic-agrees-with-Nat-inside-the-invariant",
+    "complete-ledger-tcb-with-no-bypass"
+  ],
+  "residuals": [
+    "no-distributed-or-concurrent-ledger-protocol",
+    "no-durability-or-recovery-result",
+    "zero-and-over-capacity-executable-calls-refine-stutter-only-under-the-written-Budget-mapping"
+  ],
+  "evidence_ceilings": [
+    "TLAPS-proves-unbounded-Nat-safety-under-CapacityType",
+    "Verus-proves-the-written-u64-contracts",
+    "the-existing-Budget-refinement-is-component-evidence-not-the-bounded-sufficiency-six-record-bridge"
+  ],
+  "cases": {
+    "valid": [
+      {
+        "id": "allocate-within-headroom",
+        "description": "A positive amount whose complete-ledger total fits is atomically added to allocated."
+      },
+      {
+        "id": "reservation-lifecycle",
+        "description": "Reserve, commit reservation, mark eviction, and complete eviction transfer or remove the same amount with exact frames."
+      }
+    ],
+    "boundary": [
+      {
+        "id": "exact-capacity",
+        "description": "A write reaching exactly capacity is admitted and preserves the non-strict bound."
+      },
+      {
+        "id": "rejected-overspend-stutter",
+        "description": "TryAllocate or Reserve above headroom changes no governed field."
+      }
+    ],
+    "misuse": [
+      {
+        "id": "split-check-and-commit",
+        "description": "A capacity check separated from its write without a stability proof does not inherit guarded-commit licensing."
+      },
+      {
+        "id": "omitted-ledger-term",
+        "description": "A check omitting reserved or pending_eviction is rejected as a materially wrong mapping."
+      }
+    ],
+    "failure": [
+      {
+        "id": "torn-ledger-update",
+        "description": "A partially visible transfer or non-atomic shared store lies outside the model and loses prevention."
+      },
+      {
+        "id": "bypass-writer",
+        "description": "A writer outside the inventoried budget authority invalidates the owner and TCB premises."
+      }
+    ]
+  },
+  "applicable_families": ["obligation", "check-act", "ownership-assurance", "refinement"],
+  "discharged_families": ["obligation", "check-act", "ownership-assurance", "refinement"],
+  "transfer_classes": ["safety"],
+  "refinement_status": "mechanized",
+  "conformance_details": {
+    "initialization": "Budget::new maps to capacity = Capacity and all three usage terms zero.",
+    "step-simulation": "Every complete call to the six mutating methods maps to its named Budget action or an admitted stutter for the declared wider u64 argument domain.",
+    "observation-agreement": "capacity, allocated, reserved, and pending_eviction agree exactly under the identity field mapping.",
+    "commit-agreement": "Every state-changing method call is one atomic budget-authority commit; rejected try calls are stutters and no bypass write exists.",
+    "failure-persistence-agreement": "No crash, torn write, retry, or recovery action is modeled; any implementation exposing one must add and prove its mapping.",
+    "rely-discharge": "The deployment supplies exclusive serialized mutation and the integer/linearization boundary.",
+    "liveness-preservation": "No liveness guarantee is transferred by this record.",
+    "tcb-closure": "Every transition that can mutate the four ledger fields is inventoried as a mapped method or admitted environment action."
+  },
+  "source_checks": [
+    {
+      "path": "formal/structures/Budget/Budget.tla",
+      "contains": ["VARIABLES capacity, allocated, reserved, pending_eviction", "TryAllocate(amount)", "CommitReservation(amount)", "SafetyInvariant"]
+    },
+    {
+      "path": "formal/structures/Budget/Budget_Proof.tla",
+      "contains": ["THEOREM SafetyInvariantSafety"]
+    },
+    {
+      "path": "formal/structures/Budget/refinement/BudgetImplRefinesSpec_Proof.tla",
+      "contains": ["THEOREM RefinementThm"]
+    },
+    {
+      "path": "crate://automation-structures/0.2.3/src/primitives/budget.rs",
+      "contains": ["pub struct Budget", "pub fn try_allocate", "pub fn complete_eviction", "pub open spec fn safety_invariant"]
+    }
+  ],
+  "witness": {
+    "states": ["empty", "safe-used", "safe-reserved", "safe-evicting", "overspent"],
+    "initial": ["empty"],
+    "obligation_states": ["empty", "safe-used", "safe-reserved", "safe-evicting"],
+    "violation_states": ["overspent"],
+    "system_steps": [
+      ["empty", "safe-used"],
+      ["empty", "safe-reserved"],
+      ["safe-reserved", "safe-used"],
+      ["safe-used", "empty"],
+      ["safe-used", "safe-evicting"],
+      ["safe-evicting", "empty"]
+    ],
+    "environment_steps": [],
+    "action_steps": {
+      "TryAllocate": [["empty", "safe-used"]],
+      "Reserve": [["empty", "safe-reserved"]],
+      "CommitReservation": [["safe-reserved", "safe-used"]],
+      "Release": [["safe-used", "empty"]],
+      "MarkEviction": [["safe-used", "safe-evicting"]],
+      "CompleteEviction": [["safe-evicting", "empty"]]
+    },
+    "rely_steps": [],
+    "commit_steps": [
+      ["empty", "safe-used"],
+      ["empty", "safe-reserved"],
+      ["safe-reserved", "safe-used"],
+      ["safe-used", "empty"],
+      ["safe-used", "safe-evicting"],
+      ["safe-evicting", "empty"]
+    ],
+    "failure_steps": [],
+    "interference_steps": [],
+    "check_mode": "atomic",
+    "check_result_states": ["empty", "safe-used", "safe-reserved", "safe-evicting"],
+    "predicate_states": ["empty", "safe-used", "safe-reserved", "safe-evicting"],
+    "actors": ["budget-claimant", "budget-authority"],
+    "providers": ["budget-authority"],
+    "claimant": "budget-claimant",
+    "commit_owner": "budget-authority",
+    "commit_delegate": "budget-authority",
+    "assurance_provider": "budget-authority",
+    "assurance_position": "at-commit",
+    "prevention_controllers": ["budget-authority"],
+    "unavailable_providers": [],
+    "persistent_observe": {
+      "empty": true,
+      "safe-used": true,
+      "safe-reserved": true,
+      "safe-evicting": true,
+      "overspent": false
+    },
+    "persistent_evidence": true,
+    "recovery_available": false,
+    "active_states": ["empty", "safe-used", "safe-reserved", "safe-evicting"],
+    "closed_states": [],
+    "progress_steps": [],
+    "other_steps": [],
+    "handoff_steps": [],
+    "rank_bound": 0,
+    "rank": {
+      "empty": 0,
+      "safe-used": 0,
+      "safe-reserved": 0,
+      "safe-evicting": 0,
+      "overspent": 0
+    },
+    "fairness_owners": ["budget-authority"],
+    "fairness_owner": "budget-authority",
+    "fairness_owner_of": {}
+  }
+}

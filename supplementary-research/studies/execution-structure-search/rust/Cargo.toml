@@ -1,0 +1,16 @@
+[package]
+name = "execution_modalities"
+version = "0.1.0"
+edition = "2021"
+description = "Bounded local workload and mechanism tests for four execution modalities; not a named-framework reproduction suite."
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+
+[dev-dependencies]
+proptest = "1"
+
+[[bin]]
+name = "demo"
+path = "src/bin/demo.rs"

@@ -1,0 +1,19 @@
+name = "Ptolemy_DDF"
+tier = 1
+modality = "StreamGraph"
+evidence = "direct_comparison"
+workload = "data_pipeline"
+
+[policies]
+invocation = "Dynamic_Schedule"
+topology = "Declared_Dynamic"
+dependencies = "Conditional"
+lifecycle = "Per_Firing"
+
+[trace_properties]
+no_record_loss = true
+
+citations = [
+    "Buck (1993) — Scheduling Dynamic Dataflow Graphs with Bounded Memory. PhD UC Berkeley",
+    "Ptolemy II project documentation",
+]

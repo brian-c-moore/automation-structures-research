@@ -1,0 +1,15 @@
+name = "LangGraph_batch"
+tier = 2
+modality = "StepGraph"
+evidence = "direct_comparison"
+workload = "token_stream"
+
+[policies]
+invocation = "Programmatic"
+topology = "Declared"
+dependencies = "Fixed"
+lifecycle = "Per_Invocation"
+
+citations = [
+    "LangGraph documentation",
+]

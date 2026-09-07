@@ -1,0 +1,13 @@
+[package]
+name = "execution_modalities_verus"
+version = "0.1.0"
+edition = "2021"
+description = "Exploratory Verus contracts for four execution modalities and selected shared primitives, paired with the TLA+/TLAPS and Rust study sources."
+
+[lib]
+name = "execution_modalities_verus"
+path = "src/lib.rs"
+
+# Cargo does not build this directory. It holds Verus source only, and no
+# verifier wrapper is present here.
+[dependencies]

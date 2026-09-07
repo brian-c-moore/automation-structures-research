@@ -1,0 +1,144 @@
+{
+  "module": "RelationshipGraph",
+  "structure": "RelationshipGraph",
+  "kind": "named-composition",
+  "property_classes": ["safety"],
+  "state_fields": ["edges", "adjacency"],
+  "observation_fields": ["edges", "adjacency"],
+  "implementation_state_fields": ["edges", "adjacency"],
+  "implementation_state_map": {"edges": "edges", "adjacency": "adjacency"},
+  "observation_map": {"edges": "edges", "adjacency": "adjacency"},
+  "canonical_actions": ["AddEdge", "RemoveEdge"],
+  "system_actions": ["AddEdge", "RemoveEdge"],
+  "environment_actions": [],
+  "failure_actions": [],
+  "commit_actions": ["AddEdge", "RemoveEdge"],
+  "executable_actions": ["add_edge", "remove_edge"],
+  "action_map": {"AddEdge": ["add_edge"], "RemoveEdge": ["remove_edge"]},
+  "obligations": ["AdjacencyConsistency", "NoSelfLoops"],
+  "violations": ["AdjacencyProjectionMismatch", "SelfLoopPresent"],
+  "violation_of": {"AdjacencyConsistency": "AdjacencyProjectionMismatch", "NoSelfLoops": "SelfLoopPresent"},
+  "actors": ["graph-claimant", "graph-authority"],
+  "claimant": "graph-claimant",
+  "owner_of": {"AddEdge": "graph-authority", "RemoveEdge": "graph-authority"},
+  "delegate_of": {"AddEdge": ["graph-authority"], "RemoveEdge": ["graph-authority"]},
+  "assurance_at": {"AddEdge": "at-commit", "RemoveEdge": "at-commit"},
+  "relies": ["finite-indexed-node-universe", "serialized-edge-adjacency-mutation", "atomic-dual-view-commit"],
+  "guarantees": [
+    {
+      "id": "relationshipgraph-written-profile-refinement",
+      "statement": "Mechanized refinement maps the written executable contract profile to the canonical RelationshipGraph machine under the named state, action, and premise map.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "refinement",
+      "local_theorem": "RelationshipGraphImplRefinesSpec_Proof!RefinementThm"
+    },
+    {
+      "id": "graph-projection-consistency",
+      "statement": "Every admitted add/remove commit preserves exact edge-to-adjacency projection and excludes self loops.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "obligation",
+      "local_theorem": "RelationshipGraph_Proof!Safety"
+    },
+    {
+      "id": "graph-guarded-update",
+      "statement": "An edge change is licensed only through the atomic endpoint, duplicate, and self-loop guards.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "check-act",
+      "local_theorem": "TheoryKernel_Proof!CheckActStability"
+    },
+    {
+      "id": "graph-owner-ceiling",
+      "statement": "Projection prevention depends on one graph authority owning both edge and adjacency updates.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "ownership-assurance",
+      "local_theorem": "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
+    }
+  ],
+  "runtime_providers": ["graph-authority", "exclusive-mutation-provider", "finite-index-provider"],
+  "failure_ceilings": ["no-modeled-crash-or-torn-dual-view", "concurrent-bypass-writer-outside-boundary", "finite-indexed-directed-graph-only"],
+  "execution_carriers": ["Sequential"],
+  "local_theorems": [
+    "RelationshipGraphImplRefinesSpec_Proof!RefinementThm", "RelationshipGraph_Proof!Safety", "RelationshipGraph_Proof!AdjacencyConsistencySafety", "RelationshipGraph_Proof!NoSelfLoopsSafety", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"],
+  "executable_pointers": [
+    "formal/structures/RelationshipGraph/refinement/RelationshipGraphImplRefinesSpec.tla",
+    "formal/structures/RelationshipGraph/refinement/RelationshipGraphImplRefinesSpec_Proof.tla","crate://automation-structures/0.2.3/src/compositions/relationship_graph.rs", "formal/structures/RelationshipGraph/RelationshipGraph.tla", "formal/structures/RelationshipGraph/RelationshipGraph_Proof.tla"],
+  "library_premises": [
+    "RelationshipGraph-written-contract-refinement-profile","canonical-directed-graph-machine", "RelationshipGraph-Safety", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification"],
+  "deployment_premises": ["NodesFinite", "WeightsTyped", "serialized-edge-adjacency-mutation", "atomic-dual-view-commit", "complete-graph-writer-inventory"],
+  "residuals": [
+    "formal-correspondence-is-limited-to-the-written-state-action-and-premise-map", "no-reciprocal-edge-claim", "no-path-reachability-or-acyclicity-result", "no-durable-or-concurrent-graph-protocol"],
+  "evidence_ceilings": [
+    "implementation-refinement-covers-only-the-written-bounded-contract-profile","TLAPS-proves-directed-edge-projection", "Verus-proves-the-duplicate-free-vector-representation", "no-claim-that-adjacency-is-symmetric"],
+  "cases": {
+    "valid": [{"id": "add-and-remove-edge", "description": "A valid directed edge is added to both views and later removed from both views."}],
+    "boundary": [{"id": "duplicate-add", "description": "A duplicate endpoint pair is rejected without changing either view."}],
+    "misuse": [{"id": "self-loop", "description": "An src = dst request is rejected and cannot enter either view."}],
+    "failure": [{"id": "torn-dual-view", "description": "Updating edges without adjacency, or conversely, lies outside the atomic commit model."}]
+  },
+  "applicable_families": ["obligation", "check-act", "ownership-assurance", "refinement"],
+  "discharged_families": ["obligation", "check-act", "ownership-assurance", "refinement"],
+  "transfer_classes": ["safety"],
+  "refinement_status": "mechanized",
+  "conformance_details": {
+    "initialization": "RelationshipGraph::new maps both executable lists to the empty edge and adjacency sets.",
+    "step-simulation": "add_edge maps to AddEdge and remove_edge maps to RemoveEdge; rejected duplicate, self-loop, or absent wrappers stutter.",
+    "observation-agreement": "The weighted edge list and endpoint adjacency list project to the complete canonical sets with no hidden reciprocal edge.",
+    "commit-agreement": "Each accepted mutation updates both views in one graph-authority commit.",
+    "failure-persistence-agreement": "No crash, torn dual-view write, retry, or recovery action is modeled; one must be added before such a path transfers.",
+    "rely-discharge": "Deployment supplies finite indices, serialized mutation, and complete edge/adjacency writer inventory.",
+    "liveness-preservation": "No path discovery, reachability, or eventual update guarantee is transferred.",
+    "tcb-closure": "Every path able to mutate either graph view is inventoried as add_edge or remove_edge."
+  },
+  "source_checks": [
+    {
+      "path": "formal/structures/RelationshipGraph/refinement/RelationshipGraphImplRefinesSpec_Proof.tla",
+      "contains": ["THEOREM", "Refinement"]
+    },
+    {"path": "formal/structures/RelationshipGraph/RelationshipGraph.tla", "contains": ["VARIABLES edges, adjacency", "AddEdge(src, dst, weight)", "RemoveEdge(src, dst)", "AdjacencyConsistency"]},
+    {"path": "formal/structures/RelationshipGraph/RelationshipGraph_Proof.tla", "contains": ["THEOREM Safety", "THEOREM NoSelfLoopsSafety"]},
+    {"path": "crate://automation-structures/0.2.3/src/compositions/relationship_graph.rs", "contains": ["pub struct RelationshipGraph", "pub fn add_edge", "pub fn remove_edge", "pub open spec fn adjacency_consistency"]}
+  ],
+  "proof_binding": {"canonical_directory": "formal/structures/RelationshipGraph", "proof_module": "RelationshipGraph_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
+  "witness": {
+    "states": ["empty-graph", "linked-graph", "inconsistent-graph"],
+    "initial": ["empty-graph"],
+    "obligation_states": ["empty-graph", "linked-graph"],
+    "violation_states": ["inconsistent-graph"],
+    "system_steps": [["empty-graph", "linked-graph"], ["linked-graph", "empty-graph"]],
+    "environment_steps": [],
+    "action_steps": {"AddEdge": [["empty-graph", "linked-graph"]], "RemoveEdge": [["linked-graph", "empty-graph"]]},
+    "rely_steps": [],
+    "commit_steps": [["empty-graph", "linked-graph"], ["linked-graph", "empty-graph"]],
+    "failure_steps": [],
+    "interference_steps": [],
+    "check_mode": "atomic",
+    "check_result_states": ["empty-graph", "linked-graph"],
+    "predicate_states": ["empty-graph", "linked-graph"],
+    "actors": ["graph-claimant", "graph-authority"],
+    "providers": ["graph-authority"],
+    "claimant": "graph-claimant",
+    "commit_owner": "graph-authority",
+    "commit_delegate": "graph-authority",
+    "assurance_provider": "graph-authority",
+    "assurance_position": "at-commit",
+    "prevention_controllers": ["graph-authority"],
+    "unavailable_providers": [],
+    "persistent_observe": {"empty-graph": true, "linked-graph": true, "inconsistent-graph": false},
+    "persistent_evidence": true,
+    "recovery_available": false,
+    "active_states": ["empty-graph", "linked-graph"],
+    "closed_states": [],
+    "progress_steps": [],
+    "other_steps": [],
+    "handoff_steps": [],
+    "rank_bound": 0,
+    "rank": {"empty-graph": 0, "linked-graph": 0, "inconsistent-graph": 0},
+    "fairness_owners": ["graph-authority"],
+    "fairness_owner": "graph-authority",
+    "fairness_owner_of": {}
+  }
+}

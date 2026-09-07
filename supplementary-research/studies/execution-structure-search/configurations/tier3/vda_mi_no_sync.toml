@@ -1,0 +1,16 @@
+name = "VdA_MI_WithoutSynchronization"
+tier = 3
+modality = "ForkJoin"
+evidence = "trace_equivalence"
+workload = "scientific_workflow"
+
+[policies]
+invocation = "Programmatic"
+topology = "None"
+dependencies = "Fixed"
+lifecycle = "Per_Invocation"
+
+citations = [
+    "Russell, van der Aalst & ter Hofstede (2016) Workflow Patterns: The Definitive Guide",
+    "workflowpatterns.com control-flow patterns catalog",
+]

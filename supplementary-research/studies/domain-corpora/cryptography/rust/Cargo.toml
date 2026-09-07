@@ -1,0 +1,23 @@
+[package]
+name = "dac_cryptography"
+version = "0.1.0"
+edition = "2021"
+description = "Seven cryptographic algorithms built from six catalog primitives plus content and tested for byte-exact equivalence against published vectors and reference oracles."
+
+# The implementation has no runtime dependency outside the standard library.
+[dependencies]
+
+# Every second-oracle dependency below is mandatory for the seven algorithms.
+[dev-dependencies]
+proptest = "1"
+sha2 = "0.10"             # second oracle for SHA-256
+sha3 = "0.10"             # second oracle for SHA-3
+blake3 = "1"              # second oracle for BLAKE3
+chacha20 = "0.9"          # second oracle for ChaCha20
+hmac = "0.12"             # second oracle for HMAC-SHA-256
+hkdf = "0.12"             # second oracle for HKDF-SHA-256
+pbkdf2 = "0.12"           # second oracle for PBKDF2-HMAC-SHA-256
+
+[lib]
+name = "dac_cryptography"
+path = "src/lib.rs"

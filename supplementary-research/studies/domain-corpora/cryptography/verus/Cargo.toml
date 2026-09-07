@@ -1,0 +1,17 @@
+[package]
+name = "cryptography_verus"
+version = "0.1.0"
+edition = "2021"
+description = "Exploratory Verus cryptography sources with explicit external-body trust boundaries; no crate-wide implementation-conformance claim."
+
+# Cargo does not invoke Verus. This manifest records the crate source
+# layout only.
+
+[lib]
+name = "cryptography_verus"
+path = "src/lib.rs"
+
+# Verus dependencies: builtin + vstd are imported through Verus's own
+# import path (`use vstd::prelude::*;` etc.), not through Cargo deps.
+# Single-file verification mode requires no Cargo entries for them.
+[dependencies]

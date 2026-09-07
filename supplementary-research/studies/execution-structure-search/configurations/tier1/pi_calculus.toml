@@ -1,0 +1,17 @@
+name = "PiCalculus"
+tier = 1
+modality = "StreamGraph"
+evidence = "trace_equivalence"
+workload = "actor_message_exchange"
+
+[policies]
+invocation = "Message"
+topology = "Dynamic_Addressable"
+dependencies = "Conditional"
+lifecycle = "Per_Rendezvous"
+
+citations = [
+    "Milner (1992) — The Polyadic π-Calculus: A Tutorial. Logic and Algebra of Specification",
+    "Fowler, Lindley & Wadler (2017) — Mixing Metaphors: Actors as Channels and Channels as Actors. ECOOP",
+    "Sangiorgi & Walker (2001) — The π-Calculus: A Theory of Mobile Processes. Cambridge University Press",
+]

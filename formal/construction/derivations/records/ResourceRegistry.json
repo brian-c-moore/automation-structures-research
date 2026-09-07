@@ -1,0 +1,279 @@
+{
+  "module": "ResourceRegistry",
+  "structure": "ResourceRegistry",
+  "kind": "abstraction-primitive",
+  "property_classes": ["safety"],
+  "state_fields": ["entries"],
+  "observation_fields": ["entries"],
+  "implementation_state_fields": ["entries"],
+  "implementation_state_map": {
+    "entries": "entries"
+  },
+  "observation_map": {
+    "entries": "entries"
+  },
+  "canonical_actions": ["Register", "Deregister"],
+  "system_actions": ["Register", "Deregister"],
+  "environment_actions": [],
+  "failure_actions": [],
+  "commit_actions": ["Register", "Deregister"],
+  "executable_actions": ["register", "deregister"],
+  "action_map": {
+    "Register": ["register"],
+    "Deregister": ["deregister"]
+  },
+  "obligations": ["UniqueMapping"],
+  "violations": ["DuplicateMapping"],
+  "violation_of": {
+    "UniqueMapping": "DuplicateMapping"
+  },
+  "actors": ["registry-client", "registry-authority"],
+  "claimant": "registry-client",
+  "owner_of": {
+    "Register": "registry-authority",
+    "Deregister": "registry-authority"
+  },
+  "delegate_of": {
+    "Register": ["registry-authority"],
+    "Deregister": ["registry-authority"]
+  },
+  "assurance_at": {
+    "Register": "at-commit",
+    "Deregister": "at-commit"
+  },
+  "relies": [
+    "serialized-exclusive-registry-mutation",
+    "atomic-filter-and-replacement-or-removal",
+    "complete-registry-writer-tcb-with-no-bypass"
+  ],
+  "guarantees": [
+    {
+      "id": "resourceregistry-written-profile-refinement",
+      "statement": "Mechanized refinement maps the written executable contract profile to the canonical ResourceRegistry machine under the named state, action, and premise map.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "refinement",
+      "local_theorem": "ResourceRegistryImplRefinesSpec_Proof!RefinementThm"
+    },
+    {
+      "id": "unique-key-mapping",
+      "statement": "Every admitted register or deregister action preserves at most one value for each key.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "obligation",
+      "local_theorem": "ResourceRegistry_Proof!UniqueMappingSafety"
+    },
+    {
+      "id": "atomic-upsert-license",
+      "statement": "Register removes all old values for the key and installs one replacement in the same governed commit; Deregister atomically removes that key.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "check-act",
+      "local_theorem": "TheoryKernel_Proof!CheckActStability"
+    },
+    {
+      "id": "registry-owner-ceiling",
+      "statement": "Prevention remains conditional on the registry authority controlling every entries mutation.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "ownership-assurance",
+      "local_theorem": "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
+    },
+    {
+      "id": "registry-executable-transfer",
+      "statement": "The mechanized implementation relation transfers unique mapping for the complete written two-action mutation surface.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "refinement",
+      "local_theorem": "ResourceRegistryImplRefinesSpec_Proof!RefinementThm"
+    }
+  ],
+  "runtime_providers": ["registry-authority", "exclusive-mutation-provider", "key-value-representation"],
+  "failure_ceilings": [
+    "no-modeled-crash-torn-upsert-or-storage-loss",
+    "concurrent-or-bypass-writers-outside-boundary",
+    "u64-key-value-universe-is-an-executable-instantiation-not-a-universal-domain"
+  ],
+  "execution_carriers": ["Sequential"],
+  "local_theorems": [
+    "ResourceRegistryImplRefinesSpec_Proof!RefinementThm",
+    "ResourceRegistry_Proof!UniqueMappingSafety",
+    "TheoryKernel_Proof!ObligationPreservation",
+    "TheoryKernel_Proof!CheckActStability",
+    "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
+  ],
+  "executable_pointers": [
+    "formal/structures/ResourceRegistry/refinement/ResourceRegistryImplRefinesSpec.tla",
+    "formal/structures/ResourceRegistry/refinement/ResourceRegistryImplRefinesSpec_Proof.tla",
+    "crate://automation-structures/0.2.3/src/primitives/resource_registry.rs",
+    "formal/structures/ResourceRegistry/ResourceRegistry.tla",
+    "formal/structures/ResourceRegistry/ResourceRegistry_Proof.tla"
+  ],
+  "library_premises": [
+    "ResourceRegistry-written-contract-refinement-profile",
+    "canonical-two-action-partial-function-machine",
+    "UniqueMappingSafety",
+    "ObligationPreservation",
+    "CheckActStability",
+    "OwnershipAssuranceClassification"
+  ],
+  "deployment_premises": [
+    "Keys-and-Values-instantiated-by-the-executable-u64-universes",
+    "serialized-exclusive-registry-mutation",
+    "atomic-filter-and-replacement-or-removal",
+    "complete-registry-writer-tcb-with-no-bypass"
+  ],
+  "residuals": [
+    "formal-correspondence-is-limited-to-the-written-state-action-and-premise-map",
+    "no-durable-distributed-or-versioned-registry-protocol",
+    "lookup-is-a-derived-observation-not-a-canonical-state-transition",
+    "authorization-for-which-client-may-bind-which-key-is-outside-UniqueMapping"
+  ],
+  "evidence_ceilings": [
+    "implementation-refinement-covers-only-the-written-bounded-contract-profile",
+    "TLAPS-proves-partial-function-uniqueness-for-the-canonical-set-machine",
+    "Verus-proves-the-written-vector-pair-contracts-and-other-key-frames",
+    "executable-semantic-transfer-is-limited-to-the-mapped-two-action-profile"
+  ],
+  "cases": {
+    "valid": [
+      {
+        "id": "register-new-key",
+        "description": "Register installs the one requested key/value pair and frames every other key."
+      },
+      {
+        "id": "replace-existing-key",
+        "description": "Register filters the previous value and installs exactly one replacement atomically."
+      }
+    ],
+    "boundary": [
+      {
+        "id": "deregister-present-key",
+        "description": "Deregister removes every pair for a present key and frames every other key/value binding."
+      },
+      {
+        "id": "absent-deregister-rejected",
+        "description": "An absent key does not enable canonical Deregister; an executable admission wrapper must stutter."
+      }
+    ],
+    "misuse": [
+      {
+        "id": "append-without-filter",
+        "description": "Appending a replacement without filtering the prior pair permits DuplicateMapping and is rejected."
+      },
+      {
+        "id": "presence-only-frame",
+        "description": "Preserving only other-key presence while changing another key's value is not the declared action mapping."
+      }
+    ],
+    "failure": [
+      {
+        "id": "torn-upsert",
+        "description": "Exposing the filter and replacement as separate crash-visible commits is outside the model and loses atomic upsert."
+      },
+      {
+        "id": "bypass-writer",
+        "description": "An unregistered entries writer invalidates the owner and complete-TCB premises."
+      }
+    ]
+  },
+  "applicable_families": ["obligation", "check-act", "ownership-assurance", "refinement"],
+  "discharged_families": ["obligation", "check-act", "ownership-assurance", "refinement"],
+  "transfer_classes": ["safety", "observation"],
+  "refinement_status": "mechanized",
+  "conformance_details": {
+    "initialization": "ResourceRegistry::new maps to entries = {}.",
+    "step-simulation": "Every complete register or deregister call maps to its named action; rejected absent-key wrappers may only stutter.",
+    "observation-agreement": "Executable contains_key, maps_to, and lookup are derived from the same pair sequence projected to canonical entries.",
+    "commit-agreement": "Each accepted filter/add or filter/remove mutation is one registry-authority commit and every entries writer is inventoried.",
+    "failure-persistence-agreement": "No crash, torn write, storage loss, retry, or recovery action is modeled; an implementation exposing one must add its mapping.",
+    "rely-discharge": "Deployment supplies serialized exclusive mutation, atomic vector replacement, and the finite u64 key/value representation.",
+    "liveness-preservation": "No liveness guarantee is transferred by this record.",
+    "tcb-closure": "Every path that can mutate the executable entries vector is a mapped method or a declared deployment transition."
+  },
+  "source_checks": [
+    {
+      "path": "formal/structures/ResourceRegistry/refinement/ResourceRegistryImplRefinesSpec_Proof.tla",
+      "contains": ["THEOREM", "Refinement"]
+    },
+    {
+      "path": "formal/structures/ResourceRegistry/ResourceRegistry.tla",
+      "contains": ["VARIABLES entries", "Register(k, v) ==", "Deregister(k) ==", "UniqueMapping =="]
+    },
+    {
+      "path": "formal/structures/ResourceRegistry/ResourceRegistry_Proof.tla",
+      "contains": ["THEOREM UniqueMappingSafety"]
+    },
+    {
+      "path": "crate://automation-structures/0.2.3/src/primitives/resource_registry.rs",
+      "contains": ["pub struct ResourceRegistry", "pub fn register", "pub fn deregister", "pub open spec fn unique_mapping"]
+    }
+  ],
+  "witness": {
+    "states": ["empty", "single-a", "single-b", "duplicate"],
+    "initial": ["empty"],
+    "obligation_states": ["empty", "single-a", "single-b"],
+    "violation_states": ["duplicate"],
+    "system_steps": [
+      ["empty", "single-a"],
+      ["single-a", "single-b"],
+      ["single-a", "empty"],
+      ["single-b", "empty"]
+    ],
+    "environment_steps": [],
+    "action_steps": {
+      "Register": [
+        ["empty", "single-a"],
+        ["single-a", "single-b"]
+      ],
+      "Deregister": [
+        ["single-a", "empty"],
+        ["single-b", "empty"]
+      ]
+    },
+    "rely_steps": [],
+    "commit_steps": [
+      ["empty", "single-a"],
+      ["single-a", "single-b"],
+      ["single-a", "empty"],
+      ["single-b", "empty"]
+    ],
+    "failure_steps": [],
+    "interference_steps": [],
+    "check_mode": "atomic",
+    "check_result_states": ["empty", "single-a", "single-b"],
+    "predicate_states": ["empty", "single-a", "single-b"],
+    "actors": ["registry-client", "registry-authority"],
+    "providers": ["registry-authority"],
+    "claimant": "registry-client",
+    "commit_owner": "registry-authority",
+    "commit_delegate": "registry-authority",
+    "assurance_provider": "registry-authority",
+    "assurance_position": "at-commit",
+    "prevention_controllers": ["registry-authority"],
+    "unavailable_providers": [],
+    "persistent_observe": {
+      "empty": true,
+      "single-a": true,
+      "single-b": true,
+      "duplicate": false
+    },
+    "persistent_evidence": true,
+    "recovery_available": false,
+    "active_states": ["empty", "single-a", "single-b"],
+    "closed_states": [],
+    "progress_steps": [],
+    "other_steps": [],
+    "handoff_steps": [],
+    "rank_bound": 0,
+    "rank": {
+      "empty": 0,
+      "single-a": 0,
+      "single-b": 0,
+      "duplicate": 0
+    },
+    "fairness_owners": ["registry-authority"],
+    "fairness_owner": "registry-authority",
+    "fairness_owner_of": {}
+  }
+}

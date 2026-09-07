@@ -1,0 +1,16 @@
+name = "Splunk_SOAR"
+tier = 2
+modality = "StepGraph"
+evidence = "documented_behavior"
+# note: Splunk SOAR is vendor-only; no community edition exists to direct-compare against
+workload = "scientific_workflow"
+
+[policies]
+invocation = "Security_Event"
+topology = "Declared_Playbook"
+dependencies = "Fixed"
+lifecycle = "Per_Incident"
+
+citations = [
+    "Splunk SOAR product documentation",
+]

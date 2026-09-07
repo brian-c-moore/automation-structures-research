@@ -1,0 +1,15 @@
+name = "McCool_Stencil"
+tier = 3
+modality = "ForkJoin"
+evidence = "trace_equivalence"
+workload = "data_pipeline"
+
+[policies]
+invocation = "Programmatic"
+topology = "None_Ranked"
+dependencies = "Fixed"
+lifecycle = "Sync_Barrier"
+
+citations = [
+    "McCool Robison Reinders (2012)",
+]

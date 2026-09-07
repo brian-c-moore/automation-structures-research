@@ -1,0 +1,15 @@
+name = "Mattson_RecursiveData"
+tier = 3
+modality = "StepGraph"
+evidence = "trace_equivalence"
+workload = "scientific_workflow"
+
+[policies]
+invocation = "Programmatic"
+topology = "Declared_DAG"
+dependencies = "Fixed"
+lifecycle = "Per_Invocation"
+
+citations = [
+    "Mattson Sanders Massingill (2004)",
+]

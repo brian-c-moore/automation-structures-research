@@ -1,0 +1,19 @@
+name = "Erlang"
+tier = 1
+modality = "StreamGraph"
+evidence = "direct_comparison"
+workload = "actor_message_exchange"
+
+[policies]
+invocation = "Pattern"
+topology = "Dynamic_Addressable"
+dependencies = "HotSwappable"
+lifecycle = "Supervision_Tree"
+
+[trace_properties]
+supervision_restarts_crashed = true
+
+citations = [
+    "Armstrong (2003) — Making Reliable Distributed Systems in the Presence of Software Errors. PhD KTH/SICS",
+    "Agha (1986) — Actors: A Model of Concurrent Computation. MIT Press",
+]

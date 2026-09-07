@@ -1,0 +1,16 @@
+name = "Game_Server_Entity_Systems"
+tier = 2
+modality = "StreamGraph"
+evidence = "documented_behavior"
+# note: generic ECS pattern category, no canonical reference implementation to direct-compare against
+workload = "render_graph"
+
+[policies]
+invocation = "Vsync"
+topology = "Dynamic_Addressable"
+dependencies = "Fixed"
+lifecycle = "Per_Frame"
+
+citations = [
+    "Common game server architecture (e.g. ECS literature)",
+]

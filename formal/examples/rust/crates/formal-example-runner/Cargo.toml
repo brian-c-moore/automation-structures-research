@@ -1,0 +1,13 @@
+[package]
+name = "formal-example-runner"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+formal-example-algorithms = { path = "../formal-example-algorithms" }
+formal-example-domains = { path = "../formal-example-domains" }
+formal-example-structures = { path = "../formal-example-structures" }
+serde.workspace = true
+serde_json.workspace = true

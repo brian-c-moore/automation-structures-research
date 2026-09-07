@@ -1,0 +1,15 @@
+name = "Autogen"
+tier = 2
+modality = "StreamGraph"
+evidence = "direct_comparison"
+workload = "actor_message_exchange"
+
+[policies]
+invocation = "Message"
+topology = "Dynamic_Addressable"
+dependencies = "HotSwappable"
+lifecycle = "Per_Invocation"
+
+citations = [
+    "Microsoft AutoGen documentation",
+]

@@ -1,0 +1,144 @@
+{
+  "module": "Sampler",
+  "structure": "Sampler",
+  "kind": "named-composition",
+  "property_classes": ["safety"],
+  "state_fields": ["distribution", "selected"],
+  "observation_fields": ["distribution", "selected"],
+  "implementation_state_fields": ["distribution", "selected"],
+  "implementation_state_map": {"distribution": "distribution", "selected": "selected"},
+  "observation_map": {"distribution": "distribution", "selected": "selected"},
+  "canonical_actions": ["Sample", "Zero"],
+  "system_actions": ["Sample"],
+  "environment_actions": ["Zero"],
+  "failure_actions": [],
+  "commit_actions": ["Sample"],
+  "executable_actions": ["sample", "draw_weighted", "draw_uniform", "zero"],
+  "action_map": {"Sample": ["sample", "draw_weighted", "draw_uniform"], "Zero": ["zero"]},
+  "obligations": ["BoundedSample", "SupportConsistency"],
+  "violations": ["SampleSizeExceeded", "SelectionOutsideSupport"],
+  "violation_of": {"BoundedSample": "SampleSizeExceeded", "SupportConsistency": "SelectionOutsideSupport"},
+  "actors": ["sampling-claimant", "sampling-authority", "distribution-provider"],
+  "claimant": "sampling-claimant",
+  "owner_of": {"Sample": "sampling-authority", "Zero": "distribution-provider"},
+  "delegate_of": {"Sample": ["sampling-authority"], "Zero": ["distribution-provider"]},
+  "assurance_at": {"Sample": "at-commit"},
+  "relies": ["finite-item-universe", "serialized-distribution-selection-mutation", "atomic-support-check-and-selection"],
+  "guarantees": [
+    {
+      "id": "sampler-written-profile-refinement",
+      "statement": "Mechanized refinement maps the written executable contract profile to the canonical Sampler machine under the named state, action, and premise map.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "refinement",
+      "local_theorem": "SamplerImplRefinesSpec_Proof!RefinementThm"
+    },
+    {
+      "id": "bounded-supported-selection",
+      "statement": "Every modeled sample and live zeroing step preserves the sample-size bound and keeps every selected item in current support.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "obligation",
+      "local_theorem": "Sampler_Proof!Safety"
+    },
+    {
+      "id": "atomic-support-license",
+      "statement": "A selection is licensed only through the atomic size, freshness, index, and positive-support guard.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "check-act",
+      "local_theorem": "TheoryKernel_Proof!CheckActStability"
+    },
+    {
+      "id": "sampler-owner-ceiling",
+      "statement": "Support prevention depends on the sampling authority owning selection commits and the distribution provider honoring Zero's selected-item exclusion rely.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "ownership-assurance",
+      "local_theorem": "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
+    }
+  ],
+  "runtime_providers": ["sampling-authority", "distribution-provider", "exclusive-mutation-provider", "draw-input-provider"],
+  "failure_ceilings": ["no-randomness-quality-or-distribution-convergence-claim", "no-modeled-crash-or-torn-selection", "concurrent-support-writer-outside-boundary"],
+  "execution_carriers": ["Sequential"],
+  "local_theorems": [
+    "SamplerImplRefinesSpec_Proof!RefinementThm", "Sampler_Proof!Safety", "Sampler_Proof!BoundedSampleSafety", "Sampler_Proof!SupportConsistencySafety", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"],
+  "executable_pointers": [
+    "formal/structures/Sampler/refinement/SamplerImplRefinesSpec.tla",
+    "formal/structures/Sampler/refinement/SamplerImplRefinesSpec_Proof.tla","crate://automation-structures/0.2.3/src/compositions/sampler.rs", "formal/structures/Sampler/Sampler.tla", "formal/structures/Sampler/Sampler_Proof.tla"],
+  "library_premises": [
+    "Sampler-written-contract-refinement-profile","canonical-sample-zero-machine", "Sampler-Safety", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification"],
+  "deployment_premises": ["ItemsFinite", "SampleSizeType", "MaxProbType", "serialized-distribution-selection-mutation", "atomic-support-check-and-selection"],
+  "residuals": [
+    "formal-correspondence-is-limited-to-the-written-state-action-and-premise-map", "no-randomness-quality-result", "no-fair-selection-or-frequency-result", "all-zero-policy-is-an-explicit-rejection-boundary"],
+  "evidence_ceilings": [
+    "implementation-refinement-covers-only-the-written-bounded-contract-profile","TLAPS-proves-only-bounds-and-support", "Verus-draw-input-is-caller-supplied-not-randomness-proof", "KAT-draw-boundaries-are-cross-checks-only"],
+  "cases": {
+    "valid": [{"id": "supported-fresh-draw", "description": "A fresh in-range item with positive support is selected while capacity remains."}],
+    "boundary": [{"id": "sample-size-full", "description": "A draw at the sample-size ceiling is rejected without extending selected."}],
+    "misuse": [{"id": "zero-support-draw", "description": "An item with zero current support cannot be added to selected."}],
+    "failure": [{"id": "concurrent-zero-and-draw", "description": "A support change racing a selection outside the atomic boundary loses support consistency."}]
+  },
+  "applicable_families": ["obligation", "check-act", "ownership-assurance", "refinement"],
+  "discharged_families": ["obligation", "check-act", "ownership-assurance", "refinement"],
+  "transfer_classes": ["safety"],
+  "refinement_status": "mechanized",
+  "conformance_details": {
+    "initialization": "Sampler::new maps the complete distribution and empty selected vector to canonical Init.",
+    "step-simulation": "sample, draw_weighted, and draw_uniform map to Sample; zero maps to the environment-owned Zero action; every rejected guard stutters.",
+    "observation-agreement": "The distribution vector maps pointwise and the duplicate-free selected vector projects to the selected set.",
+    "commit-agreement": "Each accepted draw is one sampling-authority commit with exact frames; Zero is an environment transition, not a governed commit.",
+    "failure-persistence-agreement": "No crash, torn distribution/selection write, retry, or recovery step is modeled.",
+    "rely-discharge": "Deployment supplies the finite item universe, serialized mutation, valid draw inputs, and a distribution provider that never zeroes a selected item.",
+    "liveness-preservation": "No eventual selection, fairness, randomness-quality, or convergence guarantee is transferred.",
+    "tcb-closure": "Every distribution or selected writer is one of the mapped sample/draw/zero methods."
+  },
+  "source_checks": [
+    {
+      "path": "formal/structures/Sampler/refinement/SamplerImplRefinesSpec_Proof.tla",
+      "contains": ["THEOREM", "Refinement"]
+    },
+    {"path": "formal/structures/Sampler/Sampler.tla", "contains": ["VARIABLES distribution, selected", "Sample ==", "Zero(i)", "SupportConsistency"]},
+    {"path": "formal/structures/Sampler/Sampler_Proof.tla", "contains": ["THEOREM Safety", "THEOREM SupportConsistencySafety"]},
+    {"path": "crate://automation-structures/0.2.3/src/compositions/sampler.rs", "contains": ["pub struct Sampler", "pub fn sample", "pub fn zero", "pub fn draw_weighted", "pub open spec fn support_consistency"]}
+  ],
+  "proof_binding": {"canonical_directory": "formal/structures/Sampler", "proof_module": "Sampler_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
+  "witness": {
+    "states": ["live-support", "sampled", "unsupported-selection"],
+    "initial": ["live-support"],
+    "obligation_states": ["live-support", "sampled"],
+    "violation_states": ["unsupported-selection"],
+    "system_steps": [["live-support", "sampled"]],
+    "environment_steps": [["sampled", "sampled"]],
+    "action_steps": {"Sample": [["live-support", "sampled"]], "Zero": [["sampled", "sampled"]]},
+    "rely_steps": [["sampled", "sampled"]],
+    "commit_steps": [["live-support", "sampled"]],
+    "failure_steps": [],
+    "interference_steps": [],
+    "check_mode": "atomic",
+    "check_result_states": ["live-support", "sampled"],
+    "predicate_states": ["live-support", "sampled"],
+    "actors": ["sampling-claimant", "sampling-authority", "distribution-provider"],
+    "providers": ["sampling-authority", "distribution-provider"],
+    "claimant": "sampling-claimant",
+    "commit_owner": "sampling-authority",
+    "commit_delegate": "sampling-authority",
+    "assurance_provider": "sampling-authority",
+    "assurance_position": "at-commit",
+    "prevention_controllers": ["sampling-authority"],
+    "unavailable_providers": [],
+    "persistent_observe": {"live-support": true, "sampled": true, "unsupported-selection": false},
+    "persistent_evidence": true,
+    "recovery_available": false,
+    "active_states": ["live-support", "sampled"],
+    "closed_states": [],
+    "progress_steps": [],
+    "other_steps": [],
+    "handoff_steps": [],
+    "rank_bound": 0,
+    "rank": {"live-support": 0, "sampled": 0, "unsupported-selection": 0},
+    "fairness_owners": ["sampling-authority"],
+    "fairness_owner": "sampling-authority",
+    "fairness_owner_of": {}
+  }
+}

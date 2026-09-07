@@ -1,0 +1,232 @@
+{
+  "schema": "formal-examples-manifest-v1",
+  "examples": [
+    {
+      "id": "FEX-DOM-REN-03",
+      "name": "Level of detail",
+      "family": "domain-example",
+      "claim": "A bounded level-of-detail scenario uses the capacity-bounded rooted-frontier composition and agrees with a separate exhaustive result.",
+      "limits": [
+        "Rendering engine integration, visibility, streaming, hysteresis, and performance are excluded.",
+        "The result is bounded to finite quality ladders and byte budgets."
+      ]
+    },
+    {
+      "id": "FEX-ASM-01",
+      "name": "LOD/quality scaling",
+      "family": "integrated-reconstruction",
+      "claim": "The LOD quality-scaling reconstruction crosses every declared structural seam and agrees with its domain reference.",
+      "limits": [
+        "This entry covers assembly and executable checks rather than a rendering product."
+      ]
+    },
+    {
+      "id": "FEX-OSPF-001",
+      "name": "Bounded OSPFv2 intra-area route selection",
+      "family": "domain-poc",
+      "claim": "For normalized finite link-state inputs, conventional Dijkstra and rooted-frontier selection compute the same route costs and equal-cost next-hop sets as a separate Bellman-Ford reference.",
+      "limits": [
+        "This is not an OSPF protocol implementation.",
+        "Input is a normalized directed topology rather than live LSAs.",
+        "Inter-area routing, external routing, flooding, aging, authentication, and convergence are excluded.",
+        "The rooted-frontier path enumerates finite simple paths and makes no routing-performance claim."
+      ]
+    },
+    {
+      "id": "FEX-XFER-LOD-OSPF-01",
+      "name": "LOD/OSPF structural correspondence",
+      "family": "cross-example-relation",
+      "claim": "Both examples invoke QualityHierarchy, TraversalEngine, CompetitiveSelection, and AllocationSnapshot in the same rooted-frontier order after domain payload erasure.",
+      "limits": [
+        "Budget<Bytes> is specific to LOD; OSPF has no route-slot budget.",
+        "Candidate generation and candidate measures remain domain-specific.",
+        "RelationshipGraph, ResourceRegistry, and path Reduction remain specific to the route example.",
+        "The relation does not equate view utility with path cost or routing semantics."
+      ]
+    },
+    {
+      "id": "FEX-DOM-CICD-01",
+      "name": "Pipeline DAG",
+      "family": "domain-example",
+      "claim": "A bounded CI job-dependency DAG uses RelationshipGraph, TraversalEngine, and StepGraph, and its accepted schedules agree with an independent dependency enumerator.",
+      "limits": [
+        "The evidence covers one immutable successful four-job workflow.",
+        "Conditional jobs, failures, retries, cancellation, product conformance, arbitrary graphs, and performance are excluded."
+      ]
+    },
+    {
+      "id": "FEX-DOM-CICD-03",
+      "name": "Parallel test execution",
+      "family": "domain-example",
+      "claim": "A bounded complete test matrix uses ResourceRegistry, Budget<Compute>, and ForkJoin; every declared partition appears in the joined output and accepted schedules agree with an independent enumerator.",
+      "limits": [
+        "The evidence covers two required test partitions inside the registered successful workflow.",
+        "The compute Budget is a total-work bound, not a runner-pool or wall-clock concurrency model."
+      ]
+    },
+    {
+      "id": "FEX-ASM-06",
+      "name": "CI/CD pipeline",
+      "family": "integrated-reconstruction",
+      "claim": "The bounded CI pipeline invokes one outer StepGraph and a nested ForkJoin test stage, crosses the registered identity, dependency, capacity, target-effect, and carrier-handoff seams, and agrees with an independent schedule oracle.",
+      "limits": [
+        "The evidence covers one immutable successful four-job workflow with two required test partitions.",
+        "GitHub Actions conformance, failure semantics, caching, deployment correctness, arbitrary graphs, and performance are excluded."
+      ]
+    },
+    {
+      "id": "FEX-DOM-RT-01",
+      "name": "Preemptive earliest-deadline-first scheduling",
+      "family": "domain-example",
+      "claim": "For the registered preemptive uniprocessor task model and bounded cases, the shared-structure construction applies finite processor-demand admission and complete-ready-set earliest-deadline dispatch and agrees with separate admission and exhaustive-scheduling oracles, while the mechanized premise-binding model passes its positive and isolated-control checks.",
+      "limits": [
+        "The Rust differential evidence is bounded to the registered generated grids and named release traces.",
+        "The bounded formal model checks composition premises and relies on the cited scheduling theorems for the unbounded implication.",
+        "Kernel conformance, multiprocessor behavior, blocking, timing overhead, and performance are excluded."
+      ]
+    },
+    {
+      "id": "FEX-DOM-DIST-01",
+      "name": "State-based replicated JSON object",
+      "family": "domain-example",
+      "claim": "For the registered finite JSON-object subset and delivery schedules, the shared-structure construction preserves the state-based merge premises, agrees with separate issued-operation and exact-union references, and converges after complete delivery, while the mechanized premise-binding model passes its positive and isolated-control checks.",
+      "limits": [
+        "Executable evidence is bounded to the named scripts, generated cases, and one finite merge-law state family.",
+        "The bounded formal model checks composition premises and relies on the cited CRDT results for the general convergence implication.",
+        "Eventual delivery, full JSON behavior, production integration, and performance are excluded."
+      ]
+    },
+    {
+      "id": "FEX-DOM-PRIV-01",
+      "name": "Fixed-grid Renyi differential privacy accountant",
+      "family": "domain-example",
+      "claim": "For the registered fixed order grid, integer scale, target delta, certified query declarations, and bounded workloads, the shared-structure construction composes every coordinate, selects and enforces the registered reported bound, and agrees with a separate prefix evaluator, while the mechanized premise-binding model passes its positive and isolated-control checks.",
+      "limits": [
+        "The executable workload evidence is bounded to the registered demonstration and generated grid.",
+        "The conditional privacy implication and conversion formula rely on the cited source theorem and valid query certificates.",
+        "Certificate truth, production mediation, continuous-order optimality, performance, and utility are excluded."
+      ]
+    },
+    {
+      "id": "FEX-DOM-TXN-01",
+      "name": "Bounded optimistic software transactional memory",
+      "family": "domain-example",
+      "claim": "For the registered finite word heaps, nonnested transaction declarations, and bounded schedules, the shared-structure construction provides stable-epoch reads, conflict abort, and complete target-bound write publication, and it produces histories accepted by a separate opacity evaluator; the mechanized premise-binding model passes its positive and isolated-control checks.",
+      "limits": [
+        "The exhaustive evidence is bounded to the registered word heaps, transaction programs, and finite schedules.",
+        "The construction relies on one standard single-word atomic epoch and makes no general Rust-to-TLA refinement or opacity-proof claim.",
+        "Weak memory, crashes, nesting, progress, persistence, production behavior, and performance are excluded."
+      ]
+    },
+    {
+      "id": "FEX-SC-C01",
+      "name": "Memoization",
+      "family": "classical-schema",
+      "claim": "Each admitted subproblem is computed once after its dependencies, and its stored result equals the registered predecessor reduction.",
+      "limits": [
+        "The reusable schema has no parametric deductive proof in this artifact.",
+        "Instance fidelity is established separately for each registered algorithm."
+      ]
+    },
+    {
+      "id": "FEX-ALG-060",
+      "name": "Climbing Stairs",
+      "family": "classical-algorithm",
+      "claim": "Result matches the independent climbing_stairs reference for every registered case in the bounded input domain.",
+      "limits": [
+        "The result is bounded to the registered typed inputs and cases.",
+        "No asymptotic optimality or production-performance claim is made."
+      ]
+    },
+    {
+      "id": "FEX-ALG-061",
+      "name": "House Robber",
+      "family": "classical-algorithm",
+      "claim": "Result matches the independent house_robber reference for every registered case in the bounded input domain.",
+      "limits": [
+        "The result is bounded to the registered typed inputs and cases.",
+        "No asymptotic optimality or production-performance claim is made."
+      ]
+    },
+    {
+      "id": "FEX-ALG-062",
+      "name": "Longest Increasing Subsequence",
+      "family": "classical-algorithm",
+      "claim": "Result matches the independent lis reference for every registered case in the bounded input domain.",
+      "limits": [
+        "The result is bounded to the registered typed inputs and cases.",
+        "No asymptotic optimality or production-performance claim is made."
+      ]
+    },
+    {
+      "id": "FEX-ALG-063",
+      "name": "Coin Change",
+      "family": "classical-algorithm",
+      "claim": "Result matches the independent coin_change reference for every registered case in the bounded input domain.",
+      "limits": [
+        "The result is bounded to the registered typed inputs and cases.",
+        "No asymptotic optimality or production-performance claim is made."
+      ]
+    },
+    {
+      "id": "FEX-ALG-064",
+      "name": "Word Break",
+      "family": "classical-algorithm",
+      "claim": "Result matches the independent word_break reference for every registered case in the bounded input domain.",
+      "limits": [
+        "The result is bounded to the registered typed inputs and cases.",
+        "No asymptotic optimality or production-performance claim is made."
+      ]
+    },
+    {
+      "id": "FEX-ALG-065",
+      "name": "Unique Paths",
+      "family": "classical-algorithm",
+      "claim": "Result matches the independent unique_paths reference for every registered case in the bounded input domain.",
+      "limits": [
+        "The result is bounded to the registered typed inputs and cases.",
+        "No asymptotic optimality or production-performance claim is made."
+      ]
+    },
+    {
+      "id": "FEX-ALG-066",
+      "name": "Longest Common Subsequence",
+      "family": "classical-algorithm",
+      "claim": "Result matches the independent lcs reference for every registered case in the bounded input domain.",
+      "limits": [
+        "The result is bounded to the registered typed inputs and cases.",
+        "No asymptotic optimality or production-performance claim is made."
+      ]
+    },
+    {
+      "id": "FEX-ALG-067",
+      "name": "Edit Distance",
+      "family": "classical-algorithm",
+      "claim": "Result matches the independent edit_distance reference for every registered case in the bounded input domain.",
+      "limits": [
+        "The result is bounded to the registered typed inputs and cases.",
+        "No asymptotic optimality or production-performance claim is made."
+      ]
+    },
+    {
+      "id": "FEX-ALG-068",
+      "name": "0/1 Knapsack",
+      "family": "classical-algorithm",
+      "claim": "Result matches the independent knapsack_01 reference for every registered case in the bounded input domain.",
+      "limits": [
+        "The result is bounded to the registered typed inputs and cases.",
+        "No asymptotic optimality or production-performance claim is made."
+      ]
+    },
+    {
+      "id": "FEX-ALG-069",
+      "name": "Longest Palindromic Subsequence",
+      "family": "classical-algorithm",
+      "claim": "Result matches the independent lps reference for every registered case in the bounded input domain.",
+      "limits": [
+        "The result is bounded to the registered typed inputs and cases.",
+        "No asymptotic optimality or production-performance claim is made."
+      ]
+    }
+  ]
+}

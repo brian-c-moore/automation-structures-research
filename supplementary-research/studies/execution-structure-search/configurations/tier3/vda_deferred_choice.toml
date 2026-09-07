@@ -1,0 +1,16 @@
+name = "VdA_DeferredChoice"
+tier = 3
+modality = "StepGraph"
+evidence = "trace_equivalence"
+workload = "scientific_workflow"
+
+[policies]
+invocation = "Event_Or_Programmatic"
+topology = "Declared_DAG"
+dependencies = "Conditional"
+lifecycle = "Per_Invocation"
+
+citations = [
+    "Russell, van der Aalst & ter Hofstede (2016) Workflow Patterns: The Definitive Guide",
+    "workflowpatterns.com control-flow patterns catalog",
+]

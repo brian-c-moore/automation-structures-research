@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "records": [
+    "Budget",
+    "PropagationPass",
+    "AuditSink",
+    "ResourceRegistry",
+    "ActuationPass",
+    "Sequential"
+  ],
+  "integrated_executable_module": "crate://automation-structures/0.2.3/src/integration/governed_commit.rs",
+  "abstract_transition_module": "formal/construction/governed-commit-bridge/tla/GovernedCommitAbstract.tla",
+  "executable_transition_module": "formal/construction/governed-commit-bridge/tla/GovernedCommitExecutable.tla",
+  "abstraction_relation": "GovernedCommitExecutable!AbsState",
+  "observation_relation": "GovernedCommitExecutable!ConcreteObservation = GovernedCommitAbstract!AbstractObservation(AbsState)",
+  "proof_logic": "Verus direct source-level refinement",
+  "proof_module": "crate://automation-structures/0.2.3/src/integration/governed_commit.rs",
+  "direct_abstraction_relation": "GovernedCommit::abstract_phase and GovernedCommit::abstract_used",
+  "direct_observation_relation": "GovernedCommit::abstract_observation_agrees",
+  "direct_action_relations": "GovernedCommit::abstract_system_step, abstract_failure_step, abstract_commit_step, and abstract_stutter_step",
+  "tlaps_model_proof_module": "formal/construction/governed-commit-bridge/tla/GovernedCommitBridge_Proof.tla",
+  "proof_producing_translation": null,
+  "translation_certificate": null,
+  "cross_model_identity": "formal/construction/governed-commit-bridge/TRANSLATION_CERTIFICATE.json",
+  "failure_retry_recovery_model": "formal/construction/governed-commit-bridge/tla/GovernedCommitExecutable.tla",
+  "observation_effect_model": "formal/construction/governed-commit-bridge/tla/GovernedCommitAbstract.tla",
+  "bridge_mutants": [
+    "formal/construction/governed-commit-bridge/tla/BridgeInitializationBroken_NEG.tla",
+    "formal/construction/governed-commit-bridge/tla/BridgeStepPreservationBroken_NEG.tla",
+    "formal/construction/governed-commit-bridge/tla/BridgeCommitEvidenceBroken_NEG.tla"
+  ],
+  "existing_component_evidence": [
+    "formal/structures/Budget/refinement/BudgetImplRefinesSpec.tla",
+    "formal/structures/Budget/refinement/BudgetImplRefinesSpec_Proof.tla",
+    "crate://automation-structures/0.2.3/src/primitives/budget.rs",
+    "crate://automation-structures/0.2.3/src/primitives/propagation_pass.rs",
+    "crate://automation-structures/0.2.3/src/primitives/audit_sink.rs",
+    "crate://automation-structures/0.2.3/src/primitives/resource_registry.rs",
+    "crate://automation-structures/0.2.3/src/primitives/actuation_pass.rs",
+    "crate://automation-structures/0.2.3/src/modalities/sequential.rs"
+  ]
+}

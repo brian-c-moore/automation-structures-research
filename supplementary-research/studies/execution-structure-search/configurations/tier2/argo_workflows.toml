@@ -1,0 +1,15 @@
+name = "Argo_Workflows"
+tier = 2
+modality = "StepGraph"
+evidence = "direct_comparison"
+workload = "scientific_workflow"
+
+[policies]
+invocation = "Event_Or_Programmatic"
+topology = "Declared_DAG"
+dependencies = "Fixed"
+lifecycle = "Rerun_From_Failure"
+
+citations = [
+    "Argo Workflows project",
+]

@@ -1,0 +1,8 @@
+# Rust build artifacts
+rust/target/
+
+# TLC scratch directories (safe to delete between runs)
+tla/**/states/
+
+# Runner logs
+.run_full/

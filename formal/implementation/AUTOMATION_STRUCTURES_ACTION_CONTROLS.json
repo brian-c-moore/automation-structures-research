@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "scope": "Every executable action named by the 23 implementation-refinement records has at least one source-level adversarial control against its published Verus carrier.",
+  "claim_ceiling": "This registry proves action-level control coverage and exact control identity. It does not replace the positive Verus contract proof, TLA+/TLAPS proof, TLC refinement control, runtime known-answer check, or semantic review of the instantiated claim.",
+  "actions": {
+    "ActuationPass": {
+      "actuate": ["actuation-pass-effect-fidelity"],
+      "allocate": ["actuation-pass-allocation-commit"],
+      "deallocate": ["actuation-pass-scope-preservation"],
+      "finish": ["actuation-pass-completion-commit"]
+    },
+    "AllocationSnapshot": {
+      "accept_node": ["allocation-snapshot-cost-accounting"]
+    },
+    "AuditSink": {
+      "record": ["audit-sink-content-binding", "audit-sink-last-hash"]
+    },
+    "BacktrackingTraversal": {
+      "descend": ["backtracking-path-ledger-pairing"],
+      "visit": ["backtracking-leaf-record"],
+      "ascend": ["backtracking-state-restoration"]
+    },
+    "Bisection": {
+      "probe": ["bisection-probe-budget", "bisection-halving-endpoint", "bisection-monotonicity-endpoint"],
+      "converged": ["bisection-converged-observation"]
+    },
+    "Budget": {
+      "try_allocate": ["budget-allocation-credit"],
+      "reserve": ["budget-reservation-credit"],
+      "commit_reservation": ["budget-reservation-commit-transfer"],
+      "release": ["budget-release-debit"],
+      "mark_eviction": ["budget-mark-eviction-credit"],
+      "complete_eviction": ["budget-complete-eviction-debit"]
+    },
+    "CompetitiveSelection": {
+      "CompetitiveSelectionRanked::select": ["competitive-selection-ranked-mark"],
+      "CompetitiveSelectionRanked::update_scores": ["competitive-selection-ranked-score-replacement"],
+      "CompetitiveSelectionHardExclusive::evaluate": ["competitive-selection-hard-winner"],
+      "CompetitiveSelectionHardExclusive::update_score": ["competitive-selection-hard-exclusive-shared-invalidation"],
+      "CompetitiveSelectionSoft::assign_next": ["competitive-selection-soft-award"],
+      "CompetitiveSelectionSoft::update_score": ["competitive-selection-soft-score-commit"]
+    },
+    "ConvergenceGovernor": {
+      "update": ["convergence-governor-state-transition", "convergence-governor-cold-cooling"]
+    },
+    "EquivalenceClass": {
+      "union": [
+        "equivalence-class-root-link",
+        "equivalence-class-root-link-direction",
+        "equivalence-class-equal-rank-root-link",
+        "equivalence-class-union-left-lower-attachment",
+        "equivalence-class-union-right-lower-attachment",
+        "equivalence-class-union-equal-attachment",
+        "equivalence-class-equal-rank-increment",
+        "equivalence-class-union-enabled-result"
+      ]
+    },
+    "FederatedBudget": {
+      "allocate_sub_pool": ["federated-budget-master-conservation"],
+      "allocate_from_sub_pool": ["federated-budget-subpool-ceiling", "federated-budget-selected-pool-frame"],
+      "release_from_sub_pool": ["federated-budget-release-transfer"]
+    },
+    "ForkJoin": {
+      "start_worker": ["fork-join-start-state"],
+      "complete_worker": ["fork-join-complete-state"],
+      "barrier": ["fork-join-barrier-phase"],
+      "produce_output": ["fork-join-early-output", "fork-join-stale-snapshot"],
+      "done_stuttering": ["fork-join-done-observation"]
+    },
+    "PropagationPass": {
+      "start_round": ["propagation-pass-start-commit"],
+      "update_node": ["propagation-pass-snapshot-locality"],
+      "end_round": ["propagation-pass-iteration-bound"],
+      "terminate": ["propagation-pass-terminate-stutter"]
+    },
+    "QualityHierarchy": {
+      "add_child": ["quality-hierarchy-parent-agreement", "quality-hierarchy-level-descent", "quality-hierarchy-cost-order"],
+      "set_node_properties": ["quality-hierarchy-property-commit"]
+    },
+    "RateLimit": {
+      "try_acquire": ["rate-limit-window-count"],
+      "tick": ["rate-limit-window-start-future"]
+    },
+    "Reduction": {
+      "process": ["reduction-prefix-fold"]
+    },
+    "RelationshipGraph": {
+      "add_edge": ["relationship-graph-adjacency-projection", "relationship-graph-self-loop"],
+      "remove_edge": ["relationship-graph-remove-pair"]
+    },
+    "ResourceRegistry": {
+      "register": ["resource-registry-install-replacement", "resource-registry-order-preserving-filter"],
+      "deregister": ["resource-registry-removal-commit", "resource-registry-order-preserving-filter"]
+    },
+    "Sampler": {
+      "sample": ["sampler-selection-commit", "sampler-sample-bound", "sampler-support-selection"],
+      "draw_weighted": ["sampler-weighted-admission", "sampler-weighted-selection-commit"],
+      "draw_uniform": ["sampler-uniform-admission", "sampler-uniform-selection-commit"],
+      "zero": ["sampler-zero-support-removal"]
+    },
+    "Sequential": {
+      "begin_step": ["sequential-begin-activation"],
+      "complete_step": ["sequential-faulty-completion"],
+      "done_stuttering": ["sequential-done-observation"]
+    },
+    "Signal": {
+      "set_value": ["signal-value-commit", "signal-append-history-frame"],
+      "notify_listener": ["signal-notification-partition", "signal-pending-notified-overlap"]
+    },
+    "StepGraph": {
+      "become_ready": ["step-graph-predecessor-bypass"],
+      "start_running": ["step-graph-start-state"],
+      "complete_node": ["step-graph-backward-state"],
+      "done_stuttering": ["step-graph-done-observation"]
+    },
+    "StreamGraph": {
+      "source_ingest": ["stream-graph-over-capacity"],
+      "middle2_fire": ["stream-graph-drop-record"],
+      "middle3_fire": ["stream-graph-third-stage-forward"],
+      "sink_consume": ["stream-graph-sink-emission"],
+      "done_stuttering": ["stream-graph-done-observation"]
+    },
+    "TraversalEngine": {
+      "visit_node": ["traversal-engine-budget-charge", "traversal-engine-accepted-visited-coupling", "traversal-engine-frontier-order"],
+      "skip": ["traversal-engine-skip-removal"],
+      "terminate": ["traversal-engine-terminate-stutter"]
+    }
+  }
+}

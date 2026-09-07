@@ -1,0 +1,303 @@
+{
+  "module": "Sequential",
+  "structure": "Sequential",
+  "kind": "execution-modality",
+  "property_classes": ["safety"],
+  "state_fields": ["pc", "value", "active", "history"],
+  "observation_fields": ["pc", "value", "active", "history"],
+  "implementation_state_fields": ["pc", "value", "active", "history"],
+  "implementation_state_map": {
+    "pc": "pc",
+    "value": "value",
+    "active": "active",
+    "history": "history"
+  },
+  "observation_map": {
+    "pc": "pc",
+    "value": "value",
+    "active": "active",
+    "history": "history"
+  },
+  "canonical_actions": ["BeginStep", "CompleteStep", "DoneStuttering"],
+  "system_actions": ["BeginStep", "CompleteStep", "DoneStuttering"],
+  "environment_actions": [],
+  "failure_actions": [],
+  "commit_actions": ["BeginStep", "CompleteStep"],
+  "executable_actions": ["begin_step", "complete_step", "done_stuttering"],
+  "action_map": {
+    "BeginStep": ["begin_step"],
+    "CompleteStep": ["complete_step"],
+    "DoneStuttering": ["done_stuttering"]
+  },
+  "obligations": ["TypeInvariant", "HistoryPositionAgreement"],
+  "violations": ["CarrierTypeViolation", "HistoryCursorMismatch"],
+  "violation_of": {
+    "TypeInvariant": "CarrierTypeViolation",
+    "HistoryPositionAgreement": "HistoryCursorMismatch"
+  },
+  "actors": ["workflow-claimant", "sequential-executor"],
+  "claimant": "workflow-claimant",
+  "owner_of": {
+    "BeginStep": "sequential-executor",
+    "CompleteStep": "sequential-executor",
+    "DoneStuttering": "sequential-executor"
+  },
+  "delegate_of": {
+    "BeginStep": ["sequential-executor"],
+    "CompleteStep": ["sequential-executor"],
+    "DoneStuttering": ["sequential-executor"]
+  },
+  "assurance_at": {
+    "BeginStep": "at-commit",
+    "CompleteStep": "at-commit"
+  },
+  "relies": [
+    "one-visible-logical-active-locus",
+    "serialized-carrier-state-mutation",
+    "positive-finite-step-count",
+    "nonempty-finite-value-domain",
+    "complete-carrier-writer-tcb"
+  ],
+  "guarantees": [
+    {
+      "id": "ordered-cursor-history",
+      "statement": "Every admitted carrier action preserves that history length equals the completed-step cursor.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "obligation",
+      "local_theorem": "Sequential_Proof!HistoryPositionAgreementSafety"
+    },
+    {
+      "id": "typed-single-locus-state",
+      "statement": "The cursor, value, active flag, and history remain in their declared domains; the model exposes one active flag and one cursor.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "obligation",
+      "local_theorem": "Sequential_Proof!TypeSafety"
+    },
+    {
+      "id": "sequential-owner-ceiling",
+      "statement": "The state-ordering result remains conditional on one executor controlling both begin and complete commits.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "ownership-assurance",
+      "local_theorem": "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
+    },
+    {
+      "id": "sequential-executable-transfer",
+      "statement": "The mechanized implementation relation transfers only the mapped cursor/history and typed-state safety result for the written three-action carrier.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "refinement",
+      "local_theorem": "SequentialImplRefinesSpec_Proof!RefinementThm"
+    }
+  ],
+  "runtime_providers": ["sequential-executor", "value-provider", "carrier-state-provider"],
+  "failure_ceilings": [
+    "no-modeled-executor-crash-retry-or-persistent-recovery",
+    "nested-or-hidden-concurrency-below-the-visible-step-boundary-is-not-excluded",
+    "no-external-effect-ownership-or-success-result",
+    "no-eventual-completion-or-time-bound"
+  ],
+  "execution_carriers": ["Sequential"],
+  "local_theorems": [
+    "Sequential_Proof!TypeSafety",
+    "Sequential_Proof!HistoryPositionAgreementSafety",
+    "SequentialImplRefinesSpec_Proof!RefinementThm",
+    "TheoryKernel_Proof!ObligationPreservation",
+    "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
+  ],
+  "executable_pointers": [
+    "crate://automation-structures/0.2.3/src/modalities/sequential.rs",
+    "formal/execution/carriers/Sequential.tla",
+    "formal/execution/carriers/Sequential_Proof.tla",
+    "formal/execution/carriers/refinement/Sequential/SequentialImplRefinesSpec.tla",
+    "formal/execution/carriers/refinement/Sequential/SequentialImplRefinesSpec_Proof.tla",
+    "formal/execution/refinements/SequentialRefinesStepGraph.tla",
+    "formal/execution/refinements/SequentialRefinesStepGraph_Proof.tla"
+  ],
+  "library_premises": [
+    "canonical-three-action-sequential-carrier",
+    "TypeSafety",
+    "HistoryPositionAgreementSafety",
+    "ObligationPreservation",
+    "OwnershipAssuranceClassification"
+  ],
+  "deployment_premises": [
+    "StepsType",
+    "ValueDomainNonEmpty",
+    "finite-u64-value-domain-instantiation",
+    "serialized-carrier-state-mutation",
+    "one-visible-logical-active-locus",
+    "complete-carrier-writer-tcb"
+  ],
+  "residuals": [
+    "single-locus-is-a-declared-representation-ceiling-not-a-noninterference-theorem",
+    "nested-runtime-concurrency-inside-one-visible-step-is-outside-the-carrier",
+    "no-scheduler-fairness-eventual-completion-or-deadline",
+    "no-crash-retry-idempotence-or-durable-history-result"
+  ],
+  "evidence_ceilings": [
+    "TLAPS-proves-TypeInvariant-and-HistoryPositionAgreement-under-positive-Steps-and-nonempty-ValueDomain",
+    "ActiveBeforeDone-is-an-inductive-strengthening-not-an-extra-advertised-claim",
+    "Verus-proves-the-written-finite-u64-carrier-contracts",
+    "existing-Sequential-to-StepGraph-refinement-is-relationship-evidence-not-the-six-record-bridge"
+  ],
+  "cases": {
+    "valid": [
+      {
+        "id": "begin-complete-pair",
+        "description": "BeginStep sets the one active flag; CompleteStep appends one chosen value and advances the cursor once."
+      },
+      {
+        "id": "terminal-stutter",
+        "description": "At the inactive terminal cursor, DoneStuttering is enabled and changes no carrier field."
+      }
+    ],
+    "boundary": [
+      {
+        "id": "first-step",
+        "description": "The empty initial history and cursor zero remain aligned through the first begin/complete pair."
+      },
+      {
+        "id": "out-of-domain-value-rejected",
+        "description": "An executable next value outside the configured value domain cannot map to CompleteStep and must stutter."
+      }
+    ],
+    "misuse": [
+      {
+        "id": "double-begin",
+        "description": "A second BeginStep while active is disabled and cannot receive progress or commit credit."
+      },
+      {
+        "id": "cursor-without-history",
+        "description": "Advancing pc without appending the same completion value violates HistoryPositionAgreement."
+      }
+    ],
+    "failure": [
+      {
+        "id": "crash-between-begin-and-complete",
+        "description": "Crash, retry, and recovery while active are outside the carrier and transfer no exactly-once or persistence claim."
+      },
+      {
+        "id": "hidden-parallel-effects",
+        "description": "Parallel runtime work inside one visible step is not ruled out and cannot inherit an absence-of-concurrency claim."
+      }
+    ]
+  },
+  "applicable_families": ["obligation", "ownership-assurance", "refinement"],
+  "discharged_families": ["obligation", "ownership-assurance", "refinement"],
+  "transfer_classes": ["safety", "observation"],
+  "refinement_status": "mechanized",
+  "conformance_details": {
+    "initialization": "Sequential::new maps pc = 0, the supplied in-domain value, active = false, and empty history to canonical Init.",
+    "step-simulation": "Accepted begin_step and complete_step calls map to their named actions; done_stuttering maps the terminal stutter; every rejected call is a proved stutter.",
+    "observation-agreement": "pc, value, active, and history agree exactly under the finite value-domain encoding.",
+    "commit-agreement": "BeginStep and CompleteStep are the only state-changing carrier commits and are owned by one sequential executor; terminal observation is not a commit.",
+    "failure-persistence-agreement": "No crash, retry, rollback, durable-history, or recovery action is modeled; an implementation exposing one must add and prove its mapping.",
+    "rely-discharge": "Deployment supplies positive steps, a nonempty finite value domain, serialized mutation, and a complete inventory of carrier writers.",
+    "liveness-preservation": "No eventual completion, fairness, throughput, or deadline guarantee is transferred by this record.",
+    "tcb-closure": "Every visible pc, value, active, and history transition is a mapped method or admitted stutter; hidden nested execution remains below the declared boundary."
+  },
+  "source_checks": [
+    {
+      "path": "formal/execution/carriers/Sequential.tla",
+      "contains": ["VARIABLES pc, value, active, history", "BeginStep ==", "CompleteStep ==", "DoneStuttering ==", "HistoryPositionAgreement =="]
+    },
+    {
+      "path": "formal/execution/carriers/Sequential_Proof.tla",
+      "contains": ["THEOREM TypeSafety", "THEOREM HistoryPositionAgreementSafety", "ActiveBeforeDone =="]
+    },
+    {
+      "path": "formal/execution/carriers/refinement/Sequential/SequentialImplRefinesSpec_Proof.tla",
+      "contains": ["THEOREM RefinementThm"]
+    },
+    {
+      "path": "crate://automation-structures/0.2.3/src/modalities/sequential.rs",
+      "contains": ["pub struct Sequential", "pub fn begin_step", "pub fn complete_step", "pub fn done_stuttering"]
+    }
+  ],
+  "witness": {
+    "states": ["idle-0", "active-0", "idle-1", "active-1", "done", "bad-history"],
+    "initial": ["idle-0"],
+    "obligation_states": ["idle-0", "active-0", "idle-1", "active-1", "done"],
+    "violation_states": ["bad-history"],
+    "system_steps": [
+      ["idle-0", "active-0"],
+      ["active-0", "idle-1"],
+      ["idle-1", "active-1"],
+      ["active-1", "done"],
+      ["done", "done"]
+    ],
+    "environment_steps": [],
+    "action_steps": {
+      "BeginStep": [
+        ["idle-0", "active-0"],
+        ["idle-1", "active-1"]
+      ],
+      "CompleteStep": [
+        ["active-0", "idle-1"],
+        ["active-1", "done"]
+      ],
+      "DoneStuttering": [["done", "done"]]
+    },
+    "rely_steps": [],
+    "commit_steps": [
+      ["idle-0", "active-0"],
+      ["active-0", "idle-1"],
+      ["idle-1", "active-1"],
+      ["active-1", "done"]
+    ],
+    "failure_steps": [],
+    "interference_steps": [],
+    "check_mode": "atomic",
+    "check_result_states": [],
+    "predicate_states": [],
+    "actors": ["workflow-claimant", "sequential-executor"],
+    "providers": ["sequential-executor"],
+    "claimant": "workflow-claimant",
+    "commit_owner": "sequential-executor",
+    "commit_delegate": "sequential-executor",
+    "assurance_provider": "sequential-executor",
+    "assurance_position": "at-commit",
+    "prevention_controllers": ["sequential-executor"],
+    "unavailable_providers": [],
+    "persistent_observe": {
+      "idle-0": true,
+      "active-0": true,
+      "idle-1": true,
+      "active-1": true,
+      "done": true,
+      "bad-history": false
+    },
+    "persistent_evidence": true,
+    "recovery_available": false,
+    "active_states": ["idle-0", "active-0", "idle-1", "active-1"],
+    "closed_states": ["done", "bad-history"],
+    "progress_steps": [
+      ["idle-0", "active-0"],
+      ["active-0", "idle-1"],
+      ["idle-1", "active-1"],
+      ["active-1", "done"]
+    ],
+    "other_steps": [
+      ["done", "done"]
+    ],
+    "handoff_steps": [
+      ["active-0", "idle-1"],
+      ["active-1", "done"]
+    ],
+    "rank_bound": 4,
+    "rank": {
+      "idle-0": 4,
+      "active-0": 3,
+      "idle-1": 2,
+      "active-1": 1,
+      "done": 0,
+      "bad-history": 0
+    },
+    "fairness_owners": ["sequential-executor"],
+    "fairness_owner": "sequential-executor",
+    "fairness_owner_of": {}
+  }
+}

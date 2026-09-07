@@ -1,0 +1,15 @@
+name = "Tekton"
+tier = 2
+modality = "StepGraph"
+evidence = "direct_comparison"
+workload = "scientific_workflow"
+
+[policies]
+invocation = "VCS_Or_Webhook"
+topology = "Declared_DAG"
+dependencies = "Fixed"
+lifecycle = "Rerun_Pipeline"
+
+citations = [
+    "Tekton Pipelines documentation",
+]

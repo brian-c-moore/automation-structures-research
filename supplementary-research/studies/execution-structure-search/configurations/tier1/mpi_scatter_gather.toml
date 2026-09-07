@@ -1,0 +1,18 @@
+name = "MPI_scatter_gather"
+tier = 1
+modality = "ForkJoin"
+evidence = "direct_comparison"
+workload = "data_pipeline"
+
+[policies]
+invocation = "Programmatic"
+topology = "None_Ranked"
+dependencies = "Fixed"
+lifecycle = "Sync_Barrier"
+
+[trace_properties]
+barrier_before_output = true
+
+citations = [
+    "MPI Forum (2015) — MPI: A Message-Passing Interface Standard, v3.1",
+]

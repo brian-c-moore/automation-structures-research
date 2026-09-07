@@ -1,0 +1,15 @@
+name = "Node-RED"
+tier = 2
+modality = "StepGraph"
+evidence = "direct_comparison"
+workload = "scientific_workflow"
+
+[policies]
+invocation = "HTTP_Or_Schedule"
+topology = "Declared_Visual_Flow"
+dependencies = "Fixed"
+lifecycle = "Per_Execution"
+
+citations = [
+    "Node-RED project documentation",
+]

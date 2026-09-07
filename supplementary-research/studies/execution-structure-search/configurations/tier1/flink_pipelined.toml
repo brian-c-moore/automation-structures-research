@@ -1,0 +1,19 @@
+name = "Flink_pipelined"
+tier = 1
+modality = "StreamGraph"
+evidence = "direct_comparison"
+workload = "streaming_sql"
+
+[policies]
+invocation = "Continuous"
+topology = "Declared_Anonymous"
+dependencies = "Fixed"
+lifecycle = "Checkpoint_Restart"
+
+[trace_properties]
+no_record_loss = true
+backpressure_correct = true
+
+citations = [
+    "Carbone et al. (2015) — Apache Flink: Stream and Batch Processing in a Single Engine.",
+]

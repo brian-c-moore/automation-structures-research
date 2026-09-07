@@ -1,0 +1,15 @@
+name = "Heron"
+tier = 2
+modality = "StreamGraph"
+evidence = "direct_comparison"
+workload = "streaming_sql"
+
+[policies]
+invocation = "Continuous"
+topology = "Declared_Topology"
+dependencies = "Fixed"
+lifecycle = "Per_Topology_Recovery"
+
+citations = [
+    "Apache Heron documentation",
+]

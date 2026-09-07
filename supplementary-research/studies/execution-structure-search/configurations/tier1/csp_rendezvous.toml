@@ -1,0 +1,15 @@
+name = "CSP_rendezvous"
+tier = 1
+modality = "StreamGraph"
+evidence = "trace_equivalence"
+workload = "actor_message_exchange"
+
+[policies]
+invocation = "Synchronous_Handshake"
+topology = "Declared"
+dependencies = "Fixed"
+lifecycle = "Per_Rendezvous"
+
+citations = [
+    "Hoare (1978) — Communicating Sequential Processes. Communications of the ACM",
+]

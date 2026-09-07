@@ -1,0 +1,18 @@
+name = "MapReduce"
+tier = 1
+modality = "ForkJoin"
+evidence = "direct_comparison"
+workload = "data_pipeline"
+
+[policies]
+invocation = "Programmatic"
+topology = "None"
+dependencies = "Fixed"
+lifecycle = "Reexecute_Failed"
+
+[trace_properties]
+barrier_before_output = true
+
+citations = [
+    "Dean & Ghemawat (2004) — MapReduce: Simplified Data Processing on Large Clusters. OSDI",
+]

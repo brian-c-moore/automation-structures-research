@@ -1,0 +1,15 @@
+name = "Solid_signals"
+tier = 2
+modality = "StreamGraph"
+evidence = "direct_comparison"
+workload = "reactive_ui"
+
+[policies]
+invocation = "UI_Or_Data_Event"
+topology = "Declared_Observable_Chain"
+dependencies = "Fixed"
+lifecycle = "Subscription"
+
+citations = [
+    "SolidJS documentation",
+]

@@ -1,0 +1,20 @@
+name = "Kafka_Streams"
+tier = 1
+modality = "StreamGraph"
+evidence = "direct_comparison"
+workload = "streaming_sql"
+
+[policies]
+invocation = "Continuous"
+topology = "Declared_Topology"
+dependencies = "Fixed"
+lifecycle = "Per_Topology_Recovery"
+
+[trace_properties]
+no_record_loss = true
+backpressure_correct = true
+
+citations = [
+    "Apache Kafka Streams documentation",
+    "Kreps (2014) — Questioning the Lambda Architecture. O'Reilly",
+]

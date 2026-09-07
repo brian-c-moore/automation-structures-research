@@ -1,0 +1,14 @@
+[package]
+name = "dac_out_of_family"
+version = "0.1.0"
+edition = "2021"
+description = "Out-of-family evidence corpus: canonical term-rewriting, computer-algebra and proof-search algorithms implemented faithfully from the published literature and validated against externally checkable reference outputs, for adversarial decomposition."
+
+# No dependencies. Each module is written to the published algorithm first
+# and decomposed second: it imports no primitive realization and carries
+# no catalog vocabulary.
+[dependencies]
+
+[lib]
+name = "dac_out_of_family"
+path = "src/lib.rs"

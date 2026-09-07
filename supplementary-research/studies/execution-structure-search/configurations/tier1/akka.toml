@@ -1,0 +1,18 @@
+name = "Akka"
+tier = 1
+modality = "StreamGraph"
+evidence = "direct_comparison"
+workload = "actor_message_exchange"
+
+[policies]
+invocation = "Message"
+topology = "Dynamic_Addressable"
+dependencies = "Fixed"
+lifecycle = "Supervision"
+
+[trace_properties]
+supervision_restarts_crashed = true
+
+citations = [
+    "Akka project documentation",
+]

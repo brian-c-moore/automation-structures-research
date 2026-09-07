@@ -1,0 +1,18 @@
+name = "GNU_parallel"
+tier = 1
+modality = "ForkJoin"
+evidence = "direct_comparison"
+workload = "data_pipeline"
+
+[policies]
+invocation = "Manual"
+topology = "None"
+dependencies = "Fixed"
+lifecycle = "Sync_Barrier"
+
+[trace_properties]
+barrier_before_output = true
+
+citations = [
+    "Tange (2011) — GNU Parallel: The Command-Line Power Tool. ;login:",
+]

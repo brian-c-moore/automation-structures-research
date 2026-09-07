@@ -1,0 +1,18 @@
+name = "Flink_blocking"
+tier = 1
+modality = "StepGraph"
+evidence = "direct_comparison"
+workload = "data_pipeline"
+
+[policies]
+invocation = "Programmatic"
+topology = "Declared_Anonymous"
+dependencies = "Fixed"
+lifecycle = "Checkpoint_Restart"
+
+[trace_properties]
+predecessor_before_successor = true
+
+citations = [
+    "Carbone et al. (2015) — Apache Flink: Stream and Batch Processing in a Single Engine. IEEE Data Eng. Bull.",
+]

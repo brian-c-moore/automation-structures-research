@@ -1,0 +1,13 @@
+[package]
+name = "algorithms_verus"
+version = "0.1.0"
+edition = "2021"
+description = "Exploratory Verus contracts for 87 classical algorithm instantiations; evidence is limited to the written specifications and named trust boundaries."
+
+[lib]
+name = "algorithms_verus"
+path = "src/lib.rs"
+
+# Verus runs as its own driver (verus.exe), not as a cargo build. It is
+# invoked directly on the .rs source.
+[dependencies]

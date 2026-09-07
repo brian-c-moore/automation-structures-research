@@ -1,0 +1,4 @@
+# Evidence records in this repo hash file bytes. Keep every checkout byte-exact:
+# no line-ending conversion by default, on any machine, regardless of autocrlf.
+# Do NOT run `git add --renormalize` - existing blobs stay exactly as committed.
+* -text

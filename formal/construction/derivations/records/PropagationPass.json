@@ -1,0 +1,321 @@
+{
+  "module": "PropagationPass",
+  "structure": "PropagationPass",
+  "kind": "abstraction-primitive",
+  "property_classes": ["safety", "liveness"],
+  "state_fields": ["values", "snapshot", "updated", "iteration", "changed", "round"],
+  "observation_fields": ["values", "snapshot", "updated", "iteration", "changed", "round"],
+  "implementation_state_fields": ["values", "snapshot", "updated", "iteration", "changed", "round"],
+  "implementation_state_map": {
+    "values": "values",
+    "snapshot": "snapshot",
+    "updated": "updated",
+    "iteration": "iteration",
+    "changed": "changed",
+    "round": "round"
+  },
+  "observation_map": {
+    "values": "values",
+    "snapshot": "snapshot",
+    "updated": "updated",
+    "iteration": "iteration",
+    "changed": "changed",
+    "round": "round"
+  },
+  "canonical_actions": ["StartRound", "UpdateNode", "EndRound", "Terminate"],
+  "system_actions": ["StartRound", "UpdateNode", "EndRound", "Terminate"],
+  "environment_actions": [],
+  "failure_actions": [],
+  "commit_actions": ["StartRound", "UpdateNode", "EndRound"],
+  "executable_actions": ["start_round", "update_node", "end_round", "terminate"],
+  "action_map": {
+    "StartRound": ["start_round"],
+    "UpdateNode": ["update_node"],
+    "EndRound": ["end_round"],
+    "Terminate": ["terminate"]
+  },
+  "obligations": ["IterationBound", "SnapshotLocality", "EventualSettledOrIterationLimit"],
+  "violations": ["IterationLimitExceeded", "LiveValueReadDuringRound", "InfiniteEnabledNonclosure"],
+  "violation_of": {
+    "IterationBound": "IterationLimitExceeded",
+    "SnapshotLocality": "LiveValueReadDuringRound",
+    "EventualSettledOrIterationLimit": "InfiniteEnabledNonclosure"
+  },
+  "actors": ["propagation-claimant", "propagation-executor", "workflow-scheduler"],
+  "claimant": "propagation-claimant",
+  "owner_of": {
+    "StartRound": "propagation-executor",
+    "UpdateNode": "propagation-executor",
+    "EndRound": "propagation-executor",
+    "Terminate": "propagation-executor"
+  },
+  "delegate_of": {
+    "StartRound": ["propagation-executor"],
+    "UpdateNode": ["propagation-executor"],
+    "EndRound": ["propagation-executor"],
+    "Terminate": ["propagation-executor"]
+  },
+  "assurance_at": {
+    "StartRound": "at-commit",
+    "UpdateNode": "at-commit",
+    "EndRound": "at-commit"
+  },
+  "relies": [
+    "finite-node-universe",
+    "weak-fair-round-admission",
+    "weak-fair-each-node-update",
+    "weak-fair-round-closure",
+    "serialized-round-state-mutation"
+  ],
+  "guarantees": [
+    {
+      "id": "propagationpass-written-profile-refinement",
+      "statement": "Mechanized refinement maps the written executable contract profile to the canonical PropagationPass machine under the named state, action, and premise map.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "refinement",
+      "local_theorem": "PropagationPassImplRefinesSpec_Proof!RefinementThm"
+    },
+    {
+      "id": "bounded-snapshot-rounds",
+      "statement": "Every admitted action preserves the iteration ceiling and every updated node is computed from the common immutable round snapshot.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "obligation",
+      "local_theorem": "PropagationPassGraph_Proof!IterationBoundSafety and SnapshotLocalitySafety"
+    },
+    {
+      "id": "eventual-settlement-or-limit",
+      "statement": "For finite Nodes, under the named weak-fair scheduler obligations, execution eventually settles or reaches MaxIterations.",
+      "property_class": "liveness",
+      "kind": "conditional",
+      "family": "progress",
+      "local_theorem": "PropagationPassGraph_Proof!EventualSettledOrIterationLimitProved"
+    },
+    {
+      "id": "propagation-owner-ceiling",
+      "statement": "The safety result requires the propagation executor to own each atomic round-state commit; liveness additionally remains conditional on the workflow scheduler.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "ownership-assurance",
+      "local_theorem": "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
+    },
+    {
+      "id": "propagation-executable-transfer",
+      "statement": "The mechanized implementation relation transfers bounded snapshot safety and only the proved eventual-closure result under the same fairness owner for the written profile.",
+      "property_class": "liveness",
+      "kind": "conditional",
+      "family": "refinement",
+      "local_theorem": "PropagationPassImplRefinesSpec_Proof!RefinementThm"
+    }
+  ],
+  "runtime_providers": ["propagation-executor", "workflow-scheduler", "exclusive-round-state-provider"],
+  "failure_ceilings": [
+    "no-modeled-executor-crash-or-state-loss",
+    "no-wall-clock-or-step-bound",
+    "no-progress-without-the-named-weak-fair-scheduler",
+    "finite-node-universe-only"
+  ],
+  "execution_carriers": ["Sequential"],
+  "local_theorems": [
+    "PropagationPassImplRefinesSpec_Proof!RefinementThm",
+    "PropagationPassGraph_Proof!IterationBoundSafety",
+    "PropagationPassGraph_Proof!SnapshotLocalitySafety",
+    "PropagationPassGraph_Proof!EventualSettledOrIterationLimitProved",
+    "TheoryKernel_Proof!ObligationPreservation",
+    "ProgressKernel_Proof!RankedProgress",
+    "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
+  ],
+  "executable_pointers": [
+    "formal/structures/PropagationPass/refinement/PropagationPassImplRefinesSpec.tla",
+    "formal/structures/PropagationPass/refinement/PropagationPassImplRefinesSpec_Proof.tla",
+    "crate://automation-structures/0.2.3/src/primitives/propagation_pass.rs",
+    "formal/structures/PropagationPass/PropagationPassGraph.tla",
+    "formal/structures/PropagationPass/PropagationPassGraph_Proof.tla"
+  ],
+  "library_premises": [
+    "PropagationPass-written-contract-refinement-profile",
+    "canonical-snapshot-round-machine",
+    "IterationBoundSafety",
+    "SnapshotLocalitySafety",
+    "EventualSettledOrIterationLimitProved",
+    "ObligationPreservation",
+    "RankedProgress",
+    "OwnershipAssuranceClassification"
+  ],
+  "deployment_premises": [
+    "MaxIterationsType",
+    "MaxValueType",
+    "NodesFinite",
+    "weak-fair-round-admission",
+    "weak-fair-each-node-update",
+    "weak-fair-round-closure",
+    "serialized-round-state-mutation",
+    "complete-transition-tcb-with-no-live-value-bypass"
+  ],
+  "residuals": [
+    "formal-correspondence-is-limited-to-the-written-state-action-and-premise-map",
+    "Combine-is-domain-supplied-and-no-universal-convergence-result-follows",
+    "the-local-temporal-result-is-eventual-closure-not-a-deadline",
+    "Rust-contract-verification-does-not-prove-runtime-scheduler-fairness",
+    "no-crash-retry-or-persistent-round-recovery-model"
+  ],
+  "evidence_ceilings": [
+    "implementation-refinement-covers-only-the-written-bounded-contract-profile",
+    "TLAPS-proves-the-local-temporal-theorem-under-finite-Nodes-and-explicit-weak-fairness",
+    "TLC-bounds-only-the-configured-three-node-path",
+    "Verus-proves-action-contracts-but-not-infinite-trace-fairness",
+    "executable-liveness-transfer-requires-the-same-written-fairness-owner"
+  ],
+  "cases": {
+    "valid": [
+      {
+        "id": "complete-snapshot-round",
+        "description": "StartRound freezes values, each finite node updates once from snapshot, and EndRound charges exactly one iteration."
+      },
+      {
+        "id": "fair-eventual-closure",
+        "description": "The named scheduler eventually selects continuously enabled admission, node updates, and closure, yielding settled or MaxIterations."
+      }
+    ],
+    "boundary": [
+      {
+        "id": "unchanged-round-settles",
+        "description": "A fully covered round with values = snapshot sets changed false and satisfies closure."
+      },
+      {
+        "id": "iteration-ceiling",
+        "description": "At MaxIterations no new round is admitted and the temporal disjunction is closed by the ceiling."
+      }
+    ],
+    "misuse": [
+      {
+        "id": "live-value-combine",
+        "description": "Reading values instead of the frozen snapshot during UpdateNode is rejected as a locality mismatch."
+      },
+      {
+        "id": "safety-only-progress-surrogate",
+        "description": "IterationBound or monotone state alone cannot stand in for EventualSettledOrIterationLimitProved."
+      }
+    ],
+    "failure": [
+      {
+        "id": "fairness-provider-absent",
+        "description": "Removing the workflow scheduler's weak fairness retains an infinite non-progress behavior."
+      },
+      {
+        "id": "round-state-loss",
+        "description": "Executor crash or loss of snapshot/updated state is outside the model and transfers no recovery claim."
+      }
+    ]
+  },
+  "applicable_families": ["obligation", "progress", "ownership-assurance", "refinement"],
+  "discharged_families": ["obligation", "progress", "ownership-assurance", "refinement"],
+  "transfer_classes": ["safety", "liveness"],
+  "refinement_status": "mechanized",
+  "conformance_details": {
+    "initialization": "new maps values and snapshot to the same finite vector, updated to empty/false, iteration to zero, changed to true, and round to idle.",
+    "step-simulation": "start_round, each update_node(n), end_round, and terminate map to the identically named formal action or a proved stutter; no other state-changing method is admitted.",
+    "observation-agreement": "values, snapshot, updated, iteration, changed, and round agree, including finite-index/set and enum/string representation mappings.",
+    "commit-agreement": "StartRound, UpdateNode, and EndRound are complete serialized executor commits; Terminate is the admitted idle stutter.",
+    "failure-persistence-agreement": "No executor crash, lost snapshot, retry, or recovery transition is modeled; any such executable step must be added before transfer.",
+    "rely-discharge": "The deployment supplies the finite node instantiation, serialized mutation, and the named weak-fair workflow scheduler.",
+    "liveness-preservation": "The bridge must rule out infinite concrete stuttering, map every progress/other step completely, preserve the local rank/closure argument, and attribute fairness to workflow-scheduler.",
+    "tcb-closure": "Every method or external path able to change round state is inventoried; a live-value writer or scheduler bypass is not admitted."
+  },
+  "source_checks": [
+    {
+      "path": "formal/structures/PropagationPass/refinement/PropagationPassImplRefinesSpec_Proof.tla",
+      "contains": ["THEOREM", "Refinement"]
+    },
+    {
+      "path": "formal/structures/PropagationPass/PropagationPassGraph.tla",
+      "contains": ["VARIABLES values", "StartRound ==", "UpdateNode(n) ==", "EndRound ==", "Fairness ==", "EventualSettledOrIterationLimit =="]
+    },
+    {
+      "path": "formal/structures/PropagationPass/PropagationPassGraph_Proof.tla",
+      "contains": ["THEOREM IterationBoundSafety", "THEOREM SnapshotLocalitySafety", "THEOREM EventualSettledOrIterationLimitProved"]
+    },
+    {
+      "path": "crate://automation-structures/0.2.3/src/primitives/propagation_pass.rs",
+      "contains": ["pub struct PropagationPass", "pub fn start_round", "pub fn update_node", "pub fn end_round", "pub fn terminate", "pub open spec fn settled_or_iteration_limit"]
+    }
+  ],
+  "witness": {
+    "states": ["idle", "running", "updated", "closed", "violating"],
+    "initial": ["idle"],
+    "obligation_states": ["idle", "running", "updated", "closed"],
+    "violation_states": ["violating"],
+    "system_steps": [
+      ["idle", "running"],
+      ["running", "updated"],
+      ["updated", "closed"],
+      ["closed", "closed"]
+    ],
+    "environment_steps": [],
+    "action_steps": {
+      "StartRound": [["idle", "running"]],
+      "UpdateNode": [["running", "updated"]],
+      "EndRound": [["updated", "closed"]],
+      "Terminate": [["closed", "closed"]]
+    },
+    "rely_steps": [],
+    "commit_steps": [
+      ["idle", "running"],
+      ["running", "updated"],
+      ["updated", "closed"]
+    ],
+    "failure_steps": [],
+    "interference_steps": [],
+    "check_mode": "atomic",
+    "check_result_states": [],
+    "predicate_states": [],
+    "actors": ["propagation-claimant", "propagation-executor", "workflow-scheduler"],
+    "providers": ["propagation-executor", "workflow-scheduler"],
+    "claimant": "propagation-claimant",
+    "commit_owner": "propagation-executor",
+    "commit_delegate": "propagation-executor",
+    "assurance_provider": "propagation-executor",
+    "assurance_position": "at-commit",
+    "prevention_controllers": ["propagation-executor"],
+    "unavailable_providers": [],
+    "persistent_observe": {
+      "idle": true,
+      "running": true,
+      "updated": true,
+      "closed": true,
+      "violating": false
+    },
+    "persistent_evidence": true,
+    "recovery_available": false,
+    "active_states": ["idle", "running", "updated"],
+    "closed_states": ["closed", "violating"],
+    "progress_steps": [
+      ["idle", "running"],
+      ["running", "updated"],
+      ["updated", "closed"]
+    ],
+    "other_steps": [
+      ["closed", "closed"],
+      ["violating", "violating"]
+    ],
+    "handoff_steps": [
+      ["idle", "running"]
+    ],
+    "rank_bound": 3,
+    "rank": {
+      "idle": 3,
+      "running": 2,
+      "updated": 1,
+      "closed": 0,
+      "violating": 0
+    },
+    "fairness_owners": ["workflow-scheduler"],
+    "fairness_owner": "workflow-scheduler",
+    "fairness_owner_of": {
+      "[\"idle\", \"running\"]": "workflow-scheduler",
+      "[\"running\", \"updated\"]": "workflow-scheduler",
+      "[\"updated\", \"closed\"]": "workflow-scheduler"
+    }
+  }
+}

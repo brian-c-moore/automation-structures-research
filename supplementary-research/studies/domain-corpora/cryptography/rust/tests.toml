@@ -1,0 +1,62 @@
+[[algorithm]]
+name = "sha256"
+category = "hash"
+phase = 1
+ordering = "Linear"
+primitives = "ResourceRegistry + TraversalEngine + ActuationPass + Reduction (mod-2^32)"
+oracle = "sha256"
+equiv = "Exact"
+
+[[algorithm]]
+name = "sha3_256"
+category = "hash"
+phase = 1
+ordering = "Linear"
+primitives = "ResourceRegistry (25 lanes) + TraversalEngine (rate blocks; 24 permutation rounds) + ActuationPass (Keccak-f) + Reduction (XOR absorb)"
+oracle = "sha3_256"
+equiv = "Exact"
+
+[[algorithm]]
+name = "blake3"
+category = "hash"
+phase = 1
+ordering = "Tree (chunks), Linear (within chunk)"
+primitives = "ResourceRegistry (per-chunk CV + tree levels) + TraversalEngine (chunks, blocks, 7 rounds, tree levels) + ActuationPass (G-function) + Reduction (XOR/wrapping_add)"
+oracle = "blake3"
+equiv = "Exact"
+
+[[algorithm]]
+name = "chacha20"
+category = "symmetric"
+phase = 2
+ordering = "Tree (blocks), Linear (within block)"
+primitives = "ResourceRegistry + TraversalEngine + ActuationPass + Reduction (mod-2^32 add, XOR)"
+oracle = "chacha20"
+equiv = "Exact"
+
+[[algorithm]]
+name = "hmac_sha256"
+category = "mac"
+phase = 4
+ordering = "Linear"
+primitives = "SHA-256 (composed twice) + Reduction (XOR) over ipad/opad prefixes"
+oracle = "hmac_sha256"
+equiv = "Exact"
+
+[[algorithm]]
+name = "hkdf_sha256"
+category = "kdf"
+phase = 5
+ordering = "Tree (extract|expand are sequential phases), Linear (within expand chain)"
+primitives = "HMAC-SHA-256 composed once (extract) + TraversalEngine over expand blocks"
+oracle = "hkdf_sha256"
+equiv = "Exact"
+
+[[algorithm]]
+name = "pbkdf2_hmac_sha256"
+category = "kdf"
+phase = 5
+ordering = "Tree (output blocks), Linear (within-block U-chain)"
+primitives = "HMAC-SHA-256 chained c times + Reduction (XOR over U_1..U_c)"
+oracle = "pbkdf2_hmac_sha256"
+equiv = "Exact"

@@ -1,0 +1,19 @@
+name = "Ptolemy_SDF"
+tier = 1
+modality = "StreamGraph"
+evidence = "direct_comparison"
+workload = "data_pipeline"
+
+[policies]
+invocation = "Static_Schedule"
+topology = "Declared_Static"
+dependencies = "Fixed"
+lifecycle = "Per_Firing"
+
+[trace_properties]
+no_record_loss = true
+
+citations = [
+    "Lee & Messerschmitt (1987) — Synchronous Data Flow. Proc. IEEE",
+    "Ptolemy II project documentation, UC Berkeley",
+]

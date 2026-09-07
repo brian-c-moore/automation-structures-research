@@ -1,0 +1,3 @@
+---- MODULE ALKClaimReferenceBindingDelegatedPostcommit ----
+EXTENDS ALKClaimReferenceBindingWitness
+====

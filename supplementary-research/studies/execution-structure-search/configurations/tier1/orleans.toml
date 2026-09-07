@@ -1,0 +1,18 @@
+name = "Orleans"
+tier = 1
+modality = "StreamGraph"
+evidence = "direct_comparison"
+workload = "actor_message_exchange"
+
+[policies]
+invocation = "Message"
+topology = "Virtual_Addressable"
+dependencies = "Fixed"
+lifecycle = "Persistence_Backed"
+
+[trace_properties]
+supervision_restarts_crashed = false
+
+citations = [
+    "Bernstein, Bykov et al. — Orleans: Distributed Virtual Actors. Microsoft Research",
+]

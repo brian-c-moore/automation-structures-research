@@ -1,0 +1,3 @@
+---- MODULE ALKClaimReferenceBindingDelegatedUnavailable ----
+EXTENDS ALKClaimReferenceBindingWitness
+====

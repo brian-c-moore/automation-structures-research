@@ -1,0 +1,16 @@
+name = "Unity_SRP"
+tier = 2
+modality = "StreamGraph"
+evidence = "documented_behavior"
+# note: Unity SRP requires the full Unity Engine install, out of scope for a research artifact
+workload = "render_graph"
+
+[policies]
+invocation = "Vsync"
+topology = "Rebuilt_Per_Frame"
+dependencies = "Fixed"
+lifecycle = "Per_Frame"
+
+citations = [
+    "Unity SRP documentation",
+]

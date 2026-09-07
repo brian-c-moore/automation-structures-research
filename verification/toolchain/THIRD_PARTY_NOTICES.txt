@@ -1,0 +1,42 @@
+TLA+ Tools
+==========
+
+Artifact: tla2tools.jar
+Version: 2026.08.11.125311
+SHA-256: ab323b79802aedc3203b3f9af37c6aca3ed43f4e0225b36f2aa77b26de46c05f
+Upstream source tag: https://github.com/tlaplus/tlaplus/tree/2026.08.11.125311
+
+This byte-identical artifact is retained because the upstream v1.8.0
+pre-release asset is replaced by later builds. The rolling release URL can
+no longer reproduce the recorded tool identity.
+
+The JAR contains its applicable license and notice texts, including
+META-INF/LICENSE.md and License.txt. The corresponding source is available
+from the upstream tag above.
+
+Other pinned Docker build inputs
+================================
+
+OpenJDK 21.0.11+10
+Source: https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.11%2B10/OpenJDK21U-jdk_x64_linux_hotspot_21.0.11_10.tar.gz
+SHA-256: 4b2220e232a97997b436ca6ab15cbf70171ecff52958a46159dfa5a8c44ca4de
+
+Verus 0.2026.05.24.ecee80a
+Source: https://github.com/verus-lang/verus/releases/download/release%2F0.2026.05.24.ecee80a/verus-0.2026.05.24.ecee80a-x86-linux.zip
+SHA-256: 323a44c0d787ce9a788665e1c6922360c44a72d1b9696359ec4f7bf5fbbc63e6
+
+TLAPS 1.5.0
+Source: https://github.com/tlaplus/tlapm/releases/download/202210041448/tlaps-1.5.0-x86_64-linux-gnu-inst.bin
+SHA-256: ebb7a3f271bdb564f74cb0a2767ef7b9ff7045621a9be7c50d363a03c2e6f08a
+
+Rust build image
+Source: docker.io/library/rust:1.95.0-bookworm
+Digest: sha256:4c2fd73ef19c5ef9d54bee03b06b2839a392604fbfcd578ed948b71b37c1d7fb
+
+Python build and runtime image
+Source: docker.io/library/python:3.13.7-bookworm
+Digest: sha256:dff7bf7639ce459600e6e042228480eb9b6c627ce590e282c9b1d7c03fcad30b
+
+Docker fetches these inputs as part of an uncached image build and verifies
+the recorded checksum or image digest. Reviewers do not install or select
+the tools separately.

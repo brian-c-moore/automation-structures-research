@@ -1,0 +1,8 @@
+{
+  "crate": "automation-structures",
+  "version": "0.2.3",
+  "archive_sha256": "eda15f767f52ff94ac4528daa25ab674c87b0e1df7ca91b1730b1d5c1336a087",
+  "vcs_sha1": "3dfa26979e3feb655b548236f341258a23e4ab87",
+  "download": "https://static.crates.io/crates/automation-structures/automation-structures-0.2.3.crate",
+  "source_locator_prefix": "crate://automation-structures/0.2.3/"
+}

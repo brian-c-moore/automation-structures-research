@@ -1,0 +1,210 @@
+{
+  "module": "CompetitiveSelection",
+  "structure": "CompetitiveSelection",
+  "kind": "abstraction-primitive",
+  "property_classes": ["safety"],
+  "state_fields": ["hard_num_seats", "hard_num_candidates", "hard_max_score", "hard_allocation", "hard_scores", "soft_weight_total", "soft_max_score", "soft_scores", "soft_extra", "mutable_weight_total", "mutable_max_score", "mutable_scores", "mutable_extra", "ranked_k", "ranked_max_score", "ranked_selected", "ranked_scores"],
+  "observation_fields": ["hard_num_seats", "hard_num_candidates", "hard_max_score", "hard_allocation", "hard_scores", "soft_weight_total", "soft_max_score", "soft_scores", "soft_extra", "mutable_weight_total", "mutable_max_score", "mutable_scores", "mutable_extra", "ranked_k", "ranked_max_score", "ranked_selected", "ranked_scores"],
+  "implementation_state_fields": ["hard_num_seats", "hard_num_candidates", "hard_max_score", "hard_allocation", "hard_scores", "soft_weight_total", "soft_max_score", "soft_scores", "soft_extra", "mutable_weight_total", "mutable_max_score", "mutable_scores", "mutable_extra", "ranked_k", "ranked_max_score", "ranked_selected", "ranked_scores"],
+  "implementation_state_map": {"hard_num_seats": "hard_num_seats", "hard_num_candidates": "hard_num_candidates", "hard_max_score": "hard_max_score", "hard_allocation": "hard_allocation", "hard_scores": "hard_scores", "soft_weight_total": "soft_weight_total", "soft_max_score": "soft_max_score", "soft_scores": "soft_scores", "soft_extra": "soft_extra", "mutable_weight_total": "mutable_weight_total", "mutable_max_score": "mutable_max_score", "mutable_scores": "mutable_scores", "mutable_extra": "mutable_extra", "ranked_k": "ranked_k", "ranked_max_score": "ranked_max_score", "ranked_selected": "ranked_selected", "ranked_scores": "ranked_scores"},
+  "observation_map": {"hard_num_seats": "hard_num_seats", "hard_num_candidates": "hard_num_candidates", "hard_max_score": "hard_max_score", "hard_allocation": "hard_allocation", "hard_scores": "hard_scores", "soft_weight_total": "soft_weight_total", "soft_max_score": "soft_max_score", "soft_scores": "soft_scores", "soft_extra": "soft_extra", "mutable_weight_total": "mutable_weight_total", "mutable_max_score": "mutable_max_score", "mutable_scores": "mutable_scores", "mutable_extra": "mutable_extra", "ranked_k": "ranked_k", "ranked_max_score": "ranked_max_score", "ranked_selected": "ranked_selected", "ranked_scores": "ranked_scores"},
+  "canonical_actions": ["RankedSelect", "RankedUpdateScores", "HardEvaluate", "HardUpdateScore", "SoftAssignNext", "MutableAssignNext", "MutableUpdateScore"],
+  "system_actions": ["RankedSelect", "HardEvaluate", "SoftAssignNext", "MutableAssignNext"],
+  "environment_actions": ["RankedUpdateScores", "HardUpdateScore", "MutableUpdateScore"],
+  "failure_actions": [],
+  "commit_actions": ["RankedSelect", "HardEvaluate", "SoftAssignNext", "MutableAssignNext"],
+  "executable_actions": ["CompetitiveSelectionRanked::select", "CompetitiveSelectionRanked::update_scores", "CompetitiveSelectionHardExclusive::evaluate", "CompetitiveSelectionHardExclusive::update_score", "CompetitiveSelectionSoft::assign_next", "CompetitiveSelectionSoft::update_score"],
+  "action_map": {
+    "RankedSelect": ["CompetitiveSelectionRanked::select"],
+    "RankedUpdateScores": ["CompetitiveSelectionRanked::update_scores"],
+    "HardEvaluate": ["CompetitiveSelectionHardExclusive::evaluate"],
+    "HardUpdateScore": ["CompetitiveSelectionHardExclusive::update_score"],
+    "SoftAssignNext": ["CompetitiveSelectionSoft::assign_next"],
+    "MutableAssignNext": ["CompetitiveSelectionSoft::assign_next"],
+    "MutableUpdateScore": ["CompetitiveSelectionSoft::update_score"]
+  },
+  "obligations": ["RankedBoundedMultiplicity", "RankedThresholdOptimality", "RankedTieBreak", "HardMutualExclusion", "HardWinnerOptimality", "HardWinnerTieBreak", "SoftNonNegativity", "SoftBoundedTotal", "SoftNormalization", "SoftUniversalContribution", "SoftScoreOrderPreservation", "SoftTieBoundedness"],
+  "violations": ["RankedTooManyWinners", "RankedSuboptimalWinner", "RankedTieBreakViolation", "HardDuplicateWinner", "HardSuboptimalAvailableWinner", "HardTieBreakViolation", "SoftNegativeWeight", "SoftTotalOvershoot", "SoftTerminalNonNormalization", "SoftZeroContribution", "SoftScoreOrderViolation", "SoftTieSpreadViolation"],
+  "violation_of": {
+    "RankedBoundedMultiplicity": "RankedTooManyWinners",
+    "RankedThresholdOptimality": "RankedSuboptimalWinner",
+    "RankedTieBreak": "RankedTieBreakViolation",
+    "HardMutualExclusion": "HardDuplicateWinner",
+    "HardWinnerOptimality": "HardSuboptimalAvailableWinner",
+    "HardWinnerTieBreak": "HardTieBreakViolation",
+    "SoftNonNegativity": "SoftNegativeWeight",
+    "SoftBoundedTotal": "SoftTotalOvershoot",
+    "SoftNormalization": "SoftTerminalNonNormalization",
+    "SoftUniversalContribution": "SoftZeroContribution",
+    "SoftScoreOrderPreservation": "SoftScoreOrderViolation",
+    "SoftTieBoundedness": "SoftTieSpreadViolation"
+  },
+  "actors": ["selection-claimant", "selection-authority", "score-provider"],
+  "claimant": "selection-claimant",
+  "owner_of": {"RankedSelect": "selection-authority", "RankedUpdateScores": "score-provider", "HardEvaluate": "selection-authority", "HardUpdateScore": "score-provider", "SoftAssignNext": "selection-authority", "MutableAssignNext": "selection-authority", "MutableUpdateScore": "score-provider"},
+  "delegate_of": {"RankedSelect": ["selection-authority"], "RankedUpdateScores": ["score-provider"], "HardEvaluate": ["selection-authority"], "HardUpdateScore": ["score-provider"], "SoftAssignNext": ["selection-authority"], "MutableAssignNext": ["selection-authority"], "MutableUpdateScore": ["score-provider"]},
+  "assurance_at": {"RankedSelect": "at-commit", "HardEvaluate": "at-commit", "SoftAssignNext": "at-commit", "MutableAssignNext": "at-commit"},
+  "relies": ["finite-candidate-and-seat-domains", "serialized-variant-state-mutation", "atomic-selection-or-award-commit", "score-writers-reset-dependent-selection-state"],
+  "guarantees": [
+    {
+      "id": "competitiveselection-hard-written-profile-refinement",
+      "statement": "Mechanized refinement maps the written hard-selection executable contract profile to the canonical hard-selection machine under the named state, action, and premise map.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "refinement",
+      "local_theorem": "CompetitiveSelectionImplRefinesSpec_Proof!HardRefinementThm"
+    },
+    {
+      "id": "competitiveselection-soft-written-profile-refinement",
+      "statement": "Mechanized refinement maps the written immutable-score soft-selection executable contract profile to the canonical soft-selection machine under the named state, action, and premise map.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "refinement",
+      "local_theorem": "CompetitiveSelectionImplRefinesSpec_Proof!SoftRefinementThm"
+    },
+    {
+      "id": "competitiveselection-mutable-written-profile-refinement",
+      "statement": "Mechanized refinement maps the written mutable-score soft-selection executable contract profile to the canonical mutable-score soft-selection machine under the named state, action, and premise map.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "refinement",
+      "local_theorem": "CompetitiveSelectionImplRefinesSpec_Proof!MutableRefinementThm"
+    },
+    {
+      "id": "competitiveselection-ranked-written-profile-refinement",
+      "statement": "Mechanized refinement maps the written ranked-selection executable contract profile to the canonical ranked-selection machine under explicit candidate order and exact selected-cardinality clauses.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "refinement",
+      "local_theorem": "CompetitiveSelectionImplRefinesSpec_Proof!RankedRefinementThm"
+    },
+    {"id": "ranked-top-k-safety", "statement": "The ranked Select action commits exactly K deterministic score/position-ranked candidates, while score replacement clears selection atomically.", "property_class": "safety", "kind": "prevention", "family": "obligation", "local_theorem": "CompetitiveSelectionRanked_Proof!Safety"},
+    {"id": "hard-exclusive-winner-safety", "statement": "The hard-exclusive carrier assigns no candidate to two seats and chooses the deterministic best candidate relative to each seat's current available pool.", "property_class": "safety", "kind": "prevention", "family": "obligation", "local_theorem": "CompetitiveSelectionHardExclusive_Proof!Safety"},
+    {"id": "soft-discrete-apportionment-safety", "statement": "The mutable-score soft carrier preserves positive bounded discrete weights, terminal normalization, score order, and plus-or-minus-one tie spread while resetting partial awards on score change.", "property_class": "safety", "kind": "prevention", "family": "obligation", "local_theorem": "CompetitiveSelectionSoftMutableScores_Proof!MutableScoreSafety"},
+    {"id": "atomic-selection-license", "statement": "Availability/rank/priority observation and the corresponding selection or unit award occur at one serialized commit; every score update resets dependent selection state as its canonical variant requires.", "property_class": "safety", "kind": "prevention", "family": "check-act", "local_theorem": "TheoryKernel_Proof!CheckActStability"},
+    {"id": "selection-owner-ceiling", "statement": "Prevention depends on the selection authority owning outcome commits and the score provider honoring each variant's atomic reset transition.", "property_class": "safety", "kind": "conditional", "family": "ownership-assurance", "local_theorem": "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"}
+  ],
+  "runtime_providers": ["selection-authority", "score-provider", "finite-enumeration-provider"],
+  "failure_ceilings": ["no-modeled-crash-or-torn-selection", "concurrent-staged-winner-outside-boundary", "score-update-without-required-reset-outside-rely"],
+  "execution_carriers": ["Sequential"],
+  "local_theorems": [
+    "CompetitiveSelectionImplRefinesSpec_Proof!HardRefinementThm",
+    "CompetitiveSelectionImplRefinesSpec_Proof!SoftRefinementThm",
+    "CompetitiveSelectionImplRefinesSpec_Proof!MutableRefinementThm",
+    "CompetitiveSelectionImplRefinesSpec_Proof!RankedRefinementThm",
+    "CompetitiveSelectionRanked_Proof!Safety", "CompetitiveSelectionHardExclusive_Proof!Safety", "CompetitiveSelectionSoftMutableScores_Proof!MutableScoreSafety", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"],
+  "executable_pointers": [
+    "formal/structures/CompetitiveSelection/refinement/CompetitiveSelectionImplRefinesSpec.tla",
+    "formal/structures/CompetitiveSelection/refinement/CompetitiveSelectionImplRefinesSpec_Proof.tla",
+    "formal/structures/CompetitiveSelection/refinement/CompetitiveSelectionImplRefinesSpec_NEG.tla",
+    "formal/structures/CompetitiveSelection/refinement/CompetitiveSelectionSoftImplRefinesSpec_NEG.tla",
+    "formal/structures/CompetitiveSelection/refinement/CompetitiveSelectionMutableImplRefinesSpec_NEG.tla",
+    "formal/structures/CompetitiveSelection/refinement/CompetitiveSelectionRankedImplRefinesSpec_NEG.tla",
+    "crate://automation-structures/0.2.3/src/primitives/competitive_selection.rs", "formal/structures/CompetitiveSelection/CompetitiveSelectionRanked.tla", "formal/structures/CompetitiveSelection/CompetitiveSelectionHardExclusive.tla", "formal/structures/CompetitiveSelection/CompetitiveSelectionSoftMutableScores.tla"],
+  "library_premises": [
+    "CompetitiveSelection-written-contract-refinement-profile","canonical-ranked-selection-machine", "canonical-hard-exclusive-selection-machine", "canonical-soft-mutable-score-machine", "three-canonical-selection-safety-theorems", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification"],
+  "deployment_premises": ["finite-candidate-and-seat-domains", "variant-specific-score-and-weight-bounds", "stable-finite-enumeration-for-tie-breaks", "serialized-variant-state-mutation", "score-writers-reset-dependent-selection-state"],
+  "residuals": [
+    "formal-correspondence-is-limited-to-the-written-state-action-and-premise-map", "no-cross-variant-equivalence-or-substitutability-theorem", "no-eventual-selection-or-coverage-result", "soft-carrier-is-discrete-Webster-apportionment-not-exact-softmax"],
+  "evidence_ceilings": [
+    "implementation-refinement-covers-only-the-written-bounded-contract-profile","TLAPS-separately-proves-all-three-canonical-carriers", "Verus-proves-the-three-written-variant-representations", "the-shared-record-is-a-tagged-family-contract-not-a-theorem-that-the-variants-are-equivalent"],
+  "cases": {
+    "valid": [{"id": "variant-admitted-selection", "description": "A builder selects one registered variant and performs its atomic rank, availability, or priority-based outcome step."}],
+    "boundary": [{"id": "score-update-reset", "description": "A score change clears ranked/hard outcomes or resets soft extra allocation exactly as the selected canonical carrier requires."}],
+    "misuse": [{"id": "mix-variant-contracts", "description": "Reading global hard argmax into exclusive availability, or exact softmax into discrete Webster weights, violates the tagged variant boundary."}],
+    "failure": [{"id": "split-observe-select", "description": "Staging a winner or award before an intervening score/availability change lies outside the atomic selection model."}]
+  },
+  "applicable_families": ["obligation", "check-act", "ownership-assurance", "refinement"],
+  "discharged_families": ["obligation", "check-act", "ownership-assurance", "refinement"],
+  "transfer_classes": ["safety"],
+  "refinement_status": "mechanized",
+  "conformance_details": {
+    "initialization": "Ranked maps k, max_score, empty selected, and ordered scores; HardExclusive maps seat/candidate bounds, max_score, null allocation, and per-seat scores; immutable and mutable Soft map weight_total, max_score, scores, and zero extra awards to their canonical Init states.",
+    "step-simulation": "Variant-qualified executable actions map only to their matching ranked, hard-exclusive, immutable-soft, or mutable-soft canonical action; score writers map to the complete reset transition and rejected guards may stutter.",
+    "observation-agreement": "All 17 profile-qualified correspondence fields project directly: ranked k/max_score/selected/scores, hard bounds/allocation/scores, and immutable/mutable soft weight_total/max_score/scores/extra.",
+    "commit-agreement": "Each accepted rank selection, seat evaluation, or soft unit award is one selection-authority commit; score updates are provider-owned environment transitions with canonical reset frames.",
+    "failure-persistence-agreement": "No crash, torn selection/reset, retry, staged concurrent winner, or recovery action is modeled.",
+    "rely-discharge": "Deployment chooses one variant, supplies its finite bounds/enumeration, serializes all state, and ensures score writers perform the variant's complete reset.",
+    "liveness-preservation": "No eventual fill, award completion, fairness, selection coverage, or latency guarantee is transferred for any variant.",
+    "tcb-closure": "Every outcome or score writer is inventoried under its variant-qualified executable method; the shared Soft methods receive separate immutable and mutable action mappings, and no guarantee transfers across variants without a theorem."
+  },
+  "source_checks": [
+    {
+      "path": "formal/structures/CompetitiveSelection/refinement/CompetitiveSelectionImplRefinesSpec_Proof.tla",
+      "contains": ["THEOREM", "Refinement"]
+    },
+    {
+      "path": "formal/structures/CompetitiveSelection/refinement/CompetitiveSelectionImplRefinesSpec_NEG.tla",
+      "contains": ["FaultHardUpdate", "HardFaultRefinement"]
+    },
+    {
+      "path": "formal/structures/CompetitiveSelection/refinement/CompetitiveSelectionSoftImplRefinesSpec_NEG.tla",
+      "contains": ["FaultSoftReset", "SoftFaultRefinement"]
+    },
+    {
+      "path": "formal/structures/CompetitiveSelection/refinement/CompetitiveSelectionMutableImplRefinesSpec_NEG.tla",
+      "contains": ["FaultMutableMultiUpdate", "MutableFaultRefinement"]
+    },
+    {
+      "path": "formal/structures/CompetitiveSelection/refinement/CompetitiveSelectionRankedImplRefinesSpec_NEG.tla",
+      "contains": ["FaultRankedScoreWithoutClear", "RankedFaultRefinement"]
+    },
+    {
+      "path": "formal/structures/CompetitiveSelection/refinement/CompetitiveSelectionRankedUnderSelectionImplRefinesSpec_NEG.tla",
+      "contains": ["FaultRankedUnderSelection", "RankedUnderSelectionFaultRefinement"]
+    },
+    {"path": "formal/structures/CompetitiveSelection/refinement/CompetitiveSelectionImplRefinesSpec.tla", "contains": ["VARIABLES hard_num_seats", "soft_weight_total", "mutable_weight_total", "ranked_k", "ImplRankedSelect", "R!Cardinality(ranked_selected') = K"]},
+    {"path": "formal/structures/CompetitiveSelection/CompetitiveSelectionRanked.tla", "contains": ["CONSTANTS Candidates, K, MaxScore, CandidateOrder", "VARIABLES selected, scores", "Cardinality(selected') = K", "UpdateScores ==", "RankedTieBreak"]},
+    {"path": "formal/structures/CompetitiveSelection/CompetitiveSelectionRanked_Proof.tla", "contains": ["THEOREM Safety", "LEMMA ContractSelectStep", "THEOREM BoundedMultiplicitySafety", "THEOREM RankedTieBreakSafety"]},
+    {"path": "formal/structures/CompetitiveSelection/CompetitiveSelectionHardExclusive.tla", "contains": ["CONSTANTS Seats, Candidates, MaxScore, NULL, CandidateOrder", "VARIABLES allocation, scores", "Evaluate(s)", "UpdateScore(s, c, new_score)", "MutualExclusion"]},
+    {"path": "formal/structures/CompetitiveSelection/CompetitiveSelectionHardExclusive_Proof.tla", "contains": ["THEOREM Safety", "THEOREM MutualExclusionSafety", "THEOREM WinnerTieBreakSafety"]},
+    {"path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoftMutableScores.tla", "contains": ["UpdateScore(c, v)", "MutableScoreNext ==", "MutableScoreSpec =="]},
+    {"path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoftMutableScores_Proof.tla", "contains": ["THEOREM MutableScoreSafety", "THEOREM MutableScoreNormalizationSafety", "THEOREM MutableScoreTieBoundednessSafety"]},
+    {"path": "crate://automation-structures/0.2.3/src/primitives/competitive_selection.rs", "contains": ["pub struct CompetitiveSelectionRanked", "pub struct CompetitiveSelectionHardExclusive", "pub struct CompetitiveSelectionSoft", "pub max_score: u64", "pub fn assign_next", "pub fn select", "pub fn update_scores"]}
+  ],
+  "proof_binding": {"canonical_directory": "formal/structures/CompetitiveSelection", "proof_module": "CompetitiveSelectionRanked_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
+  "proof_constants": ["HardSeats", "HardNULL", "SoftWeightTotal"],
+  "proof_variables": ["HardAllocation", "HardScores", "SoftScores", "SoftExtra"],
+  "instance_proof_bindings": [
+    {"alias": "HardExclusiveProof", "module": "CompetitiveSelectionHardExclusive_Proof", "theorem": "Safety", "statement": "HardExclusiveProof!Spec => []HardExclusiveProof!Inv", "substitutions": {"Seats": "HardSeats", "Candidates": "Candidates", "MaxScore": "MaxScore", "NULL": "HardNULL", "allocation": "HardAllocation", "scores": "HardScores"}},
+    {"alias": "SoftMutableProof", "module": "CompetitiveSelectionSoftMutableScores_Proof", "theorem": "MutableScoreSafety", "statement": "SoftMutableProof!MutableScoreSpec => []SoftMutableProof!Inv", "substitutions": {"Candidates": "Candidates", "WeightTotal": "SoftWeightTotal", "MaxScore": "MaxScore", "scores": "SoftScores", "extra": "SoftExtra"}}
+  ],
+  "witness": {
+    "states": ["scores-ready", "ranked-selected", "hard-assigned", "soft-partial", "invalid-selection"],
+    "initial": ["scores-ready"],
+    "obligation_states": ["scores-ready", "ranked-selected", "hard-assigned", "soft-partial"],
+    "violation_states": ["invalid-selection"],
+    "system_steps": [["scores-ready", "ranked-selected"], ["scores-ready", "hard-assigned"], ["scores-ready", "soft-partial"]],
+    "environment_steps": [["ranked-selected", "scores-ready"], ["hard-assigned", "scores-ready"], ["soft-partial", "scores-ready"]],
+    "action_steps": {"RankedSelect": [["scores-ready", "ranked-selected"]], "RankedUpdateScores": [["ranked-selected", "scores-ready"]], "HardEvaluate": [["scores-ready", "hard-assigned"]], "HardUpdateScore": [["hard-assigned", "scores-ready"]], "SoftAssignNext": [["scores-ready", "soft-partial"]], "MutableAssignNext": [["scores-ready", "soft-partial"]], "MutableUpdateScore": [["soft-partial", "scores-ready"]]},
+    "rely_steps": [["ranked-selected", "scores-ready"], ["hard-assigned", "scores-ready"], ["soft-partial", "scores-ready"]],
+    "commit_steps": [["scores-ready", "ranked-selected"], ["scores-ready", "hard-assigned"], ["scores-ready", "soft-partial"]],
+    "failure_steps": [],
+    "interference_steps": [],
+    "check_mode": "atomic",
+    "check_result_states": ["scores-ready", "ranked-selected", "hard-assigned", "soft-partial"],
+    "predicate_states": ["scores-ready", "ranked-selected", "hard-assigned", "soft-partial"],
+    "actors": ["selection-claimant", "selection-authority", "score-provider"],
+    "providers": ["selection-authority", "score-provider"],
+    "claimant": "selection-claimant",
+    "commit_owner": "selection-authority",
+    "commit_delegate": "selection-authority",
+    "assurance_provider": "selection-authority",
+    "assurance_position": "at-commit",
+    "prevention_controllers": ["selection-authority"],
+    "unavailable_providers": [],
+    "persistent_observe": {"scores-ready": true, "ranked-selected": true, "hard-assigned": true, "soft-partial": true, "invalid-selection": false},
+    "persistent_evidence": true,
+    "recovery_available": false,
+    "active_states": ["scores-ready", "ranked-selected", "hard-assigned", "soft-partial"],
+    "closed_states": [],
+    "progress_steps": [],
+    "other_steps": [],
+    "handoff_steps": [],
+    "rank_bound": 0,
+    "rank": {"scores-ready": 0, "ranked-selected": 0, "hard-assigned": 0, "soft-partial": 0, "invalid-selection": 0},
+    "fairness_owners": ["selection-authority"],
+    "fairness_owner": "selection-authority",
+    "fairness_owner_of": {}
+  }
+}

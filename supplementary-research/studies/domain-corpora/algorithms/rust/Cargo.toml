@@ -1,0 +1,19 @@
+[package]
+name = "dac_algorithms"
+version = "0.1.0"
+edition = "2021"
+description = "Teaching-oriented primitive compositions tested for operational equivalence against independent Python oracles."
+
+# Dependency posture mirrors supplementary-research/studies/execution-structure-search/rust/Cargo.toml:
+# serde+toml for the per-algorithm manifest, proptest as a dev-dependency
+# for property-based corpus inputs.
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+
+[dev-dependencies]
+proptest = "1"
+
+[lib]
+name = "dac_algorithms"
+path = "src/lib.rs"

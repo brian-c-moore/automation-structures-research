@@ -1,0 +1,18 @@
+name = "Airflow"
+tier = 1
+modality = "StepGraph"
+evidence = "direct_comparison"
+workload = "scientific_workflow"
+
+[policies]
+invocation = "Time_Or_DepCompletion"
+topology = "Declared_DAG_Task"
+dependencies = "Fixed"
+lifecycle = "Rerun_From_Failure"
+
+[trace_properties]
+predecessor_before_successor = true
+
+citations = [
+    "Apache Airflow project documentation",
+]

@@ -1,0 +1,16 @@
+name = "Unreal_RDG"
+tier = 2
+modality = "StreamGraph"
+evidence = "documented_behavior"
+# note: Unreal Engine RDG requires the full Unreal Engine install, out of scope for a research artifact
+workload = "render_graph"
+
+[policies]
+invocation = "Vsync"
+topology = "Rebuilt_Per_Frame"
+dependencies = "Fixed"
+lifecycle = "Per_Frame"
+
+citations = [
+    "Unreal Engine RDG documentation",
+]

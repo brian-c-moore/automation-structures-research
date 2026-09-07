@@ -1,0 +1,2821 @@
+{
+  "schema": "alk-obligation-schema-registry-v3",
+  "catalog_boundary": {
+    "normalization": "Clauses share one schema only when their carrier, selected mode, proof profile, predicate binding, assumptions, observation boundary, and failure ceiling support the same responsibility. Clause labels alone never establish equivalence.",
+    "qualifier_vocabulary": [
+      "recorded-effect-only",
+      "fairness-dependent",
+      "conditional-proof",
+      "selected-policy",
+      "state-level-only"
+    ],
+    "outcome_vocabulary": [
+      "preserved",
+      "violated",
+      "unowned",
+      "assurance-only"
+    ],
+    "claim_layer": {
+      "qualifiers_field": "qualifiers",
+      "outcomes_field": "outcomes",
+      "guarantee_kind_field": null
+    }
+  },
+  "counts": {
+    "primitives": 9,
+    "named_compositions": 10,
+    "execution_modalities": 4,
+    "connective_roles": 7,
+    "profiles": 29,
+    "obligation_schemas": 36,
+    "clause_occurrences": 69,
+    "credited_clause_occurrences": 59,
+    "distinct_local_clause_names": 66
+  },
+  "carrier_kinds": {
+    "abstraction-primitive": [
+      "Budget",
+      "QualityHierarchy",
+      "ResourceRegistry",
+      "CompetitiveSelection",
+      "ActuationPass",
+      "PropagationPass",
+      "ConvergenceGovernor",
+      "AuditSink",
+      "BacktrackingTraversal"
+    ],
+    "named-composition": [
+      "AllocationSnapshot",
+      "FederatedBudget",
+      "Bisection",
+      "EquivalenceClass",
+      "RateLimit",
+      "Reduction",
+      "RelationshipGraph",
+      "Sampler",
+      "Signal",
+      "TraversalEngine"
+    ],
+    "execution-modality": [
+      "Sequential",
+      "ForkJoin",
+      "StepGraph",
+      "StreamGraph"
+    ]
+  },
+  "connective_roles": [
+    "Projection",
+    "Cursor",
+    "Accumulator",
+    "Marker",
+    "Counter",
+    "Buffer",
+    "OrderingPass"
+  ],
+  "assumption_sets": {
+    "A-BUD": "Natural or checked `u64` accounting; serialized atomic guard/update; complete writer inventory; no distributed, durable, or recovery claim.",
+    "A-QH": "Finite nodes; typed level/cost domains; atomic edge and parent commit; no connectivity, balancing, concurrency, or durability claim.",
+    "A-RR": "Typed keys/values; serialized atomic replace/remove; complete writer inventory; no authorization, versioning, durability, or distribution claim.",
+    "A-CS": "Finite candidates/seats, stable candidate order, bounded scores/weights, serialized mutation, and reset of dependent state after score change; no cross-mode equivalence or eventual selection.",
+    "A-ACT": "Fixed allocation, atomic allocation-read/effect-record and finish check, serialized mutation; recorded effects do not prove an external side effect, exactly-once execution, durability, or recovery.",
+    "A-PROP": "Finite graph, typed `Combine`, serialized rounds; the liveness row additionally relies on weak fairness of round admission, every node update, and round closure; no deadline or universal convergence.",
+    "A-CONV": "Natural thresholds, positive window, bounded delta, exact post-slide average, serialized updates; no eventual or statistical convergence.",
+    "A-AUDIT": "Typed finite log and atomic append. Preimage uniqueness additionally assumes `HashCR`; the crate's modulo-100 operation intentionally collides. No tamper transition, persistent custody, freshness, durability, or recovery is modeled.",
+    "A-BACK": "Finite bounded tree, modulo-three mutation closure and inverse round trip, serialized path/ledger mutation; no leaf coverage, search order, or general graph completeness.",
+    "A-ALLOC": "Finite node/cost domains, serialized atomic membership-cost-budget commit; formula is an upper-bound relation, not exact conservation or durability.",
+    "A-FED": "Finite sub-pools, serialized atomic delegation/allocation, one master capacity; no independent-pool failure, reclamation, consensus, or partition-tolerance result.",
+    "A-BISECT": "Ordered monotone threshold domain, sufficient declared probe budget, serialized interval mutation; convergence additionally assumes weak-fair probing; no time bound or changing-predicate result.",
+    "A-EQUIV": "Finite elements, bounded successful union count, serialized parent/rank mutation; no path compression, runtime complexity, or concurrency result.",
+    "A-RATE": "Monotone bounded logical clock supplied by the caller, serialized atomic rollover/acquire; no wall-clock accuracy, distribution, throughput, or fairness claim.",
+    "A-REDUCE": "Immutable ordered source, closed operator, serialized prefix mutation; no eventual full consumption, reorder equivalence, parallel reduction, or unchecked-overflow transfer.",
+    "A-GRAPH": "Finite nodes and weights, serialized registry mutation and derived adjacency projection. Irreflexivity applies only to the selected profile; no reachability, acyclicity, reciprocity, concurrency, or durability claim.",
+    "A-SAMPLE": "Finite item universe, serialized support-check/selection, caller-supplied proposals; no randomness quality, frequency, or fairness result.",
+    "A-SIGNAL": "Finite values/listeners and atomic pending/notified update; no eventual, exactly-once, durable, or distributed delivery.",
+    "A-TRAV": "Finite rooted star profile, fixed node cost, serialized atomic visit/admission/charge; no queue-drain liveness, general topology, or durability.",
+    "A-SEQ": "Positive finite step count, nonempty value domain, one visible logical active locus, complete serialized writer inventory; no scheduler fairness, deadline, nested noninterference, or durable history.",
+    "A-FJ": "Finite workers and values, serialized atomic worker/barrier/output transitions, complete writer inventory; no worker progress, noninterference, deadline, or durability.",
+    "A-STEP": "Fixed finite topology, valid distinct edges, serialized atomic predecessor-check/readiness commit, complete writer inventory; no acyclicity, scheduler fairness, completion, or time bound.",
+    "A-STREAM": "Three- or four-stage chain, positive finite queue capacity, bounded input and typed records, serialized atomic queue/counter mutation; no scheduler fairness, eventual drain, arbitrary topology, durability, or exactly-once delivery."
+  },
+  "profiles": {
+    "budget-default": {
+      "carrier": "Budget",
+      "catalog_mode": "default",
+      "proof_profile": "default",
+      "public_carriers": [
+        "Budget"
+      ],
+      "predicate_modules": [
+        "formal/structures/Budget/Budget.tla"
+      ],
+      "configurations": [
+        "formal/structures/Budget/Budget.cfg"
+      ],
+      "parameters": [
+        "Capacity"
+      ]
+    },
+    "quality-default": {
+      "carrier": "QualityHierarchy",
+      "catalog_mode": "default",
+      "proof_profile": "default",
+      "public_carriers": [
+        "QualityHierarchy"
+      ],
+      "predicate_modules": [
+        "formal/structures/QualityHierarchy/QualityHierarchy.tla"
+      ],
+      "configurations": [
+        "formal/structures/QualityHierarchy/QualityHierarchy.cfg"
+      ],
+      "parameters": [
+        "Nodes",
+        "MaxLevel",
+        "NULL"
+      ]
+    },
+    "registry-default": {
+      "carrier": "ResourceRegistry",
+      "catalog_mode": "default",
+      "proof_profile": "default",
+      "public_carriers": [
+        "ResourceRegistry"
+      ],
+      "predicate_modules": [
+        "formal/structures/ResourceRegistry/ResourceRegistry.tla"
+      ],
+      "configurations": [
+        "formal/structures/ResourceRegistry/ResourceRegistry.cfg"
+      ],
+      "parameters": [
+        "Keys",
+        "Values"
+      ]
+    },
+    "competitive-ranked": {
+      "carrier": "CompetitiveSelection",
+      "catalog_mode": "ranked",
+      "proof_profile": "ranked",
+      "public_carriers": [
+        "CompetitiveSelectionRanked"
+      ],
+      "predicate_modules": [
+        "formal/structures/CompetitiveSelection/CompetitiveSelectionRanked.tla"
+      ],
+      "configurations": [
+        "formal/structures/CompetitiveSelection/CompetitiveSelectionRanked.cfg"
+      ],
+      "parameters": [
+        "Candidates",
+        "K",
+        "MaxScore",
+        "CandidateOrder"
+      ]
+    },
+    "competitive-hard": {
+      "carrier": "CompetitiveSelection",
+      "catalog_mode": "hard",
+      "proof_profile": "hard-exclusive",
+      "public_carriers": [
+        "CompetitiveSelectionHard",
+        "CompetitiveSelectionHardExclusive"
+      ],
+      "predicate_modules": [
+        "formal/structures/CompetitiveSelection/CompetitiveSelectionHardExclusive.tla"
+      ],
+      "configurations": [
+        "formal/structures/CompetitiveSelection/CompetitiveSelectionHardExclusive.cfg"
+      ],
+      "parameters": [
+        "Seats",
+        "Candidates",
+        "MaxScore",
+        "NULL",
+        "CandidateOrder"
+      ]
+    },
+    "competitive-soft": {
+      "carrier": "CompetitiveSelection",
+      "catalog_mode": "soft",
+      "proof_profile": "static-and-mutable-score",
+      "public_carriers": [
+        "CompetitiveSelectionSoft"
+      ],
+      "predicate_modules": [
+        "formal/structures/CompetitiveSelection/CompetitiveSelectionSoft.tla",
+        "formal/structures/CompetitiveSelection/CompetitiveSelectionSoftMutableScores.tla"
+      ],
+      "configurations": [
+        "formal/structures/CompetitiveSelection/CompetitiveSelectionSoftMutableScores.cfg"
+      ],
+      "parameters": [
+        "Candidates",
+        "WeightTotal",
+        "MaxScore",
+        "CandidateOrder"
+      ]
+    },
+    "actuation-default": {
+      "carrier": "ActuationPass",
+      "catalog_mode": "default",
+      "proof_profile": "default",
+      "public_carriers": [
+        "ActuationPass"
+      ],
+      "predicate_modules": [
+        "formal/structures/ActuationPass/ActuationPass.tla"
+      ],
+      "configurations": [
+        "formal/structures/ActuationPass/ActuationPass.cfg"
+      ],
+      "parameters": [
+        "Seats",
+        "Resources",
+        "NULL"
+      ]
+    },
+    "propagation-bounded": {
+      "carrier": "PropagationPass",
+      "catalog_mode": "default",
+      "proof_profile": "bounded-round",
+      "public_carriers": [
+        "PropagationPass"
+      ],
+      "predicate_modules": [
+        "formal/structures/PropagationPass/PropagationPassGraph.tla"
+      ],
+      "configurations": [
+        "formal/structures/PropagationPass/PropagationPassGraph.cfg"
+      ],
+      "parameters": [
+        "Nodes",
+        "Edges",
+        "MaxIterations",
+        "MaxValue"
+      ]
+    },
+    "propagation-fair": {
+      "carrier": "PropagationPass",
+      "catalog_mode": "default",
+      "proof_profile": "fair-bounded-round",
+      "public_carriers": [
+        "PropagationPass"
+      ],
+      "predicate_modules": [
+        "formal/structures/PropagationPass/PropagationPassGraph.tla"
+      ],
+      "configurations": [
+        "formal/structures/PropagationPass/PropagationPassGraph.cfg"
+      ],
+      "parameters": [
+        "Nodes",
+        "Edges",
+        "MaxIterations",
+        "MaxValue"
+      ]
+    },
+    "convergence-phase": {
+      "carrier": "ConvergenceGovernor",
+      "catalog_mode": "default",
+      "proof_profile": "phase-aware",
+      "public_carriers": [
+        "ConvergenceGovernor"
+      ],
+      "predicate_modules": [
+        "formal/structures/ConvergenceGovernor/ConvergenceGovernorPhaseAware.tla"
+      ],
+      "configurations": [
+        "formal/structures/ConvergenceGovernor/ConvergenceGovernorPhaseAware.cfg"
+      ],
+      "parameters": [
+        "Threshold",
+        "AwakenThreshold",
+        "Window",
+        "MaxDelta"
+      ]
+    },
+    "audit-chain": {
+      "carrier": "AuditSink",
+      "catalog_mode": "default",
+      "proof_profile": "append-chain-and-conditional-preimage",
+      "public_carriers": [
+        "AuditSink"
+      ],
+      "predicate_modules": [
+        "formal/structures/AuditSink/AuditSink.tla"
+      ],
+      "configurations": [
+        "formal/structures/AuditSink/AuditSink.cfg"
+      ],
+      "parameters": [
+        "Operations",
+        "MaxLogLen",
+        "Hash"
+      ]
+    },
+    "backtracking-undo": {
+      "carrier": "BacktrackingTraversal",
+      "catalog_mode": "default",
+      "proof_profile": "undo",
+      "public_carriers": [
+        "BacktrackingTraversal"
+      ],
+      "predicate_modules": [
+        "formal/structures/BacktrackingTraversal/BacktrackingTraversalUndo.tla"
+      ],
+      "configurations": [
+        "formal/structures/BacktrackingTraversal/BacktrackingTraversalUndo.cfg"
+      ],
+      "parameters": [
+        "BranchFactor",
+        "MaxDepth",
+        "InitAux",
+        "AuxDomain",
+        "Deltas",
+        "Mutate",
+        "Undo"
+      ]
+    },
+    "allocation-default": {
+      "carrier": "AllocationSnapshot",
+      "catalog_mode": "default",
+      "proof_profile": "default",
+      "public_carriers": [
+        "AllocationSnapshot"
+      ],
+      "predicate_modules": [
+        "formal/structures/AllocationSnapshot/AllocationSnapshot.tla"
+      ],
+      "configurations": [
+        "formal/structures/AllocationSnapshot/AllocationSnapshot.cfg"
+      ],
+      "parameters": [
+        "Nodes",
+        "BudgetCapacity"
+      ]
+    },
+    "federated-default": {
+      "carrier": "FederatedBudget",
+      "catalog_mode": "default",
+      "proof_profile": "default",
+      "public_carriers": [
+        "FederatedBudget"
+      ],
+      "predicate_modules": [
+        "formal/structures/FederatedBudget/FederatedBudget.tla"
+      ],
+      "configurations": [
+        "formal/structures/FederatedBudget/FederatedBudget.cfg"
+      ],
+      "parameters": [
+        "SubPoolNames",
+        "MasterCapacity"
+      ]
+    },
+    "bisection-interval": {
+      "carrier": "Bisection",
+      "catalog_mode": "default",
+      "proof_profile": "monotone-threshold",
+      "public_carriers": [
+        "Bisection"
+      ],
+      "predicate_modules": [
+        "formal/structures/Bisection/Bisection.tla"
+      ],
+      "configurations": [
+        "formal/structures/Bisection/Bisection.cfg"
+      ],
+      "parameters": [
+        "DomainSize",
+        "Threshold",
+        "MaxProbes"
+      ]
+    },
+    "bisection-probes": {
+      "carrier": "Bisection",
+      "catalog_mode": "default",
+      "proof_profile": "bounded-probe",
+      "public_carriers": [
+        "Bisection"
+      ],
+      "predicate_modules": [
+        "formal/structures/Bisection/Bisection.tla"
+      ],
+      "configurations": [
+        "formal/structures/Bisection/Bisection.cfg"
+      ],
+      "parameters": [
+        "DomainSize",
+        "Threshold",
+        "MaxProbes"
+      ]
+    },
+    "bisection-fair": {
+      "carrier": "Bisection",
+      "catalog_mode": "default",
+      "proof_profile": "fair-monotone-threshold",
+      "public_carriers": [
+        "Bisection"
+      ],
+      "predicate_modules": [
+        "formal/structures/Bisection/Bisection.tla"
+      ],
+      "configurations": [
+        "formal/structures/Bisection/Bisection.cfg"
+      ],
+      "parameters": [
+        "DomainSize",
+        "Threshold",
+        "MaxProbes"
+      ]
+    },
+    "equivalence-bounded": {
+      "carrier": "EquivalenceClass",
+      "catalog_mode": "default",
+      "proof_profile": "bounded-union",
+      "public_carriers": [
+        "EquivalenceClass"
+      ],
+      "predicate_modules": [
+        "formal/structures/EquivalenceClass/EquivalenceClass.tla"
+      ],
+      "configurations": [
+        "formal/structures/EquivalenceClass/EquivalenceClass.cfg"
+      ],
+      "parameters": [
+        "Elements",
+        "MaxOps"
+      ]
+    },
+    "rate-logical-clock": {
+      "carrier": "RateLimit",
+      "catalog_mode": "default",
+      "proof_profile": "logical-clock",
+      "public_carriers": [
+        "RateLimit"
+      ],
+      "predicate_modules": [
+        "formal/structures/RateLimit/RateLimit.tla"
+      ],
+      "configurations": [
+        "formal/structures/RateLimit/RateLimit.cfg"
+      ],
+      "parameters": [
+        "MaxPerWindow",
+        "WindowDuration",
+        "MaxClock"
+      ]
+    },
+    "reduction-additive": {
+      "carrier": "Reduction",
+      "catalog_mode": "default",
+      "proof_profile": "additive-stream",
+      "public_carriers": [
+        "Reduction"
+      ],
+      "predicate_modules": [
+        "formal/structures/Reduction/ReductionStream.tla"
+      ],
+      "configurations": [
+        "formal/structures/Reduction/ReductionStream.cfg"
+      ],
+      "parameters": [
+        "Src",
+        "Op",
+        "Identity"
+      ]
+    },
+    "graph-directed": {
+      "carrier": "RelationshipGraph",
+      "catalog_mode": "default",
+      "proof_profile": "weighted-directed",
+      "public_carriers": [
+        "RelationshipGraph"
+      ],
+      "predicate_modules": [
+        "formal/structures/RelationshipGraph/RelationshipGraph.tla"
+      ],
+      "configurations": [
+        "formal/structures/RelationshipGraph/RelationshipGraph.cfg",
+        "formal/structures/RelationshipGraph/RelationshipGraph_Reflexive.cfg"
+      ],
+      "parameters": [
+        "Nodes",
+        "MaxWeight",
+        "AllowSelfLoops"
+      ]
+    },
+    "graph-irreflexive": {
+      "carrier": "RelationshipGraph",
+      "catalog_mode": "default",
+      "proof_profile": "selected-irreflexive",
+      "public_carriers": [
+        "RelationshipGraph"
+      ],
+      "predicate_modules": [
+        "formal/structures/RelationshipGraph/RelationshipGraph.tla"
+      ],
+      "configurations": [
+        "formal/structures/RelationshipGraph/RelationshipGraph.cfg"
+      ],
+      "parameters": [
+        "Nodes",
+        "MaxWeight",
+        "AllowSelfLoops"
+      ]
+    },
+    "sampler-without-replacement": {
+      "carrier": "Sampler",
+      "catalog_mode": "default",
+      "proof_profile": "without-replacement",
+      "public_carriers": [
+        "Sampler"
+      ],
+      "predicate_modules": [
+        "formal/structures/Sampler/Sampler.tla"
+      ],
+      "configurations": [
+        "formal/structures/Sampler/Sampler.cfg"
+      ],
+      "parameters": [
+        "Items",
+        "SampleSize",
+        "MaxProb"
+      ]
+    },
+    "signal-change": {
+      "carrier": "Signal",
+      "catalog_mode": "default",
+      "proof_profile": "change-notification",
+      "public_carriers": [
+        "Signal"
+      ],
+      "predicate_modules": [
+        "formal/structures/Signal/Signal.tla"
+      ],
+      "configurations": [
+        "formal/structures/Signal/Signal.cfg"
+      ],
+      "parameters": [
+        "Values",
+        "Listeners"
+      ]
+    },
+    "traversal-fixed-cost": {
+      "carrier": "TraversalEngine",
+      "catalog_mode": "default",
+      "proof_profile": "fixed-cost-star",
+      "public_carriers": [
+        "TraversalEngine"
+      ],
+      "predicate_modules": [
+        "formal/structures/TraversalEngine/TraversalEngine.tla"
+      ],
+      "configurations": [
+        "formal/structures/TraversalEngine/TraversalEngine.cfg"
+      ],
+      "parameters": [
+        "Nodes",
+        "RootNode",
+        "MaxBudget"
+      ]
+    },
+    "sequential-fixed": {
+      "carrier": "Sequential",
+      "catalog_mode": "default",
+      "proof_profile": "fixed-sequence",
+      "public_carriers": [
+        "Sequential"
+      ],
+      "predicate_modules": [
+        "formal/execution/carriers/Sequential.tla"
+      ],
+      "configurations": [
+        "formal/execution/carriers/Sequential.cfg"
+      ],
+      "parameters": [
+        "Steps",
+        "ValueDomain"
+      ]
+    },
+    "forkjoin-bounded": {
+      "carrier": "ForkJoin",
+      "catalog_mode": "default",
+      "proof_profile": "bounded-worker",
+      "public_carriers": [
+        "ForkJoin"
+      ],
+      "predicate_modules": [
+        "formal/execution/carriers/ForkJoin.tla"
+      ],
+      "configurations": [
+        "formal/execution/carriers/ForkJoin.cfg"
+      ],
+      "parameters": [
+        "Workers",
+        "ValueDomain"
+      ]
+    },
+    "step-fixed": {
+      "carrier": "StepGraph",
+      "catalog_mode": "default",
+      "proof_profile": "fixed-topology",
+      "public_carriers": [
+        "StepGraph"
+      ],
+      "predicate_modules": [
+        "formal/execution/carriers/StepGraph.tla"
+      ],
+      "configurations": [
+        "formal/execution/carriers/StepGraph.cfg"
+      ],
+      "parameters": [
+        "Nodes",
+        "Edges"
+      ]
+    },
+    "stream-linear": {
+      "carrier": "StreamGraph",
+      "catalog_mode": "default",
+      "proof_profile": "linear-bounded",
+      "public_carriers": [
+        "StreamGraph"
+      ],
+      "predicate_modules": [
+        "formal/execution/carriers/StreamGraph.tla"
+      ],
+      "configurations": [
+        "formal/execution/carriers/StreamGraph.cfg"
+      ],
+      "parameters": [
+        "Capacity",
+        "MaxInputs",
+        "RecordDomain",
+        "ChainLength"
+      ]
+    }
+  },
+  "schemas": {
+    "AS-BUD-CAP": {
+      "carrier": "Budget",
+      "profile": "budget-default",
+      "clauses": {
+        "primary": [
+          "Budget!SafetyInvariant"
+        ],
+        "contributing": [],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-QH-EDGE": {
+      "carrier": "QualityHierarchy",
+      "profile": "quality-default",
+      "clauses": {
+        "primary": [],
+        "contributing": [
+          "QualityHierarchy!StrictLevelDescent",
+          "QualityHierarchy!ParentEdgeAgreement",
+          "QualityHierarchy!CostMonotonicity"
+        ],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-RR-UNIQUE": {
+      "carrier": "ResourceRegistry",
+      "profile": "registry-default",
+      "clauses": {
+        "primary": [
+          "ResourceRegistry!UniqueMapping"
+        ],
+        "contributing": [],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-CS-RANKED": {
+      "carrier": "CompetitiveSelection",
+      "profile": "competitive-ranked",
+      "clauses": {
+        "primary": [],
+        "contributing": [
+          "CompetitiveSelection!RankedBoundedMultiplicity",
+          "CompetitiveSelection!RankedThresholdOptimality",
+          "CompetitiveSelection!RankedTieBreak"
+        ],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-CS-HARD": {
+      "carrier": "CompetitiveSelection",
+      "profile": "competitive-hard",
+      "clauses": {
+        "primary": [],
+        "contributing": [
+          "CompetitiveSelection!HardMutualExclusion",
+          "CompetitiveSelection!HardWinnerOptimality",
+          "CompetitiveSelection!HardWinnerTieBreak"
+        ],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-CS-SOFT": {
+      "carrier": "CompetitiveSelection",
+      "profile": "competitive-soft",
+      "clauses": {
+        "primary": [],
+        "contributing": [
+          "CompetitiveSelection!SoftBoundedTotal",
+          "CompetitiveSelection!SoftNormalization",
+          "CompetitiveSelection!SoftUniversalContribution",
+          "CompetitiveSelection!SoftScoreOrderPreservation",
+          "CompetitiveSelection!SoftTieBoundedness"
+        ],
+        "support": [
+          "CompetitiveSelection!SoftNonNegativity"
+        ],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-ACT-EFFECT": {
+      "carrier": "ActuationPass",
+      "profile": "actuation-default",
+      "clauses": {
+        "primary": [
+          "ActuationPass!EffectFidelity"
+        ],
+        "contributing": [],
+        "support": [],
+        "derived": [
+          "ActuationPass!ActuationScope"
+        ],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-ACT-CLOSURE": {
+      "carrier": "ActuationPass",
+      "profile": "actuation-default",
+      "clauses": {
+        "primary": [
+          "ActuationPass!PassCompleteness"
+        ],
+        "contributing": [],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-PROP-LOCAL": {
+      "carrier": "PropagationPass",
+      "profile": "propagation-bounded",
+      "clauses": {
+        "primary": [
+          "PropagationPass!SnapshotLocality"
+        ],
+        "contributing": [],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-PROP-BOUND": {
+      "carrier": "PropagationPass",
+      "profile": "propagation-bounded",
+      "clauses": {
+        "primary": [
+          "PropagationPass!IterationBound"
+        ],
+        "contributing": [],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-PROP-PROGRESS": {
+      "carrier": "PropagationPass",
+      "profile": "propagation-fair",
+      "clauses": {
+        "primary": [
+          "PropagationPass!EventualSettledOrIterationLimit"
+        ],
+        "contributing": [],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-CONV-LIFECYCLE": {
+      "carrier": "ConvergenceGovernor",
+      "profile": "convergence-phase",
+      "clauses": {
+        "primary": [
+          "ConvergenceGovernor!ValidTransitionsProp"
+        ],
+        "contributing": [
+          "ConvergenceGovernor!NoCoolingFromCold",
+          "ConvergenceGovernor!ConvergenceRequiresHistory"
+        ],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-AUDIT-CHAIN": {
+      "carrier": "AuditSink",
+      "profile": "audit-chain",
+      "clauses": {
+        "primary": [],
+        "contributing": [
+          "AuditSink!ChainIntegrity",
+          "AuditSink!HashConsistency",
+          "AuditSink!HashBindsContent"
+        ],
+        "support": [],
+        "derived": [
+          "AuditSink!TamperEvidentInv"
+        ],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-BACKTRACK-RESTORE": {
+      "carrier": "BacktrackingTraversal",
+      "profile": "backtracking-undo",
+      "clauses": {
+        "primary": [],
+        "contributing": [
+          "BacktrackingTraversal!Pairing",
+          "BacktrackingTraversal!StateRestoration"
+        ],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-BACKTRACK-VISIT": {
+      "carrier": "BacktrackingTraversal",
+      "profile": "backtracking-undo",
+      "clauses": {
+        "primary": [
+          "BacktrackingTraversal!RecordedLeafValidity"
+        ],
+        "contributing": [],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-ALLOC-ACCOUNT": {
+      "carrier": "AllocationSnapshot",
+      "profile": "allocation-default",
+      "clauses": {
+        "primary": [
+          "AllocationSnapshot!BudgetConsistency"
+        ],
+        "contributing": [],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-FED-CAPACITY": {
+      "carrier": "FederatedBudget",
+      "profile": "federated-default",
+      "clauses": {
+        "primary": [],
+        "contributing": [
+          "FederatedBudget!MasterCapacityBound",
+          "FederatedBudget!SubPoolCapacityBound",
+          "FederatedBudget!CapacityConservation"
+        ],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-BISECT-INTERVAL": {
+      "carrier": "Bisection",
+      "profile": "bisection-interval",
+      "clauses": {
+        "primary": [
+          "Bisection!MonotonicityPreservation"
+        ],
+        "contributing": [
+          "Bisection!Halving"
+        ],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-BISECT-PROBES": {
+      "carrier": "Bisection",
+      "profile": "bisection-probes",
+      "clauses": {
+        "primary": [
+          "Bisection!ProbeBound"
+        ],
+        "contributing": [],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-BISECT-PROGRESS": {
+      "carrier": "Bisection",
+      "profile": "bisection-fair",
+      "clauses": {
+        "primary": [
+          "Bisection!EventualConvergence"
+        ],
+        "contributing": [],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-EQUIV-INTEGRITY": {
+      "carrier": "EquivalenceClass",
+      "profile": "equivalence-bounded",
+      "clauses": {
+        "primary": [
+          "EquivalenceClass!RepresentativeRootedness"
+        ],
+        "contributing": [
+          "EquivalenceClass!RankMonotonicity"
+        ],
+        "support": [],
+        "derived": [
+          "EquivalenceClass!RepresentativeIdempotence"
+        ],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-RATE-WINDOW": {
+      "carrier": "RateLimit",
+      "profile": "rate-logical-clock",
+      "clauses": {
+        "primary": [
+          "RateLimit!WindowCountBound"
+        ],
+        "contributing": [],
+        "support": [
+          "RateLimit!WindowStartNotFuture"
+        ],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-REDUCE-PREFIX": {
+      "carrier": "Reduction",
+      "profile": "reduction-additive",
+      "clauses": {
+        "primary": [
+          "Reduction!ConsumedPrefixFold"
+        ],
+        "contributing": [],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-GRAPH-PROJECTION": {
+      "carrier": "RelationshipGraph",
+      "profile": "graph-directed",
+      "clauses": {
+        "primary": [
+          "RelationshipGraph!AdjacencyConsistency"
+        ],
+        "contributing": [],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-GRAPH-IRREFLEXIVE": {
+      "carrier": "RelationshipGraph",
+      "profile": "graph-irreflexive",
+      "clauses": {
+        "primary": [],
+        "contributing": [],
+        "support": [],
+        "derived": [],
+        "selected_policy": [
+          "RelationshipGraph!NoSelfLoops"
+        ]
+      },
+      "depends_on_schemas": [
+        "AS-GRAPH-PROJECTION"
+      ]
+    },
+    "AS-SAMPLE-SUPPORT": {
+      "carrier": "Sampler",
+      "profile": "sampler-without-replacement",
+      "clauses": {
+        "primary": [],
+        "contributing": [
+          "Sampler!BoundedSample",
+          "Sampler!SupportConsistency"
+        ],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-SIGNAL-BOOKKEEPING": {
+      "carrier": "Signal",
+      "profile": "signal-change",
+      "clauses": {
+        "primary": [],
+        "contributing": [
+          "Signal!PendingNotifiedDisjointness",
+          "Signal!NotificationProvenance"
+        ],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-TRAV-ACCEPT": {
+      "carrier": "TraversalEngine",
+      "profile": "traversal-fixed-cost",
+      "clauses": {
+        "primary": [
+          "TraversalEngine!AcceptedSubsetVisited"
+        ],
+        "contributing": [],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "AS-TRAV-COST": {
+      "carrier": "TraversalEngine",
+      "profile": "traversal-fixed-cost",
+      "clauses": {
+        "primary": [
+          "TraversalEngine!AcceptedCostAccounting"
+        ],
+        "contributing": [],
+        "support": [],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "EX-SEQ-SERIAL": {
+      "carrier": "Sequential",
+      "profile": "sequential-fixed",
+      "clauses": {
+        "primary": [],
+        "contributing": [
+          "Sequential!HistoryPositionAgreement"
+        ],
+        "support": [
+          "Sequential!TypeInvariant"
+        ],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "EX-FORKJOIN-LIFECYCLE": {
+      "carrier": "ForkJoin",
+      "profile": "forkjoin-bounded",
+      "clauses": {
+        "primary": [],
+        "contributing": [
+          "ForkJoin!BarrierCompleteness",
+          "ForkJoin!OutputConsistency",
+          "ForkJoin!PhaseOrdering"
+        ],
+        "support": [
+          "ForkJoin!TypeInvariant"
+        ],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "EX-STEP-ELIGIBILITY": {
+      "carrier": "StepGraph",
+      "profile": "step-fixed",
+      "clauses": {
+        "primary": [
+          "StepGraph!EligibilityClosed"
+        ],
+        "contributing": [],
+        "support": [
+          "StepGraph!TypeInvariant"
+        ],
+        "derived": [
+          "StepGraph!NoRunBeforePredecessors"
+        ],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "EX-STEP-MONOTONIC": {
+      "carrier": "StepGraph",
+      "profile": "step-fixed",
+      "clauses": {
+        "primary": [
+          "StepGraph!ProgressMonotonic"
+        ],
+        "contributing": [],
+        "support": [
+          "StepGraph!TypeInvariant"
+        ],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "EX-STREAM-CAPACITY": {
+      "carrier": "StreamGraph",
+      "profile": "stream-linear",
+      "clauses": {
+        "primary": [
+          "StreamGraph!BackpressureCorrect"
+        ],
+        "contributing": [],
+        "support": [
+          "StreamGraph!TypeInvariant"
+        ],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "EX-STREAM-COUNT": {
+      "carrier": "StreamGraph",
+      "profile": "stream-linear",
+      "clauses": {
+        "primary": [
+          "StreamGraph!OccupancyCountConservation"
+        ],
+        "contributing": [],
+        "support": [
+          "StreamGraph!TypeInvariant"
+        ],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": []
+    },
+    "EX-STREAM-ENABLED": {
+      "carrier": "StreamGraph",
+      "profile": "stream-linear",
+      "clauses": {
+        "primary": [
+          "StreamGraph!SomeActionEnabled"
+        ],
+        "contributing": [],
+        "support": [
+          "StreamGraph!TypeInvariant"
+        ],
+        "derived": [],
+        "selected_policy": []
+      },
+      "depends_on_schemas": [
+        "EX-STREAM-CAPACITY",
+        "EX-STREAM-COUNT"
+      ]
+    }
+  },
+  "clauses": {
+    "Budget!SafetyInvariant": {
+      "profile": "budget-default",
+      "predicate": {
+        "path": "formal/structures/Budget/Budget.tla",
+        "operator": "SafetyInvariant"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/Budget/Budget_Proof.tla",
+          "theorem": "SafetyInvariantSafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "capacity",
+      "assumption_set": "A-BUD",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "QualityHierarchy!StrictLevelDescent": {
+      "profile": "quality-default",
+      "predicate": {
+        "path": "formal/structures/QualityHierarchy/QualityHierarchy.tla",
+        "operator": "StrictLevelDescent"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/QualityHierarchy/QualityHierarchy_Proof.tla",
+          "theorem": "StrictLevelDescentSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "hierarchy",
+      "assumption_set": "A-QH",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "QualityHierarchy!ParentEdgeAgreement": {
+      "profile": "quality-default",
+      "predicate": {
+        "path": "formal/structures/QualityHierarchy/QualityHierarchy.tla",
+        "operator": "ParentEdgeAgreement"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/QualityHierarchy/QualityHierarchy_Proof.tla",
+          "theorem": "ParentEdgeAgreementSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "projection-integrity",
+      "assumption_set": "A-QH",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "QualityHierarchy!CostMonotonicity": {
+      "profile": "quality-default",
+      "predicate": {
+        "path": "formal/structures/QualityHierarchy/QualityHierarchy.tla",
+        "operator": "CostMonotonicity"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/QualityHierarchy/QualityHierarchy_Proof.tla",
+          "theorem": "CostMonotonicitySafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "hierarchy",
+      "assumption_set": "A-QH",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "ResourceRegistry!UniqueMapping": {
+      "profile": "registry-default",
+      "predicate": {
+        "path": "formal/structures/ResourceRegistry/ResourceRegistry.tla",
+        "operator": "UniqueMapping"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/ResourceRegistry/ResourceRegistry_Proof.tla",
+          "theorem": "UniqueMappingSafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "identity",
+      "assumption_set": "A-RR",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "CompetitiveSelection!RankedBoundedMultiplicity": {
+      "profile": "competitive-ranked",
+      "predicate": {
+        "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionRanked.tla",
+        "operator": "BoundedMultiplicity"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionRanked_Proof.tla",
+          "theorem": "BoundedMultiplicitySafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "selection-bound",
+      "assumption_set": "A-CS",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "CompetitiveSelection!RankedThresholdOptimality": {
+      "profile": "competitive-ranked",
+      "predicate": {
+        "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionRanked.tla",
+        "operator": "ThresholdOptimality"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionRanked_Proof.tla",
+          "theorem": "ThresholdOptimalitySafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "selection-quality",
+      "assumption_set": "A-CS",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "CompetitiveSelection!RankedTieBreak": {
+      "profile": "competitive-ranked",
+      "predicate": {
+        "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionRanked.tla",
+        "operator": "RankedTieBreak"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionRanked_Proof.tla",
+          "theorem": "RankedTieBreakSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "deterministic-choice",
+      "assumption_set": "A-CS",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "CompetitiveSelection!HardMutualExclusion": {
+      "profile": "competitive-hard",
+      "predicate": {
+        "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionHardExclusive.tla",
+        "operator": "MutualExclusion"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionHardExclusive_Proof.tla",
+          "theorem": "MutualExclusionSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "exclusivity",
+      "assumption_set": "A-CS",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "CompetitiveSelection!HardWinnerOptimality": {
+      "profile": "competitive-hard",
+      "predicate": {
+        "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionHardExclusive.tla",
+        "operator": "WinnerOptimality"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionHardExclusive_Proof.tla",
+          "theorem": "WinnerOptimalitySafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "selection-quality",
+      "assumption_set": "A-CS",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "CompetitiveSelection!HardWinnerTieBreak": {
+      "profile": "competitive-hard",
+      "predicate": {
+        "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionHardExclusive.tla",
+        "operator": "WinnerTieBreak"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionHardExclusive_Proof.tla",
+          "theorem": "WinnerTieBreakSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "deterministic-choice",
+      "assumption_set": "A-CS",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "CompetitiveSelection!SoftNonNegativity": {
+      "profile": "competitive-soft",
+      "predicate": {
+        "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoft.tla",
+        "operator": "NonNegativity"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoft_Proof.tla",
+          "theorem": "NonNegativitySafety"
+        },
+        {
+          "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoftMutableScores_Proof.tla",
+          "theorem": "MutableScoreNonNegativitySafety"
+        }
+      ],
+      "status": "support",
+      "temporal_form": "state-safety",
+      "concern": "representation",
+      "assumption_set": "A-CS",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "CompetitiveSelection!SoftBoundedTotal": {
+      "profile": "competitive-soft",
+      "predicate": {
+        "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoft.tla",
+        "operator": "BoundedTotal"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoft_Proof.tla",
+          "theorem": "BoundedTotalSafety"
+        },
+        {
+          "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoftMutableScores_Proof.tla",
+          "theorem": "MutableScoreBoundedTotalSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "capacity",
+      "assumption_set": "A-CS",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "CompetitiveSelection!SoftNormalization": {
+      "profile": "competitive-soft",
+      "predicate": {
+        "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoft.tla",
+        "operator": "Normalization"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoft_Proof.tla",
+          "theorem": "NormalizationSafety"
+        },
+        {
+          "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoftMutableScores_Proof.tla",
+          "theorem": "MutableScoreNormalizationSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "terminal-accounting",
+      "assumption_set": "A-CS",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "CompetitiveSelection!SoftUniversalContribution": {
+      "profile": "competitive-soft",
+      "predicate": {
+        "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoft.tla",
+        "operator": "UniversalContribution"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoft_Proof.tla",
+          "theorem": "UniversalContributionSafety"
+        },
+        {
+          "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoftMutableScores_Proof.tla",
+          "theorem": "MutableScoreUniversalContributionSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "allocation-policy",
+      "assumption_set": "A-CS",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "CompetitiveSelection!SoftScoreOrderPreservation": {
+      "profile": "competitive-soft",
+      "predicate": {
+        "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoft.tla",
+        "operator": "ScoreOrderPreservation"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoft_Proof.tla",
+          "theorem": "ScoreOrderPreservationSafety"
+        },
+        {
+          "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoftMutableScores_Proof.tla",
+          "theorem": "MutableScoreOrderPreservationSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "allocation-ordering",
+      "assumption_set": "A-CS",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "CompetitiveSelection!SoftTieBoundedness": {
+      "profile": "competitive-soft",
+      "predicate": {
+        "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoft.tla",
+        "operator": "TieBoundedness"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoft_Proof.tla",
+          "theorem": "TieBoundednessSafety"
+        },
+        {
+          "path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoftMutableScores_Proof.tla",
+          "theorem": "MutableScoreTieBoundednessSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "allocation-fairness",
+      "assumption_set": "A-CS",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "ActuationPass!EffectFidelity": {
+      "profile": "actuation-default",
+      "predicate": {
+        "path": "formal/structures/ActuationPass/ActuationPass.tla",
+        "operator": "EffectFidelity"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/ActuationPass/ActuationPass_Proof.tla",
+          "theorem": "EffectFidelitySafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "effect-record",
+      "assumption_set": "A-ACT",
+      "qualifiers": [
+        "recorded-effect-only"
+      ],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "ActuationPass!PassCompleteness": {
+      "profile": "actuation-default",
+      "predicate": {
+        "path": "formal/structures/ActuationPass/ActuationPass.tla",
+        "operator": "PassCompleteness"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/ActuationPass/ActuationPass_Proof.tla",
+          "theorem": "PassCompletenessSafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "lifecycle-closure",
+      "assumption_set": "A-ACT",
+      "qualifiers": [
+        "recorded-effect-only"
+      ],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "ActuationPass!ActuationScope": {
+      "profile": "actuation-default",
+      "predicate": {
+        "path": "formal/structures/ActuationPass/ActuationPass.tla",
+        "operator": "ActuationScope"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/ActuationPass/ActuationPass_Proof.tla",
+          "theorem": "ActuationScopeSafety"
+        }
+      ],
+      "status": "derived",
+      "temporal_form": "state-safety",
+      "concern": "scope",
+      "assumption_set": "A-ACT",
+      "qualifiers": [
+        "recorded-effect-only"
+      ],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [
+        "ActuationPass!EffectFidelity"
+      ],
+      "derivation_proof_roots": [
+        {
+          "path": "formal/structures/ActuationPass/ActuationPass_Proof.tla",
+          "theorem": "ScopeFromFidelity"
+        }
+      ]
+    },
+    "PropagationPass!IterationBound": {
+      "profile": "propagation-bounded",
+      "predicate": {
+        "path": "formal/structures/PropagationPass/PropagationPassGraph.tla",
+        "operator": "IterationBound"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/PropagationPass/PropagationPassGraph_Proof.tla",
+          "theorem": "IterationBoundSafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "bounded-work",
+      "assumption_set": "A-PROP",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "PropagationPass!SnapshotLocality": {
+      "profile": "propagation-bounded",
+      "predicate": {
+        "path": "formal/structures/PropagationPass/PropagationPassGraph.tla",
+        "operator": "SnapshotLocality"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/PropagationPass/PropagationPassGraph_Proof.tla",
+          "theorem": "SnapshotLocalitySafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "locality",
+      "assumption_set": "A-PROP",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "PropagationPass!EventualSettledOrIterationLimit": {
+      "profile": "propagation-fair",
+      "predicate": {
+        "path": "formal/structures/PropagationPass/PropagationPassGraph.tla",
+        "operator": "EventualSettledOrIterationLimit"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/PropagationPass/PropagationPassGraph_Proof.tla",
+          "theorem": "EventualSettledOrIterationLimitProved"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "liveness",
+      "concern": "progress",
+      "assumption_set": "A-PROP",
+      "qualifiers": [
+        "fairness-dependent"
+      ],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "ConvergenceGovernor!NoCoolingFromCold": {
+      "profile": "convergence-phase",
+      "predicate": {
+        "path": "formal/structures/ConvergenceGovernor/ConvergenceGovernorPhaseAware.tla",
+        "operator": "NoCoolingFromCold"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/ConvergenceGovernor/ConvergenceGovernorPhaseAware_Proof.tla",
+          "theorem": "NoCoolingFromColdSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "phase-integrity",
+      "assumption_set": "A-CONV",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "ConvergenceGovernor!ConvergenceRequiresHistory": {
+      "profile": "convergence-phase",
+      "predicate": {
+        "path": "formal/structures/ConvergenceGovernor/ConvergenceGovernorPhaseAware.tla",
+        "operator": "ConvergenceRequiresHistory"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/ConvergenceGovernor/ConvergenceGovernorPhaseAware_Proof.tla",
+          "theorem": "ConvergenceRequiresHistorySafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "history-provenance",
+      "assumption_set": "A-CONV",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "ConvergenceGovernor!ValidTransitionsProp": {
+      "profile": "convergence-phase",
+      "predicate": {
+        "path": "formal/structures/ConvergenceGovernor/ConvergenceGovernorPhaseAware.tla",
+        "operator": "ValidTransitionsProp"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/ConvergenceGovernor/ConvergenceGovernorPhaseAware_Proof.tla",
+          "theorem": "ValidTransitionsSafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "action-safety",
+      "concern": "lifecycle",
+      "assumption_set": "A-CONV",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "AuditSink!ChainIntegrity": {
+      "profile": "audit-chain",
+      "predicate": {
+        "path": "formal/structures/AuditSink/AuditSink.tla",
+        "operator": "ChainIntegrity"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/AuditSink/AuditSink_Proof.tla",
+          "theorem": "SafetyOriginal"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "chain-integrity",
+      "assumption_set": "A-AUDIT",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "AuditSink!HashConsistency": {
+      "profile": "audit-chain",
+      "predicate": {
+        "path": "formal/structures/AuditSink/AuditSink.tla",
+        "operator": "HashConsistency"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/AuditSink/AuditSink_Proof.tla",
+          "theorem": "SafetyOriginal"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "projection-integrity",
+      "assumption_set": "A-AUDIT",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "AuditSink!HashBindsContent": {
+      "profile": "audit-chain",
+      "predicate": {
+        "path": "formal/structures/AuditSink/AuditSink.tla",
+        "operator": "HashBindsContent"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/AuditSink/AuditSink_Proof.tla",
+          "theorem": "SafetyOriginal"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "content-relation",
+      "assumption_set": "A-AUDIT",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "AuditSink!TamperEvidentInv": {
+      "profile": "audit-chain",
+      "predicate": {
+        "path": "formal/structures/AuditSink/AuditSink_Proof.tla",
+        "operator": "TamperEvidentInv"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/AuditSink/AuditSink_Proof.tla",
+          "theorem": "TamperEvident"
+        }
+      ],
+      "status": "derived-conditional",
+      "temporal_form": "state-safety",
+      "concern": "preimage-uniqueness",
+      "assumption_set": "A-AUDIT",
+      "qualifiers": [
+        "conditional-proof"
+      ],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [
+        "AuditSink!ChainIntegrity",
+        "AuditSink!HashConsistency",
+        "AuditSink!HashBindsContent"
+      ],
+      "derivation_proof_roots": [
+        {
+          "path": "formal/structures/AuditSink/AuditSink_Proof.tla",
+          "theorem": "TamperEvident"
+        }
+      ]
+    },
+    "BacktrackingTraversal!Pairing": {
+      "profile": "backtracking-undo",
+      "predicate": {
+        "path": "formal/structures/BacktrackingTraversal/BacktrackingTraversalUndo.tla",
+        "operator": "Pairing"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/BacktrackingTraversal/BacktrackingTraversalUndo_Proof.tla",
+          "theorem": "PairingSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "reversible-state",
+      "assumption_set": "A-BACK",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "BacktrackingTraversal!StateRestoration": {
+      "profile": "backtracking-undo",
+      "predicate": {
+        "path": "formal/structures/BacktrackingTraversal/BacktrackingTraversalUndo.tla",
+        "operator": "StateRestoration"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/BacktrackingTraversal/BacktrackingTraversalUndo_Proof.tla",
+          "theorem": "StateRestorationSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "restoration",
+      "assumption_set": "A-BACK",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "BacktrackingTraversal!RecordedLeafValidity": {
+      "profile": "backtracking-undo",
+      "predicate": {
+        "path": "formal/structures/BacktrackingTraversal/BacktrackingTraversalUndo.tla",
+        "operator": "RecordedLeafValidity"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/BacktrackingTraversal/BacktrackingTraversalUndo_Proof.tla",
+          "theorem": "RecordedLeafValiditySafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "recorded-visit-validity",
+      "assumption_set": "A-BACK",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [
+        "Completeness"
+      ],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "AllocationSnapshot!BudgetConsistency": {
+      "profile": "allocation-default",
+      "predicate": {
+        "path": "formal/structures/AllocationSnapshot/AllocationSnapshot.tla",
+        "operator": "BudgetConsistency"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/AllocationSnapshot/AllocationSnapshot_Proof.tla",
+          "theorem": "BudgetConsistencySafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "joined-capacity",
+      "assumption_set": "A-ALLOC",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "FederatedBudget!MasterCapacityBound": {
+      "profile": "federated-default",
+      "predicate": {
+        "path": "formal/structures/FederatedBudget/FederatedBudget.tla",
+        "operator": "MasterCapacityBound"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/FederatedBudget/FederatedBudget_Proof.tla",
+          "theorem": "MasterCapacityBoundSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "capacity",
+      "assumption_set": "A-FED",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "FederatedBudget!SubPoolCapacityBound": {
+      "profile": "federated-default",
+      "predicate": {
+        "path": "formal/structures/FederatedBudget/FederatedBudget.tla",
+        "operator": "SubPoolCapacityBound"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/FederatedBudget/FederatedBudget_Proof.tla",
+          "theorem": "SubPoolCapacityBoundSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "partition-capacity",
+      "assumption_set": "A-FED",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "FederatedBudget!CapacityConservation": {
+      "profile": "federated-default",
+      "predicate": {
+        "path": "formal/structures/FederatedBudget/FederatedBudget.tla",
+        "operator": "CapacityConservation"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/FederatedBudget/FederatedBudget_Proof.tla",
+          "theorem": "CapacityConservationSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "conservation",
+      "assumption_set": "A-FED",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "Bisection!Halving": {
+      "profile": "bisection-interval",
+      "predicate": {
+        "path": "formal/structures/Bisection/Bisection.tla",
+        "operator": "Halving"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/Bisection/Bisection_Proof.tla",
+          "theorem": "HalvingProperty"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "action-safety",
+      "concern": "contraction",
+      "assumption_set": "A-BISECT",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "Bisection!MonotonicityPreservation": {
+      "profile": "bisection-interval",
+      "predicate": {
+        "path": "formal/structures/Bisection/Bisection.tla",
+        "operator": "MonotonicityPreservation"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/Bisection/Bisection_Proof.tla",
+          "theorem": "MonotonicityPreservationSafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "interval-correctness",
+      "assumption_set": "A-BISECT",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "Bisection!ProbeBound": {
+      "profile": "bisection-probes",
+      "predicate": {
+        "path": "formal/structures/Bisection/Bisection.tla",
+        "operator": "ProbeBound"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/Bisection/Bisection_Proof.tla",
+          "theorem": "ProbeBoundSafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "bounded-work",
+      "assumption_set": "A-BISECT",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "Bisection!EventualConvergence": {
+      "profile": "bisection-fair",
+      "predicate": {
+        "path": "formal/structures/Bisection/Bisection.tla",
+        "operator": "EventualConvergence"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/Bisection/Bisection_Proof.tla",
+          "theorem": "EventualConvergenceProved"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "liveness",
+      "concern": "convergence",
+      "assumption_set": "A-BISECT",
+      "qualifiers": [
+        "fairness-dependent"
+      ],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "EquivalenceClass!RepresentativeIdempotence": {
+      "profile": "equivalence-bounded",
+      "predicate": {
+        "path": "formal/structures/EquivalenceClass/EquivalenceClass.tla",
+        "operator": "RepresentativeIdempotence"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/EquivalenceClass/EquivalenceClass_Proof.tla",
+          "theorem": "RepresentativeIdempotenceSafety"
+        }
+      ],
+      "status": "derived",
+      "temporal_form": "state-safety",
+      "concern": "representative-identity",
+      "assumption_set": "A-EQUIV",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [
+        "EquivalenceClass!RepresentativeRootedness"
+      ],
+      "derivation_proof_roots": [
+        {
+          "path": "formal/structures/EquivalenceClass/EquivalenceClass_Proof.tla",
+          "theorem": "RepresentativeIdempotenceSafety"
+        }
+      ]
+    },
+    "EquivalenceClass!RankMonotonicity": {
+      "profile": "equivalence-bounded",
+      "predicate": {
+        "path": "formal/structures/EquivalenceClass/EquivalenceClass.tla",
+        "operator": "RankMonotonicity"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/EquivalenceClass/EquivalenceClass_Proof.tla",
+          "theorem": "RankMonotonicitySafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "rank-integrity",
+      "assumption_set": "A-EQUIV",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "EquivalenceClass!RepresentativeRootedness": {
+      "profile": "equivalence-bounded",
+      "predicate": {
+        "path": "formal/structures/EquivalenceClass/EquivalenceClass.tla",
+        "operator": "RepresentativeRootedness"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/EquivalenceClass/EquivalenceClass_Proof.tla",
+          "theorem": "RepresentativeRootednessSafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "representative-integrity",
+      "assumption_set": "A-EQUIV",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "RateLimit!WindowCountBound": {
+      "profile": "rate-logical-clock",
+      "predicate": {
+        "path": "formal/structures/RateLimit/RateLimit.tla",
+        "operator": "WindowCountBound"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/RateLimit/RateLimit_Proof.tla",
+          "theorem": "WindowCountBoundSafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "rate-accounting",
+      "assumption_set": "A-RATE",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "RateLimit!WindowStartNotFuture": {
+      "profile": "rate-logical-clock",
+      "predicate": {
+        "path": "formal/structures/RateLimit/RateLimit.tla",
+        "operator": "WindowStartNotFuture"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/RateLimit/RateLimit_Proof.tla",
+          "theorem": "WindowStartNotFutureSafety"
+        }
+      ],
+      "status": "support",
+      "temporal_form": "state-safety",
+      "concern": "clock-consistency",
+      "assumption_set": "A-RATE",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "Reduction!ConsumedPrefixFold": {
+      "profile": "reduction-additive",
+      "predicate": {
+        "path": "formal/structures/Reduction/ReductionStream.tla",
+        "operator": "ConsumedPrefixFold"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/Reduction/ReductionStream_Proof.tla",
+          "theorem": "ConsumedPrefixFoldSafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "exact-reduction",
+      "assumption_set": "A-REDUCE",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "RelationshipGraph!AdjacencyConsistency": {
+      "profile": "graph-directed",
+      "predicate": {
+        "path": "formal/structures/RelationshipGraph/RelationshipGraph.tla",
+        "operator": "AdjacencyConsistency"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/RelationshipGraph/RelationshipGraph_Proof.tla",
+          "theorem": "AdjacencyConsistencySafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "projection-integrity",
+      "assumption_set": "A-GRAPH",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "RelationshipGraph!NoSelfLoops": {
+      "profile": "graph-irreflexive",
+      "predicate": {
+        "path": "formal/structures/RelationshipGraph/RelationshipGraph.tla",
+        "operator": "NoSelfLoops"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/RelationshipGraph/RelationshipGraph_Proof.tla",
+          "theorem": "NoSelfLoopsSafety"
+        }
+      ],
+      "status": "selected-policy",
+      "temporal_form": "state-safety",
+      "concern": "graph-policy",
+      "assumption_set": "A-GRAPH",
+      "qualifiers": [
+        "selected-policy"
+      ],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "Sampler!BoundedSample": {
+      "profile": "sampler-without-replacement",
+      "predicate": {
+        "path": "formal/structures/Sampler/Sampler.tla",
+        "operator": "BoundedSample"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/Sampler/Sampler_Proof.tla",
+          "theorem": "BoundedSampleSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "bounded-selection",
+      "assumption_set": "A-SAMPLE",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "Sampler!SupportConsistency": {
+      "profile": "sampler-without-replacement",
+      "predicate": {
+        "path": "formal/structures/Sampler/Sampler.tla",
+        "operator": "SupportConsistency"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/Sampler/Sampler_Proof.tla",
+          "theorem": "SupportConsistencySafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "support-validity",
+      "assumption_set": "A-SAMPLE",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "Signal!PendingNotifiedDisjointness": {
+      "profile": "signal-change",
+      "predicate": {
+        "path": "formal/structures/Signal/Signal.tla",
+        "operator": "PendingNotifiedDisjointness"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/Signal/Signal_Proof.tla",
+          "theorem": "PendingNotifiedDisjointnessSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "bookkeeping",
+      "assumption_set": "A-SIGNAL",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "Signal!NotificationProvenance": {
+      "profile": "signal-change",
+      "predicate": {
+        "path": "formal/structures/Signal/Signal.tla",
+        "operator": "NotificationProvenance"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/Signal/Signal_Proof.tla",
+          "theorem": "NotificationProvenanceSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "provenance",
+      "assumption_set": "A-SIGNAL",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "TraversalEngine!AcceptedCostAccounting": {
+      "profile": "traversal-fixed-cost",
+      "predicate": {
+        "path": "formal/structures/TraversalEngine/TraversalEngine.tla",
+        "operator": "AcceptedCostAccounting"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/TraversalEngine/TraversalEngine_Proof.tla",
+          "theorem": "AcceptedCostAccountingSafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "typing",
+      "assumption_set": "A-TRAV",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [
+        "BudgetInvariant"
+      ],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "TraversalEngine!AcceptedSubsetVisited": {
+      "profile": "traversal-fixed-cost",
+      "predicate": {
+        "path": "formal/structures/TraversalEngine/TraversalEngine.tla",
+        "operator": "AcceptedSubsetVisited"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/structures/TraversalEngine/TraversalEngine_Proof.tla",
+          "theorem": "AcceptedSubsetVisitedSafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "admission-provenance",
+      "assumption_set": "A-TRAV",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "Sequential!TypeInvariant": {
+      "profile": "sequential-fixed",
+      "predicate": {
+        "path": "formal/execution/carriers/Sequential.tla",
+        "operator": "TypeInvariant"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/execution/carriers/Sequential_Proof.tla",
+          "theorem": "TypeSafety"
+        }
+      ],
+      "status": "support",
+      "temporal_form": "state-safety",
+      "concern": "representation",
+      "assumption_set": "A-SEQ",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "Sequential!HistoryPositionAgreement": {
+      "profile": "sequential-fixed",
+      "predicate": {
+        "path": "formal/execution/carriers/Sequential.tla",
+        "operator": "HistoryPositionAgreement"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/execution/carriers/Sequential_Proof.tla",
+          "theorem": "HistoryPositionAgreementSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "history-cursor-agreement",
+      "assumption_set": "A-SEQ",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [
+        "TotalOrder"
+      ],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "ForkJoin!TypeInvariant": {
+      "profile": "forkjoin-bounded",
+      "predicate": {
+        "path": "formal/execution/carriers/ForkJoin.tla",
+        "operator": "TypeInvariant"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/execution/carriers/ForkJoin_Proof.tla",
+          "theorem": "TypeSafety"
+        }
+      ],
+      "status": "support",
+      "temporal_form": "state-safety",
+      "concern": "representation",
+      "assumption_set": "A-FJ",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "ForkJoin!BarrierCompleteness": {
+      "profile": "forkjoin-bounded",
+      "predicate": {
+        "path": "formal/execution/carriers/ForkJoin.tla",
+        "operator": "BarrierCompleteness"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/execution/carriers/ForkJoin_Proof.tla",
+          "theorem": "BarrierCompletenessSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "barrier",
+      "assumption_set": "A-FJ",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "ForkJoin!OutputConsistency": {
+      "profile": "forkjoin-bounded",
+      "predicate": {
+        "path": "formal/execution/carriers/ForkJoin.tla",
+        "operator": "OutputConsistency"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/execution/carriers/ForkJoin_Proof.tla",
+          "theorem": "OutputConsistencySafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "output-fidelity",
+      "assumption_set": "A-FJ",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "ForkJoin!PhaseOrdering": {
+      "profile": "forkjoin-bounded",
+      "predicate": {
+        "path": "formal/execution/carriers/ForkJoin.tla",
+        "operator": "PhaseOrdering"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/execution/carriers/ForkJoin_Proof.tla",
+          "theorem": "PhaseOrderingSafety"
+        }
+      ],
+      "status": "contributing",
+      "temporal_form": "state-safety",
+      "concern": "lifecycle",
+      "assumption_set": "A-FJ",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "StepGraph!TypeInvariant": {
+      "profile": "step-fixed",
+      "predicate": {
+        "path": "formal/execution/carriers/StepGraph.tla",
+        "operator": "TypeInvariant"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/execution/carriers/StepGraph_Proof.tla",
+          "theorem": "TypeSafety"
+        }
+      ],
+      "status": "support",
+      "temporal_form": "state-safety",
+      "concern": "representation",
+      "assumption_set": "A-STEP",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "StepGraph!EligibilityClosed": {
+      "profile": "step-fixed",
+      "predicate": {
+        "path": "formal/execution/carriers/StepGraph.tla",
+        "operator": "EligibilityClosed"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/execution/carriers/StepGraph_Proof.tla",
+          "theorem": "EligibilityClosedSafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "dependency-eligibility",
+      "assumption_set": "A-STEP",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "StepGraph!NoRunBeforePredecessors": {
+      "profile": "step-fixed",
+      "predicate": {
+        "path": "formal/execution/carriers/StepGraph.tla",
+        "operator": "NoRunBeforePredecessors"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/execution/carriers/StepGraph_Proof.tla",
+          "theorem": "NoRunBeforePredecessorsSafety"
+        }
+      ],
+      "status": "derived",
+      "temporal_form": "state-safety",
+      "concern": "dependency-eligibility",
+      "assumption_set": "A-STEP",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [
+        "StepGraph!EligibilityClosed"
+      ],
+      "derivation_proof_roots": [
+        {
+          "path": "formal/execution/carriers/StepGraph_Proof.tla",
+          "theorem": "NoRunBeforePredecessorsSafety"
+        }
+      ]
+    },
+    "StepGraph!ProgressMonotonic": {
+      "profile": "step-fixed",
+      "predicate": {
+        "path": "formal/execution/carriers/StepGraph.tla",
+        "operator": "ProgressMonotonic"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/execution/carriers/StepGraph_Proof.tla",
+          "theorem": "ProgressMonotonicSafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "action-safety",
+      "concern": "state-progression",
+      "assumption_set": "A-STEP",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "StreamGraph!TypeInvariant": {
+      "profile": "stream-linear",
+      "predicate": {
+        "path": "formal/execution/carriers/StreamGraph.tla",
+        "operator": "TypeInvariant"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/execution/carriers/StreamGraph_Proof.tla",
+          "theorem": "TypeSafety"
+        }
+      ],
+      "status": "support",
+      "temporal_form": "state-safety",
+      "concern": "representation",
+      "assumption_set": "A-STREAM",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "StreamGraph!BackpressureCorrect": {
+      "profile": "stream-linear",
+      "predicate": {
+        "path": "formal/execution/carriers/StreamGraph.tla",
+        "operator": "BackpressureCorrect"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/execution/carriers/StreamGraph_Proof.tla",
+          "theorem": "BackpressureSafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "capacity",
+      "assumption_set": "A-STREAM",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "StreamGraph!OccupancyCountConservation": {
+      "profile": "stream-linear",
+      "predicate": {
+        "path": "formal/execution/carriers/StreamGraph.tla",
+        "operator": "OccupancyCountConservation"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/execution/carriers/StreamGraph_Proof.tla",
+          "theorem": "OccupancyCountConservationSafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "count-conservation",
+      "assumption_set": "A-STREAM",
+      "qualifiers": [],
+      "outcomes": [],
+      "compatibility_names": [
+        "NoRecordLoss"
+      ],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    },
+    "StreamGraph!SomeActionEnabled": {
+      "profile": "stream-linear",
+      "predicate": {
+        "path": "formal/execution/carriers/StreamGraph.tla",
+        "operator": "SomeActionEnabled"
+      },
+      "proof_roots": [
+        {
+          "path": "formal/execution/carriers/StreamGraph_Proof.tla",
+          "theorem": "SomeActionEnabledSafety"
+        }
+      ],
+      "status": "primary",
+      "temporal_form": "state-safety",
+      "concern": "enabledness",
+      "assumption_set": "A-STREAM",
+      "qualifiers": [
+        "state-level-only"
+      ],
+      "outcomes": [],
+      "compatibility_names": [
+        "DeadlockFreedom"
+      ],
+      "derived_from": [],
+      "derivation_proof_roots": []
+    }
+  }
+}

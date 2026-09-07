@@ -1,0 +1,16 @@
+name = "VdA_TransientTrigger"
+tier = 3
+modality = "StreamGraph"
+evidence = "trace_equivalence"
+workload = "scientific_workflow"
+
+[policies]
+invocation = "UI_Or_Data_Event"
+topology = "Declared_Observable_Chain"
+dependencies = "Fixed"
+lifecycle = "Subscription"
+
+citations = [
+    "Russell, van der Aalst & ter Hofstede (2016) Workflow Patterns: The Definitive Guide",
+    "workflowpatterns.com control-flow patterns catalog",
+]

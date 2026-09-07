@@ -1,0 +1,17 @@
+INVALIDATED TRACE-COMPARISON SOURCES
+
+The 70 scenario-specific Rust files in this directory are retained as
+failed-method records. Their former test aggregator has been removed.
+
+The checks encode both an expected trace and a local reproduction of
+that trace. This can test the local encoding but cannot, by itself,
+establish equivalence to a cited framework or published operational
+semantics. Representative cases also described a StreamGraph
+reproduction without invoking the StreamGraph driver. Accordingly:
+
+- these files are not registered Cargo tests;
+- they provide no framework, catalog, or trace-equivalence evidence;
+- a missing run or passing local comparison cannot count as a pass.
+
+The shared pattern_kernel.rs and util.rs files are retained only to
+make the failed mechanism inspectable.

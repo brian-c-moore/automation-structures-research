@@ -1,0 +1,144 @@
+{
+  "module": "RateLimit",
+  "structure": "RateLimit",
+  "kind": "named-composition",
+  "property_classes": ["safety"],
+  "state_fields": ["count", "window_start", "clock"],
+  "observation_fields": ["count", "window_start", "clock"],
+  "implementation_state_fields": ["count", "window_start", "clock"],
+  "implementation_state_map": {"count": "count", "window_start": "window_start", "clock": "clock"},
+  "observation_map": {"count": "count", "window_start": "window_start", "clock": "clock"},
+  "canonical_actions": ["TryAcquire", "Tick"],
+  "system_actions": ["TryAcquire"],
+  "environment_actions": ["Tick"],
+  "failure_actions": [],
+  "commit_actions": ["TryAcquire"],
+  "executable_actions": ["try_acquire", "tick"],
+  "action_map": {"TryAcquire": ["try_acquire"], "Tick": ["tick"]},
+  "obligations": ["WindowCountBound", "WindowStartNotFuture"],
+  "violations": ["WindowLimitExceeded", "FutureWindowStart"],
+  "violation_of": {"WindowCountBound": "WindowLimitExceeded", "WindowStartNotFuture": "FutureWindowStart"},
+  "actors": ["rate-claimant", "rate-authority", "clock-provider"],
+  "claimant": "rate-claimant",
+  "owner_of": {"TryAcquire": "rate-authority", "Tick": "clock-provider"},
+  "delegate_of": {"TryAcquire": ["rate-authority"], "Tick": ["clock-provider"]},
+  "assurance_at": {"TryAcquire": "at-commit"},
+  "relies": ["monotone-bounded-clock-delivery", "serialized-rate-state-mutation", "atomic-window-guard-and-count-update"],
+  "guarantees": [
+    {
+      "id": "ratelimit-written-profile-refinement",
+      "statement": "Mechanized refinement maps the written executable contract profile to the canonical RateLimit machine under the named state, action, and premise map.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "refinement",
+      "local_theorem": "RateLimitImplRefinesSpec_Proof!RefinementThm"
+    },
+    {
+      "id": "window-count-bound",
+      "statement": "Every modeled acquire and clock tick preserves count <= MaxPerWindow and window_start <= clock.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "obligation",
+      "local_theorem": "RateLimit_Proof!Safety"
+    },
+    {
+      "id": "atomic-acquire-license",
+      "statement": "An acquire is licensed only by the atomic current-window count guard; a saturated-window attempt stutters.",
+      "property_class": "safety",
+      "kind": "prevention",
+      "family": "check-act",
+      "local_theorem": "TheoryKernel_Proof!CheckActStability"
+    },
+    {
+      "id": "clock-owner-ceiling",
+      "statement": "The bound is conditional on the rate authority owning acquires and the clock provider satisfying the named environment rely.",
+      "property_class": "safety",
+      "kind": "conditional",
+      "family": "ownership-assurance",
+      "local_theorem": "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
+    }
+  ],
+  "runtime_providers": ["rate-authority", "clock-provider", "exclusive-mutation-provider"],
+  "failure_ceilings": ["clock-regression-outside-rely", "no-modeled-crash-or-durable-window", "concurrent-bypass-acquire-outside-boundary"],
+  "execution_carriers": ["Sequential"],
+  "local_theorems": [
+    "RateLimitImplRefinesSpec_Proof!RefinementThm", "RateLimit_Proof!Safety", "RateLimit_Proof!WindowCountBoundSafety", "RateLimit_Proof!WindowStartNotFutureSafety", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"],
+  "executable_pointers": [
+    "formal/structures/RateLimit/refinement/RateLimitImplRefinesSpec.tla",
+    "formal/structures/RateLimit/refinement/RateLimitImplRefinesSpec_Proof.tla","crate://automation-structures/0.2.3/src/compositions/rate_limit.rs", "formal/structures/RateLimit/RateLimit.tla", "formal/structures/RateLimit/RateLimit_Proof.tla"],
+  "library_premises": [
+    "RateLimit-written-contract-refinement-profile","canonical-window-machine", "RateLimit-Safety", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification"],
+  "deployment_premises": ["MaxPerWindowType", "WindowDurationType", "MaxClockType", "monotone-bounded-clock-delivery", "serialized-rate-state-mutation", "atomic-window-guard-and-count-update"],
+  "residuals": [
+    "formal-correspondence-is-limited-to-the-written-state-action-and-premise-map", "no-wall-clock-accuracy-result", "no-distributed-rate-limit-protocol", "no-throughput-or-fairness-guarantee"],
+  "evidence_ceilings": [
+    "implementation-refinement-covers-only-the-written-bounded-contract-profile","TLAPS-proves-the-bounded-logical-clock-machine", "Verus-proves-the-written-u64-state-contract", "KAT-clock-boundaries-do-not-prove-real-clock-delivery"],
+  "cases": {
+    "valid": [{"id": "acquire-below-limit", "description": "An acquire below the current-window limit increments count exactly once."}],
+    "boundary": [{"id": "window-rollover", "description": "The first acquire after a complete window reanchors window_start and resets count to one."}],
+    "misuse": [{"id": "regressing-clock", "description": "A clock value behind the modeled clock violates the environment rely and receives no guarantee."}],
+    "failure": [{"id": "split-window-commit", "description": "A non-atomic rollover/count update lies outside the model and can exceed the bound."}]
+  },
+  "applicable_families": ["obligation", "check-act", "ownership-assurance", "refinement"],
+  "discharged_families": ["obligation", "check-act", "ownership-assurance", "refinement"],
+  "transfer_classes": ["safety"],
+  "refinement_status": "mechanized",
+  "conformance_details": {
+    "initialization": "RateLimit::new maps count, window_start, and clock to zero with positive max_per_window and nonnegative window_duration and max_clock.",
+    "step-simulation": "try_acquire maps to TryAcquire and tick maps to Tick with rejected saturation represented as stutter.",
+    "observation-agreement": "count, window_start, and clock map identically at the serialized boundary.",
+    "commit-agreement": "The count/window update is one rate-authority commit; Tick remains an environment-owned clock transition.",
+    "failure-persistence-agreement": "No crash, torn state, retry, or recovery action is modeled; an implementation exposing one must add its mapping.",
+    "rely-discharge": "Deployment supplies monotone clock delivery, exclusive mutation, and complete acquire/clock writer inventory.",
+    "liveness-preservation": "No eventual acquire, fairness, or deadline guarantee is transferred.",
+    "tcb-closure": "Every path that can mutate count, window_start, or clock is a mapped method or declared clock transition."
+  },
+  "source_checks": [
+    {
+      "path": "formal/structures/RateLimit/refinement/RateLimitImplRefinesSpec_Proof.tla",
+      "contains": ["THEOREM", "Refinement"]
+    },
+    {"path": "formal/structures/RateLimit/RateLimit.tla", "contains": ["VARIABLES count, window_start, clock", "TryAcquire", "Tick", "WindowCountBound"]},
+    {"path": "formal/structures/RateLimit/RateLimit_Proof.tla", "contains": ["THEOREM Safety", "THEOREM WindowStartNotFutureSafety"]},
+    {"path": "crate://automation-structures/0.2.3/src/compositions/rate_limit.rs", "contains": ["pub struct RateLimit", "pub fn try_acquire", "pub fn tick", "pub open spec fn window_count_bound"]}
+  ],
+  "proof_binding": {"canonical_directory": "formal/structures/RateLimit", "proof_module": "RateLimit_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
+  "witness": {
+    "states": ["empty-window", "counted-window", "over-limit"],
+    "initial": ["empty-window"],
+    "obligation_states": ["empty-window", "counted-window"],
+    "violation_states": ["over-limit"],
+    "system_steps": [["empty-window", "counted-window"]],
+    "environment_steps": [["counted-window", "empty-window"]],
+    "action_steps": {"TryAcquire": [["empty-window", "counted-window"]], "Tick": [["counted-window", "empty-window"]]},
+    "rely_steps": [["counted-window", "empty-window"]],
+    "commit_steps": [["empty-window", "counted-window"]],
+    "failure_steps": [],
+    "interference_steps": [],
+    "check_mode": "atomic",
+    "check_result_states": ["empty-window", "counted-window"],
+    "predicate_states": ["empty-window", "counted-window"],
+    "actors": ["rate-claimant", "rate-authority", "clock-provider"],
+    "providers": ["rate-authority", "clock-provider"],
+    "claimant": "rate-claimant",
+    "commit_owner": "rate-authority",
+    "commit_delegate": "rate-authority",
+    "assurance_provider": "rate-authority",
+    "assurance_position": "at-commit",
+    "prevention_controllers": ["rate-authority"],
+    "unavailable_providers": [],
+    "persistent_observe": {"empty-window": true, "counted-window": true, "over-limit": false},
+    "persistent_evidence": true,
+    "recovery_available": false,
+    "active_states": ["empty-window", "counted-window"],
+    "closed_states": [],
+    "progress_steps": [],
+    "other_steps": [],
+    "handoff_steps": [],
+    "rank_bound": 0,
+    "rank": {"empty-window": 0, "counted-window": 0, "over-limit": 0},
+    "fairness_owners": ["rate-authority"],
+    "fairness_owner": "rate-authority",
+    "fairness_owner_of": {}
+  }
+}

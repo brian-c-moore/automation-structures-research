@@ -1,0 +1,5 @@
+Invalidated direct-comparison experiments
+
+These source files are preserved because they document attempted framework probes. They are not Rust test entrypoints and receive no evidence credit.
+
+The removed test aggregator treated a missing framework, dependency, network service, or parseable result as a successful Rust test after printing SKIP. That behavior could not distinguish an executed comparison from no comparison. A future experiment may reuse a probe only if absence and invocation failure produce a failing or explicitly external result state rather than a passing test.

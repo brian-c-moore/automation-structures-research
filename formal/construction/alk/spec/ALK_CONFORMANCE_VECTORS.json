@@ -1,0 +1,997 @@
+{
+  "claim": "Bounded abstract reference-spec behavior; not implementation conformance, deployment certification, or an executable bridge.",
+  "path_inventory": {
+    "administrative": "mediated",
+    "credential": "mediated",
+    "debug": "excluded",
+    "direct-database": "excluded",
+    "external-service": "external",
+    "recovery": "mediated",
+    "shared-memory": "excluded"
+  },
+  "profile_variants": {
+    "bounded-distributed/at-commit": {
+      "assurance_mode": "at-commit",
+      "commit_owner": "cluster-owner",
+      "profile": "bounded-distributed"
+    },
+    "delegated/at-commit": {
+      "assurance_mode": "at-commit",
+      "commit_owner": "external-owner",
+      "profile": "delegated"
+    },
+    "delegated/postcommit": {
+      "assurance_mode": "postcommit",
+      "commit_owner": "external-owner",
+      "profile": "delegated"
+    },
+    "delegated/precommit": {
+      "assurance_mode": "precommit",
+      "commit_owner": "external-owner",
+      "profile": "delegated"
+    },
+    "delegated/unavailable": {
+      "assurance_mode": "unavailable",
+      "commit_owner": "external-owner",
+      "profile": "delegated"
+    },
+    "local-reference/at-commit": {
+      "assurance_mode": "at-commit",
+      "commit_owner": "builder",
+      "profile": "local-reference"
+    },
+    "modular/at-commit": {
+      "assurance_mode": "at-commit",
+      "commit_owner": "builder",
+      "profile": "modular"
+    }
+  },
+  "reference_spec_version": "ALK-SPEC-1",
+  "schema": "alk-conformance-vectors/v1",
+  "vectors": [
+    {
+      "actions": [
+        "Admit",
+        "PrepareEffect",
+        "CommitAtomic"
+      ],
+      "classification": "positive",
+      "expected": {
+        "effect_count": 1,
+        "evidence": "durable",
+        "phase": "committed",
+        "response": "success"
+      },
+      "id": "positive.atomic-commit",
+      "profile_prefixes": {
+        "bounded-distributed/at-commit": [
+          "GovernedConfigurationUpdate"
+        ]
+      },
+      "profiles": [
+        "local-reference/at-commit",
+        "modular/at-commit",
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit",
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "A successful admitted operation couples one durable effect to durable evidence."
+    },
+    {
+      "actions": [
+        "RejectUnavailableAssurance"
+      ],
+      "classification": "negative",
+      "expected": {
+        "effect_count": 0,
+        "failure": "assurance-loss",
+        "phase": "rejected",
+        "presented_epoch": 1,
+        "response": "rejected"
+      },
+      "id": "negative.assurance-unavailable",
+      "profiles": [
+        "delegated/unavailable"
+      ],
+      "rationale": "Unavailable delegated assurance fails closed before admission."
+    },
+    {
+      "actions": [
+        "Admit",
+        "PrepareEffect",
+        "FailBeforeEffect",
+        "FailBeforeEffect"
+      ],
+      "classification": "negative",
+      "expected": {
+        "effect_count": 0,
+        "failure": "retry-exhaustion",
+        "phase": "rejected",
+        "response": "rejected"
+      },
+      "id": "negative.retry-exhaustion",
+      "profile_prefixes": {
+        "bounded-distributed/at-commit": [
+          "GovernedConfigurationUpdate"
+        ]
+      },
+      "profiles": [
+        "local-reference/at-commit",
+        "modular/at-commit",
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit",
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "Exhausted attempts reject without an effect."
+    },
+    {
+      "actions": [
+        "Admit",
+        "PrepareEffect",
+        "ApplyEffectBeforeEvidence",
+        "RecoverEvidence"
+      ],
+      "classification": "positive",
+      "expected": {
+        "effect_count": 1,
+        "evidence": "durable",
+        "phase": "committed",
+        "response": "success"
+      },
+      "id": "positive.partial-persistence-recovery",
+      "profile_prefixes": {
+        "bounded-distributed/at-commit": [
+          "GovernedConfigurationUpdate"
+        ]
+      },
+      "profiles": [
+        "local-reference/at-commit",
+        "modular/at-commit",
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit",
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "A durable effect with pending evidence enters governed recovery and never repeats the effect."
+    },
+    {
+      "actions": [
+        "Admit",
+        "PrepareEffect",
+        "CommitAtomic",
+        "DuplicateSameRequest"
+      ],
+      "classification": "positive",
+      "expected": {
+        "effect_count": 1,
+        "phase": "committed",
+        "presented_digest": "digest-a",
+        "presented_epoch": 1,
+        "presented_order": 1,
+        "request_digest": "digest-a",
+        "request_order": 1,
+        "response": "success"
+      },
+      "id": "positive.same-request-duplicate",
+      "profile_expected_overrides": {
+        "bounded-distributed/at-commit": {
+          "presented_epoch": 2
+        }
+      },
+      "profile_prefixes": {
+        "bounded-distributed/at-commit": [
+          "GovernedConfigurationUpdate"
+        ]
+      },
+      "profiles": [
+        "local-reference/at-commit",
+        "modular/at-commit",
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit",
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "The same operation identity and digest return the prior outcome idempotently."
+    },
+    {
+      "actions": [
+        "Admit",
+        "PrepareEffect",
+        "CommitAtomic",
+        "ConflictingDuplicate"
+      ],
+      "classification": "negative",
+      "expected": {
+        "effect_count": 1,
+        "failure": "none",
+        "phase": "committed",
+        "presented_digest": "digest-b",
+        "presented_epoch": 1,
+        "presented_order": 1,
+        "request_digest": "digest-a",
+        "request_order": 1,
+        "response": "conflict"
+      },
+      "id": "negative.conflicting-duplicate",
+      "profile_expected_overrides": {
+        "bounded-distributed/at-commit": {
+          "presented_epoch": 2
+        }
+      },
+      "profile_prefixes": {
+        "bounded-distributed/at-commit": [
+          "GovernedConfigurationUpdate"
+        ]
+      },
+      "profiles": [
+        "local-reference/at-commit",
+        "modular/at-commit",
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit",
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "A conflicting digest under the operation identity cannot create a second effect."
+    },
+    {
+      "actions": [
+        "Admit",
+        "PrepareEffect",
+        "CommitAtomic",
+        "LoseResponse",
+        "RetryLostResponse"
+      ],
+      "classification": "positive",
+      "expected": {
+        "effect_count": 1,
+        "evidence": "durable",
+        "phase": "committed",
+        "presented_epoch": 1,
+        "response": "success"
+      },
+      "id": "positive.lost-response-retry",
+      "profile_expected_overrides": {
+        "bounded-distributed/at-commit": {
+          "presented_epoch": 2
+        }
+      },
+      "profile_prefixes": {
+        "bounded-distributed/at-commit": [
+          "GovernedConfigurationUpdate"
+        ]
+      },
+      "profiles": [
+        "local-reference/at-commit",
+        "modular/at-commit",
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit",
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "Lost response recovery reads the committed result without repeating the effect."
+    },
+    {
+      "actions": [
+        "GovernedConfigurationUpdate",
+        "ReplayStaleRequest"
+      ],
+      "classification": "negative",
+      "expected": {
+        "effect_count": 0,
+        "epoch": 2,
+        "failure": "stale-epoch",
+        "phase": "idle",
+        "presented_epoch": 1,
+        "response": "stale"
+      },
+      "id": "negative.stale-replay",
+      "profiles": [
+        "local-reference/at-commit",
+        "modular/at-commit",
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit",
+        "delegated/unavailable",
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "A request from an old governed epoch is rejected before admission."
+    },
+    {
+      "actions": [
+        "GovernedConfigurationUpdate",
+        "ReadStaleState"
+      ],
+      "classification": "negative",
+      "expected": {
+        "effect_count": 0,
+        "failure": "stale-epoch",
+        "phase": "idle",
+        "response": "stale"
+      },
+      "id": "negative.stale-read",
+      "profiles": [
+        "local-reference/at-commit",
+        "modular/at-commit",
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit",
+        "delegated/unavailable",
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "A stale read cannot authorize or fabricate an operation outcome."
+    },
+    {
+      "actions": [
+        "Admit",
+        "PrepareEffect",
+        "RejectReorderedRequest"
+      ],
+      "classification": "negative",
+      "expected": {
+        "effect_count": 0,
+        "evidence": "none",
+        "failure": "reordered",
+        "phase": "prepared",
+        "presented_digest": "digest-a",
+        "presented_epoch": 1,
+        "presented_order": 0,
+        "request_digest": "digest-a",
+        "request_order": 1,
+        "response": "stale"
+      },
+      "id": "negative.reordered-request",
+      "profile_expected_overrides": {
+        "bounded-distributed/at-commit": {
+          "presented_epoch": 2
+        }
+      },
+      "profile_prefixes": {
+        "bounded-distributed/at-commit": [
+          "GovernedConfigurationUpdate"
+        ]
+      },
+      "profiles": [
+        "local-reference/at-commit",
+        "modular/at-commit",
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit",
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "An out-of-order request cannot create an effect or publish success."
+    },
+    {
+      "actions": [
+        "CrashBeforeCheck",
+        "Restart"
+      ],
+      "classification": "negative",
+      "crash_point": "before-check",
+      "expected": {
+        "effect_count": 0,
+        "failure": "before-check",
+        "operation_id": "none",
+        "phase": "idle",
+        "response": "none"
+      },
+      "id": "negative.crash-before-check",
+      "profiles": [
+        "local-reference/at-commit",
+        "modular/at-commit",
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit",
+        "delegated/unavailable",
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "A pre-check crash leaves no operation or effect to recover."
+    },
+    {
+      "actions": [
+        "Admit",
+        "PrepareEffect",
+        "CrashBetweenCheckAndCommit",
+        "Restart",
+        "FailBeforeEffect",
+        "FailBeforeEffect"
+      ],
+      "classification": "negative",
+      "crash_point": "between-check-and-commit",
+      "expected": {
+        "effect_count": 0,
+        "failure": "retry-exhaustion",
+        "phase": "rejected",
+        "response": "rejected"
+      },
+      "id": "negative.crash-between-check-and-commit",
+      "profile_prefixes": {
+        "bounded-distributed/at-commit": [
+          "GovernedConfigurationUpdate"
+        ]
+      },
+      "profiles": [
+        "local-reference/at-commit",
+        "modular/at-commit",
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit",
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "A crash after admission but before effect leaves no partial effect."
+    },
+    {
+      "actions": [
+        "Admit",
+        "PrepareEffect",
+        "ApplyEffectBeforeEvidence",
+        "CrashAfterEffect",
+        "Restart",
+        "RecoverEvidence"
+      ],
+      "classification": "positive",
+      "crash_point": "after-effect",
+      "expected": {
+        "effect_count": 1,
+        "evidence": "durable",
+        "phase": "committed",
+        "response": "success"
+      },
+      "id": "positive.crash-after-effect",
+      "profile_prefixes": {
+        "bounded-distributed/at-commit": [
+          "GovernedConfigurationUpdate"
+        ]
+      },
+      "profiles": [
+        "local-reference/at-commit",
+        "modular/at-commit",
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit",
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "Recovery intent survives a crash after the durable effect."
+    },
+    {
+      "actions": [
+        "Admit",
+        "PrepareEffect",
+        "ApplyEffectBeforeEvidence",
+        "CrashBeforeEvidencePublication",
+        "Restart",
+        "RecoverEvidence"
+      ],
+      "classification": "positive",
+      "crash_point": "before-evidence",
+      "expected": {
+        "effect_count": 1,
+        "evidence": "durable",
+        "phase": "committed",
+        "response": "success"
+      },
+      "id": "positive.crash-before-evidence",
+      "profile_prefixes": {
+        "bounded-distributed/at-commit": [
+          "GovernedConfigurationUpdate"
+        ]
+      },
+      "profiles": [
+        "local-reference/at-commit",
+        "modular/at-commit",
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit",
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "Evidence recovery resumes from durable recovery intent without replaying the effect."
+    },
+    {
+      "actions": [
+        "Admit",
+        "PrepareEffect",
+        "CommitAtomic",
+        "CrashAfterCommit",
+        "Restart",
+        "DuplicateSameRequest"
+      ],
+      "classification": "positive",
+      "crash_point": "after-commit",
+      "expected": {
+        "effect_count": 1,
+        "evidence": "durable",
+        "phase": "committed",
+        "response": "success"
+      },
+      "id": "positive.crash-after-commit",
+      "profile_prefixes": {
+        "bounded-distributed/at-commit": [
+          "GovernedConfigurationUpdate"
+        ]
+      },
+      "profiles": [
+        "local-reference/at-commit",
+        "modular/at-commit",
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit",
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "A committed durable outcome remains queryable after restart."
+    },
+    {
+      "actions": [
+        "Admit",
+        "PrepareEffect",
+        "Partition",
+        "RejectPartitionedCommit"
+      ],
+      "classification": "negative",
+      "expected": {
+        "effect_count": 0,
+        "failure": "partition",
+        "phase": "rejected",
+        "response": "rejected"
+      },
+      "id": "negative.partitioned-commit",
+      "profile_prefixes": {
+        "bounded-distributed/at-commit": [
+          "GovernedConfigurationUpdate"
+        ]
+      },
+      "profiles": [
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "The bounded distributed profile rejects a commit while partitioned."
+    },
+    {
+      "actions": [
+        "Admit",
+        "PrepareEffect",
+        "Partition",
+        "HealPartition",
+        "CommitAtomic"
+      ],
+      "classification": "positive",
+      "expected": {
+        "effect_count": 1,
+        "evidence": "durable",
+        "phase": "committed",
+        "response": "success"
+      },
+      "id": "positive.partition-heal-retry",
+      "profile_prefixes": {
+        "bounded-distributed/at-commit": [
+          "GovernedConfigurationUpdate"
+        ]
+      },
+      "profiles": [
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "After governed healing, the original current-epoch request may commit once."
+    },
+    {
+      "actions": [
+        "Admit",
+        "PrepareEffect",
+        "ExternalOwnerUnavailable"
+      ],
+      "classification": "negative",
+      "expected": {
+        "effect_count": 0,
+        "failure": "external-owner",
+        "phase": "rejected",
+        "response": "rejected"
+      },
+      "id": "negative.external-owner-unavailable",
+      "profiles": [
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit"
+      ],
+      "rationale": "Failure of the delegated commit owner cannot be credited as a successful ALK commit."
+    },
+    {
+      "actions": [
+        "Admit",
+        "PrepareEffect",
+        "CommitAtomic",
+        "LoseAuditAfterCommit",
+        "RecoverEvidence"
+      ],
+      "classification": "positive",
+      "expected": {
+        "effect_count": 1,
+        "evidence": "durable",
+        "phase": "committed",
+        "response": "success"
+      },
+      "id": "positive.audit-loss-recovery",
+      "profile_prefixes": {
+        "bounded-distributed/at-commit": [
+          "GovernedConfigurationUpdate"
+        ]
+      },
+      "profiles": [
+        "local-reference/at-commit",
+        "modular/at-commit",
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit",
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "Audit custody loss demotes success until governed evidence recovery completes."
+    },
+    {
+      "actions": [],
+      "attempted_path": "direct-database",
+      "classification": "negative",
+      "expected": {
+        "effect_count": 0,
+        "response": "not-expressible",
+        "transition": "absent"
+      },
+      "id": "negative.direct-database-bypass",
+      "profiles": [
+        "local-reference/at-commit",
+        "modular/at-commit",
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit",
+        "delegated/unavailable",
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "The frozen API has no direct database effect transition."
+    },
+    {
+      "actions": [],
+      "attempted_path": "debug",
+      "classification": "negative",
+      "expected": {
+        "effect_count": 0,
+        "response": "not-expressible",
+        "transition": "absent"
+      },
+      "id": "negative.debug-bypass",
+      "profiles": [
+        "local-reference/at-commit",
+        "modular/at-commit",
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit",
+        "delegated/unavailable",
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "The frozen API has no debug effect transition."
+    },
+    {
+      "actions": [],
+      "attempted_path": "shared-memory",
+      "classification": "negative",
+      "expected": {
+        "effect_count": 0,
+        "response": "not-expressible",
+        "transition": "absent"
+      },
+      "id": "negative.shared-memory-bypass",
+      "profiles": [
+        "local-reference/at-commit",
+        "modular/at-commit",
+        "delegated/at-commit",
+        "delegated/precommit",
+        "delegated/postcommit",
+        "delegated/unavailable",
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "The frozen API has no shared-memory effect transition."
+    },
+    {
+      "actions": [
+        "GovernedConfigurationUpdate",
+        "Admit",
+        "PrepareEffect",
+        "CommitAtomic"
+      ],
+      "classification": "positive",
+      "expected": {
+        "configuration_version": 2,
+        "configured_guarantees": [
+          "conditional",
+          "detection",
+          "prevention"
+        ],
+        "configured_owner": "builder-rotated",
+        "configured_tcb": [
+          "audit-store",
+          "claim-configuration-v2",
+          "configuration-store",
+          "effect-provider",
+          "identity-authority",
+          "kernel-code",
+          "recovery-store"
+        ],
+        "credential_epoch": 2,
+        "effect_count": 1,
+        "effect_owner": "builder-rotated",
+        "epoch": 2,
+        "guarantee_revision": 2,
+        "membership": [
+          "single-node"
+        ],
+        "owner_revision": 2,
+        "phase": "committed",
+        "response": "success",
+        "tcb_revision": 2
+      },
+      "id": "positive.governed-configuration-local-reference-at-commit",
+      "profiles": [
+        "local-reference/at-commit"
+      ],
+      "rationale": "The governed version rotates the concrete owner binding, narrows the advertised guarantee set within its declared ceiling, replaces the version-specific claim-TCB dependency, advances identity and membership, and then exercises the resulting configuration."
+    },
+    {
+      "actions": [
+        "GovernedConfigurationUpdate",
+        "Admit",
+        "PrepareEffect",
+        "CommitAtomic"
+      ],
+      "classification": "positive",
+      "expected": {
+        "configuration_version": 2,
+        "configured_guarantees": [
+          "conditional",
+          "detection",
+          "prevention"
+        ],
+        "configured_owner": "builder-rotated",
+        "configured_tcb": [
+          "audit-store",
+          "claim-configuration-v2",
+          "configuration-store",
+          "effect-provider",
+          "identity-authority",
+          "kernel-code",
+          "recovery-store"
+        ],
+        "credential_epoch": 2,
+        "effect_count": 1,
+        "effect_owner": "builder-rotated",
+        "epoch": 2,
+        "guarantee_revision": 2,
+        "membership": [
+          "single-node"
+        ],
+        "owner_revision": 2,
+        "phase": "committed",
+        "response": "success",
+        "tcb_revision": 2
+      },
+      "id": "positive.governed-configuration-modular-at-commit",
+      "profiles": [
+        "modular/at-commit"
+      ],
+      "rationale": "The governed version rotates the concrete owner binding, narrows the advertised guarantee set within its declared ceiling, replaces the version-specific claim-TCB dependency, advances identity and membership, and then exercises the resulting configuration."
+    },
+    {
+      "actions": [
+        "GovernedConfigurationUpdate",
+        "Admit",
+        "PrepareEffect",
+        "CommitAtomic"
+      ],
+      "classification": "positive",
+      "expected": {
+        "configuration_version": 2,
+        "configured_guarantees": [
+          "conditional",
+          "detection",
+          "prevention"
+        ],
+        "configured_owner": "external-owner-rotated",
+        "configured_tcb": [
+          "audit-store",
+          "claim-configuration-v2",
+          "configuration-store",
+          "effect-provider",
+          "external-owner-adapter",
+          "identity-authority",
+          "kernel-code",
+          "recovery-store"
+        ],
+        "credential_epoch": 2,
+        "effect_count": 1,
+        "effect_owner": "external-owner-rotated",
+        "epoch": 2,
+        "guarantee_revision": 2,
+        "membership": [
+          "single-node"
+        ],
+        "owner_revision": 2,
+        "phase": "committed",
+        "response": "success",
+        "tcb_revision": 2
+      },
+      "id": "positive.governed-configuration-delegated-at-commit",
+      "profiles": [
+        "delegated/at-commit"
+      ],
+      "rationale": "The governed version rotates the concrete owner binding, narrows the advertised guarantee set within its declared ceiling, replaces the version-specific claim-TCB dependency, advances identity and membership, and then exercises the resulting configuration."
+    },
+    {
+      "actions": [
+        "GovernedConfigurationUpdate",
+        "Admit",
+        "PrepareEffect",
+        "CommitAtomic"
+      ],
+      "classification": "positive",
+      "expected": {
+        "configuration_version": 2,
+        "configured_guarantees": [
+          "conditional"
+        ],
+        "configured_owner": "external-owner-rotated",
+        "configured_tcb": [
+          "audit-store",
+          "claim-configuration-v2",
+          "configuration-store",
+          "effect-provider",
+          "external-owner-adapter",
+          "identity-authority",
+          "kernel-code",
+          "recovery-store"
+        ],
+        "credential_epoch": 2,
+        "effect_count": 1,
+        "effect_owner": "external-owner-rotated",
+        "epoch": 2,
+        "guarantee_revision": 2,
+        "membership": [
+          "single-node"
+        ],
+        "owner_revision": 2,
+        "phase": "committed",
+        "response": "success",
+        "tcb_revision": 2
+      },
+      "id": "positive.governed-configuration-delegated-precommit",
+      "profiles": [
+        "delegated/precommit"
+      ],
+      "rationale": "The governed version rotates the concrete owner binding, narrows the advertised guarantee set within its declared ceiling, replaces the version-specific claim-TCB dependency, advances identity and membership, and then exercises the resulting configuration."
+    },
+    {
+      "actions": [
+        "GovernedConfigurationUpdate",
+        "Admit",
+        "PrepareEffect",
+        "CommitAtomic"
+      ],
+      "classification": "positive",
+      "expected": {
+        "configuration_version": 2,
+        "configured_guarantees": [
+          "conditional",
+          "detection"
+        ],
+        "configured_owner": "external-owner-rotated",
+        "configured_tcb": [
+          "audit-store",
+          "claim-configuration-v2",
+          "configuration-store",
+          "effect-provider",
+          "external-owner-adapter",
+          "identity-authority",
+          "kernel-code",
+          "recovery-store"
+        ],
+        "credential_epoch": 2,
+        "effect_count": 1,
+        "effect_owner": "external-owner-rotated",
+        "epoch": 2,
+        "guarantee_revision": 2,
+        "membership": [
+          "single-node"
+        ],
+        "owner_revision": 2,
+        "phase": "committed",
+        "response": "success",
+        "tcb_revision": 2
+      },
+      "id": "positive.governed-configuration-delegated-postcommit",
+      "profiles": [
+        "delegated/postcommit"
+      ],
+      "rationale": "The governed version rotates the concrete owner binding, narrows the advertised guarantee set within its declared ceiling, replaces the version-specific claim-TCB dependency, advances identity and membership, and then exercises the resulting configuration."
+    },
+    {
+      "actions": [
+        "GovernedConfigurationUpdate",
+        "RejectUnavailableAssurance"
+      ],
+      "classification": "negative",
+      "expected": {
+        "configuration_version": 2,
+        "configured_guarantees": [],
+        "configured_owner": "external-owner-rotated",
+        "configured_tcb": [
+          "audit-store",
+          "claim-configuration-v2",
+          "configuration-store",
+          "effect-provider",
+          "external-owner-adapter",
+          "identity-authority",
+          "kernel-code",
+          "recovery-store"
+        ],
+        "credential_epoch": 2,
+        "effect_count": 0,
+        "effect_owner": "none",
+        "epoch": 2,
+        "failure": "assurance-loss",
+        "guarantee_revision": 2,
+        "membership": [
+          "single-node"
+        ],
+        "owner_revision": 2,
+        "phase": "rejected",
+        "response": "rejected",
+        "tcb_revision": 2
+      },
+      "id": "negative.governed-configuration-delegated-unavailable",
+      "profiles": [
+        "delegated/unavailable"
+      ],
+      "rationale": "The governed version rotates the concrete owner binding, narrows the advertised guarantee set within its declared ceiling, replaces the version-specific claim-TCB dependency, advances identity and membership, and then exercises the resulting configuration."
+    },
+    {
+      "actions": [
+        "GovernedConfigurationUpdate",
+        "Admit",
+        "PrepareEffect",
+        "CommitAtomic"
+      ],
+      "classification": "positive",
+      "expected": {
+        "configuration_version": 2,
+        "configured_guarantees": [
+          "conditional",
+          "detection",
+          "prevention"
+        ],
+        "configured_owner": "cluster-owner-rotated",
+        "configured_tcb": [
+          "audit-store",
+          "claim-configuration-v2",
+          "configuration-store",
+          "effect-provider",
+          "identity-authority",
+          "kernel-code",
+          "membership-store",
+          "recovery-store",
+          "scheduler"
+        ],
+        "credential_epoch": 2,
+        "effect_count": 1,
+        "effect_owner": "cluster-owner-rotated",
+        "epoch": 2,
+        "guarantee_revision": 2,
+        "membership": [
+          "node-b",
+          "node-c"
+        ],
+        "owner_revision": 2,
+        "phase": "committed",
+        "response": "success",
+        "tcb_revision": 2
+      },
+      "id": "positive.governed-configuration-bounded-distributed-at-commit",
+      "profiles": [
+        "bounded-distributed/at-commit"
+      ],
+      "rationale": "The governed version rotates the concrete owner binding, narrows the advertised guarantee set within its declared ceiling, replaces the version-specific claim-TCB dependency, advances identity and membership, and then exercises the resulting configuration."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+name = "Oozie"
+tier = 2
+modality = "StepGraph"
+evidence = "direct_comparison"
+workload = "scientific_workflow"
+
+[policies]
+invocation = "Time_Or_DepCompletion"
+topology = "Declared_DAG"
+dependencies = "Fixed"
+lifecycle = "Rerun_From_Failure"
+
+citations = [
+    "Apache Oozie documentation",
+]

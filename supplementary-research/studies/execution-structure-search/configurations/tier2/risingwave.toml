@@ -1,0 +1,15 @@
+name = "RisingWave"
+tier = 2
+modality = "StreamGraph"
+evidence = "direct_comparison"
+workload = "streaming_sql"
+
+[policies]
+invocation = "Continuous_Differential"
+topology = "Declared_Incremental"
+dependencies = "Fixed"
+lifecycle = "Maintained_Views"
+
+citations = [
+    "RisingWave documentation",
+]

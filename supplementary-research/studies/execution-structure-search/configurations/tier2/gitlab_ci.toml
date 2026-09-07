@@ -1,0 +1,15 @@
+name = "GitLab_CI"
+tier = 2
+modality = "StepGraph"
+evidence = "direct_comparison"
+workload = "scientific_workflow"
+
+[policies]
+invocation = "VCS_Event"
+topology = "Declared_DAG"
+dependencies = "Fixed"
+lifecycle = "Rerun_Job"
+
+citations = [
+    "GitLab CI/CD documentation",
+]

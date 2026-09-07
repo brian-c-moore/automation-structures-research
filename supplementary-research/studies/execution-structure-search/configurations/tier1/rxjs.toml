@@ -1,0 +1,19 @@
+name = "RxJS"
+tier = 1
+modality = "StreamGraph"
+evidence = "direct_comparison"
+workload = "reactive_ui"
+
+[policies]
+invocation = "UI_Or_Data_Event"
+topology = "Declared_Observable_Chain"
+dependencies = "Fixed"
+lifecycle = "Subscription"
+
+[trace_properties]
+no_record_loss = true
+
+citations = [
+    "RxJS / ReactiveX documentation (rxjs.dev / reactivex.io)",
+    "Bainomugisha et al. (2013) — A Survey on Reactive Programming. ACM CSUR",
+]

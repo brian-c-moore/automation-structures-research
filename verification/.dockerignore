@@ -1,0 +1,5 @@
+results
+*.log
+*.exe
+*.rlib
+__pycache__

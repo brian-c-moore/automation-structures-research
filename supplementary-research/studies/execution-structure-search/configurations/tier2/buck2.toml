@@ -1,0 +1,15 @@
+name = "Buck2"
+tier = 2
+modality = "StepGraph"
+evidence = "direct_comparison"
+workload = "build_dag"
+
+[policies]
+invocation = "Demand_Pull"
+topology = "Declared_DAG_ContentHash"
+dependencies = "Fixed"
+lifecycle = "Incremental"
+
+citations = [
+    "Buck2 project documentation",
+]

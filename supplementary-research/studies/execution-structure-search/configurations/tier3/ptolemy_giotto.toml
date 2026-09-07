@@ -1,0 +1,15 @@
+name = "Ptolemy_Giotto"
+tier = 3
+modality = "StreamGraph"
+evidence = "direct_comparison"
+workload = "data_pipeline"
+
+[policies]
+invocation = "Time"
+topology = "Declared_Static"
+dependencies = "Fixed"
+lifecycle = "Per_Firing"
+
+citations = [
+    "Lee Ptolemy II Giotto domain",
+]

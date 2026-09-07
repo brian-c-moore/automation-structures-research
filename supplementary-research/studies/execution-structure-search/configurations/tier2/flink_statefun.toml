@@ -1,0 +1,15 @@
+name = "Flink_Statefun"
+tier = 2
+modality = "StreamGraph"
+evidence = "direct_comparison"
+workload = "actor_message_exchange"
+
+[policies]
+invocation = "Message"
+topology = "Dynamic_Addressable"
+dependencies = "Fixed"
+lifecycle = "Checkpoint_Restart"
+
+citations = [
+    "Apache Flink Stateful Functions documentation",
+]

@@ -1,0 +1,11 @@
+[package]
+name = "formal-example-domains"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+formal-example-structures = { path = "../formal-example-structures" }
+serde.workspace = true
+serde_json.workspace = true

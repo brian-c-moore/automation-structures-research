@@ -1,0 +1,15 @@
+name = "VdA_Sequence"
+tier = 3
+modality = "Sequential"
+evidence = "trace_equivalence"
+workload = "data_pipeline"
+
+[policies]
+invocation = "Programmatic"
+topology = "None"
+dependencies = "Fixed"
+lifecycle = "None"
+
+citations = [
+    "Russell van der Aalst ter Hofstede (2016) Workflow Patterns",
+]

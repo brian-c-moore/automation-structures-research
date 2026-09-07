@@ -1,0 +1,19 @@
+name = "Frostbite_FrameGraph"
+tier = 1
+modality = "StreamGraph"
+evidence = "documented_behavior"
+# note: EA Frostbite engine is proprietary; no public runtime to direct-compare against
+workload = "render_graph"
+
+[policies]
+invocation = "Vsync"
+topology = "Rebuilt_Per_Frame"
+dependencies = "Fixed"
+lifecycle = "Per_Frame"
+
+[trace_properties]
+per_frame_rebuild = true
+
+citations = [
+    "O'Donnell (2017) — FrameGraph: Extensible Rendering Architecture in Frostbite. GDC",
+]

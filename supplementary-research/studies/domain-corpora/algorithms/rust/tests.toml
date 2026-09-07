@@ -1,0 +1,782 @@
+[[algorithm]]
+name = "Climbing Stairs"
+category = "1-D DP"
+phase = 1
+ordering = "DAG"
+primitives = "Memoization = ResourceRegistry + TraversalEngine(topo) + Reduction"
+oracle = "climbing_stairs"
+equiv = "Exact"
+
+[[algorithm]]
+name = "House Robber"
+category = "1-D DP"
+phase = 1
+ordering = "DAG"
+primitives = "Memoization = ResourceRegistry + TraversalEngine(topo) + Reduction"
+oracle = "house_robber"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Longest Increasing Subsequence"
+category = "1-D DP"
+phase = 1
+ordering = "DAG"
+primitives = "Memoization = ResourceRegistry + TraversalEngine(topo) + Reduction"
+oracle = "lis"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Coin Change"
+category = "1-D DP"
+phase = 1
+ordering = "DAG"
+primitives = "Memoization = ResourceRegistry + TraversalEngine(topo) + Reduction"
+oracle = "coin_change"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Word Break"
+category = "1-D DP"
+phase = 1
+ordering = "DAG"
+primitives = "Memoization = ResourceRegistry + TraversalEngine(topo) + Reduction"
+oracle = "word_break"
+equiv = "BoolEq"
+
+[[algorithm]]
+name = "Unique Paths"
+category = "2-D DP"
+phase = 1
+ordering = "DAG"
+primitives = "Memoization = ResourceRegistry + TraversalEngine(topo) + Reduction"
+oracle = "unique_paths"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Longest Common Subsequence"
+category = "2-D DP"
+phase = 1
+ordering = "DAG"
+primitives = "Memoization = ResourceRegistry + TraversalEngine(topo) + Reduction"
+oracle = "lcs"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Edit Distance"
+category = "2-D DP"
+phase = 1
+ordering = "DAG"
+primitives = "Memoization = ResourceRegistry + TraversalEngine(topo) + Reduction"
+oracle = "edit_distance"
+equiv = "Exact"
+
+[[algorithm]]
+name = "0/1 Knapsack"
+category = "2-D DP"
+phase = 1
+ordering = "DAG"
+primitives = "Memoization = ResourceRegistry + TraversalEngine(topo) + Reduction"
+oracle = "knapsack_01"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Longest Palindromic Subsequence"
+category = "2-D DP"
+phase = 1
+ordering = "DAG"
+primitives = "Memoization = ResourceRegistry + TraversalEngine(topo) + Reduction"
+oracle = "lps"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Valid Parentheses"
+category = "Stack"
+phase = 2
+ordering = "Linear"
+primitives = "LIFO stack (substrate buffer)"
+oracle = "valid_parentheses"
+equiv = "BoolEq"
+
+[[algorithm]]
+name = "Min Stack"
+category = "Stack"
+phase = 2
+ordering = "Linear"
+primitives = "main + running-min stacks (substrate buffers) + Reduction(min)"
+oracle = "min_stack"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Evaluate Reverse Polish Notation"
+category = "Stack"
+phase = 2
+ordering = "Linear"
+primitives = "operand stack (substrate buffer) + Reduction"
+oracle = "eval_rpn"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Daily Temperatures"
+category = "Stack"
+phase = 2
+ordering = "Linear"
+primitives = "monotonic stack (substrate buffer) + ActuationPass(evict) + Reduction"
+oracle = "daily_temperatures"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Largest Rectangle in Histogram"
+category = "Stack"
+phase = 2
+ordering = "Linear"
+primitives = "monotonic stack (substrate buffer) + ActuationPass(evict) + Reduction"
+oracle = "largest_rect_histogram"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Binary Search"
+category = "Binary Search"
+phase = 2
+ordering = "Linear"
+primitives = "Bisection"
+oracle = "binary_search"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Search in Rotated Sorted Array"
+category = "Binary Search"
+phase = 2
+ordering = "Linear"
+primitives = "Bisection"
+oracle = "search_rotated"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Find Minimum in Rotated Sorted Array"
+category = "Binary Search"
+phase = 2
+ordering = "Linear"
+primitives = "Bisection"
+oracle = "find_min_rotated"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Koko Eating Bananas"
+category = "Binary Search"
+phase = 2
+ordering = "Linear"
+primitives = "Bisection + Reduction(feasibility sum)"
+oracle = "koko_bananas"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Median of Two Sorted Arrays"
+category = "Binary Search"
+phase = 2
+ordering = "Linear"
+primitives = "Bisection"
+oracle = "median_two_sorted"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Network Delay Time"
+category = "Advanced Graphs"
+phase = 3
+ordering = "DAG"
+primitives = "PriorityQueue(CompetitiveSelection-hard) + ResourceRegistry(dist/visited) + PropagationPass + Reduction(min)"
+oracle = "dijkstra"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Cheapest Flights Within K Stops"
+category = "Advanced Graphs"
+phase = 3
+ordering = "DAG"
+primitives = "PropagationPass(K+1 rounds) + Reduction(min)"
+oracle = "bellman_ford"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Minimum Spanning Tree (Kruskal)"
+category = "Advanced Graphs"
+phase = 3
+ordering = "Tree"
+primitives = "EquivalenceClass(union-find)"
+oracle = "kruskal_mst"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Minimum Spanning Tree (Prim)"
+category = "Advanced Graphs"
+phase = 3
+ordering = "DAG"
+primitives = "PriorityQueue(CompetitiveSelection-hard) + ResourceRegistry(in-tree) + PropagationPass + Reduction(sum)"
+oracle = "prim_mst"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Floyd-Warshall"
+category = "Advanced Graphs"
+phase = 3
+ordering = "DAG"
+primitives = "ResourceRegistry(dist matrix) + Reduction(min)"
+oracle = "floyd_warshall"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Graph Valid Tree"
+category = "Advanced Graphs"
+phase = 3
+ordering = "Linear"
+primitives = "EquivalenceClass(union-find)"
+oracle = "graph_valid_tree"
+equiv = "BoolEq"
+
+[[algorithm]]
+name = "Subsets"
+category = "Backtracking"
+phase = 4
+ordering = "Tree"
+primitives = "TraversalEngine::backtrack (paired-undo driver)"
+oracle = "subsets"
+equiv = "SetOfIntLists"
+
+[[algorithm]]
+name = "Combination Sum"
+category = "Backtracking"
+phase = 4
+ordering = "Tree"
+primitives = "TraversalEngine::backtrack (paired-undo driver)"
+oracle = "combination_sum"
+equiv = "SetOfIntLists"
+
+[[algorithm]]
+name = "Permutations"
+category = "Backtracking"
+phase = 4
+ordering = "Tree"
+primitives = "TraversalEngine::backtrack + ResourceRegistry (visited/occupied)"
+oracle = "permutations"
+equiv = "SetOfIntLists"
+
+[[algorithm]]
+name = "Word Search"
+category = "Backtracking"
+phase = 4
+ordering = "Tree"
+primitives = "TraversalEngine::backtrack + ResourceRegistry (visited/occupied)"
+oracle = "word_search"
+equiv = "BoolEq"
+
+[[algorithm]]
+name = "N-Queens"
+category = "Backtracking"
+phase = 4
+ordering = "Tree"
+primitives = "TraversalEngine::backtrack + ResourceRegistry (visited/occupied)"
+oracle = "n_queens"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Invert Binary Tree"
+category = "Trees"
+phase = 5
+ordering = "Tree"
+primitives = "TraversalEngine + ActuationPass"
+oracle = "invert_binary_tree"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Maximum Depth of Binary Tree"
+category = "Trees"
+phase = 5
+ordering = "Tree"
+primitives = "TraversalEngine + Reduction"
+oracle = "max_depth"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Same Tree"
+category = "Trees"
+phase = 5
+ordering = "Tree"
+primitives = "TraversalEngine + Reduction"
+oracle = "same_tree"
+equiv = "BoolEq"
+
+[[algorithm]]
+name = "Binary Tree Level Order Traversal"
+category = "Trees"
+phase = 5
+ordering = "Tree"
+primitives = "TraversalEngine(BFS, level-batched) + queue frontier (substrate buffer)"
+oracle = "level_order"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Validate Binary Search Tree"
+category = "Trees"
+phase = 5
+ordering = "Linear"
+primitives = "TraversalEngine(in-order) + Reduction"
+oracle = "validate_bst"
+equiv = "BoolEq"
+
+[[algorithm]]
+name = "Binary Tree Maximum Path Sum"
+category = "Trees"
+phase = 5
+ordering = "Tree"
+primitives = "TraversalEngine + Reduction"
+oracle = "max_path_sum"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Kth Largest in Stream"
+category = "Heap"
+phase = 5
+ordering = "Linear"
+primitives = "PriorityQueue(CompetitiveSelection-ranked)"
+oracle = "kth_largest_stream"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Last Stone Weight"
+category = "Heap"
+phase = 5
+ordering = "Linear"
+primitives = "PriorityQueue(CompetitiveSelection-hard) + ActuationPass"
+oracle = "last_stone_weight"
+equiv = "Exact"
+
+[[algorithm]]
+name = "K Closest Points to Origin"
+category = "Heap"
+phase = 5
+ordering = "Tree"
+primitives = "CompetitiveSelection-ranked"
+oracle = "k_closest_points"
+equiv = "SetOfIntLists"
+
+[[algorithm]]
+name = "Find Median from Data Stream"
+category = "Heap"
+phase = 5
+ordering = "Linear"
+primitives = "PriorityQueue x2 (CompetitiveSelection-hard) + ActuationPass"
+oracle = "find_median_stream"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Contains Duplicate"
+category = "Arrays & Hashing"
+phase = 6
+ordering = "Linear"
+primitives = "ResourceRegistry(presence)"
+oracle = "contains_duplicate"
+equiv = "BoolEq"
+
+[[algorithm]]
+name = "Two Sum"
+category = "Arrays & Hashing"
+phase = 6
+ordering = "Linear"
+primitives = "ResourceRegistry(complement-index)"
+oracle = "two_sum"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Group Anagrams"
+category = "Arrays & Hashing"
+phase = 6
+ordering = "Tree"
+primitives = "ResourceRegistry(canonical-bucket)"
+oracle = "group_anagrams"
+equiv = "SetOfIntLists"
+
+[[algorithm]]
+name = "Top K Frequent"
+category = "Arrays & Hashing"
+phase = 6
+ordering = "Tree"
+primitives = "ResourceRegistry(counter) + Reduction(sum) + CompetitiveSelection(ranked)"
+oracle = "top_k_frequent"
+equiv = "MultisetInt"
+
+[[algorithm]]
+name = "Product Except Self"
+category = "Arrays & Hashing"
+phase = 6
+ordering = "Tree"
+primitives = "Reduction(prefix-product) x2"
+oracle = "product_except_self"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Longest Consecutive"
+category = "Arrays & Hashing"
+phase = 6
+ordering = "Tree"
+primitives = "ResourceRegistry(presence) + Reduction(max)"
+oracle = "longest_consecutive"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Valid Palindrome"
+category = "Two Pointers"
+phase = 6
+ordering = "Linear"
+primitives = "cursors (no primitive)"
+oracle = "valid_palindrome"
+equiv = "BoolEq"
+
+[[algorithm]]
+name = "Two Sum II"
+category = "Two Pointers"
+phase = 6
+ordering = "Linear"
+primitives = "cursors (no primitive)"
+oracle = "two_sum_ii"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Three Sum"
+category = "Two Pointers"
+phase = 6
+ordering = "Tree"
+primitives = "SortThenSweep: (sort) + cursors + ResourceRegistry(triplet dedup)"
+oracle = "three_sum"
+equiv = "SetOfIntLists"
+
+[[algorithm]]
+name = "Container With Most Water"
+category = "Two Pointers"
+phase = 6
+ordering = "Linear"
+primitives = "cursors + Reduction(running-max)"
+oracle = "container_with_most_water"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Trapping Rain Water"
+category = "Two Pointers"
+phase = 6
+ordering = "Linear"
+primitives = "cursors + Reduction(left-max) + Reduction(right-max)"
+oracle = "trapping_rain_water"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Buy Sell Stock"
+category = "Sliding Window"
+phase = 6
+ordering = "Linear"
+primitives = "Reduction(running-min) + Reduction(running-max)"
+oracle = "buy_sell_stock"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Longest No Repeat"
+category = "Sliding Window"
+phase = 6
+ordering = "Linear"
+primitives = "ResourceRegistry(window-char) + Reduction(window-max)"
+oracle = "longest_no_repeat"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Char Replacement"
+category = "Sliding Window"
+phase = 6
+ordering = "Linear"
+primitives = "ResourceRegistry(char-counts) + Reduction(max-count) + Reduction(window-max)"
+oracle = "char_replacement"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Min Window Substring"
+category = "Sliding Window"
+phase = 6
+ordering = "Linear"
+primitives = "ResourceRegistry(window-counts) + ResourceRegistry(required) + Reduction(meet-count) + Reduction(min-window)"
+oracle = "min_window_substring"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Sliding Window Max"
+category = "Sliding Window"
+phase = 6
+ordering = "Linear"
+primitives = "monotonic deque (substrate buffer) + ActuationPass(bidirectional-evict)"
+oracle = "sliding_window_max"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Reverse Linked List"
+category = "Linked List"
+phase = 7
+ordering = "Linear"
+primitives = "TraversalEngine + ActuationPass"
+oracle = "reverse_linked_list"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Linked List Cycle"
+category = "Linked List"
+phase = 7
+ordering = "Linear"
+primitives = "FastSlow (two-cursor; no governance primitive)"
+oracle = "linked_list_cycle"
+equiv = "BoolEq"
+
+[[algorithm]]
+name = "Merge Two Sorted Lists"
+category = "Linked List"
+phase = 7
+ordering = "Linear"
+primitives = "TraversalEngine + ActuationPass"
+oracle = "merge_two_sorted_lists"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Merge K Sorted Lists"
+category = "Linked List"
+phase = 7
+ordering = "Linear"
+primitives = "PriorityQueue(CompetitiveSelection-hard) + TraversalEngine + ActuationPass"
+oracle = "merge_k_sorted_lists"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Reorder List"
+category = "Linked List"
+phase = 7
+ordering = "Tree"
+primitives = "TraversalEngine + ActuationPass"
+oracle = "reorder_list"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Implement Trie"
+category = "Tries"
+phase = 7
+ordering = "Linear"
+primitives = "ResourceRegistry(nested-registry-trie) + TraversalEngine"
+oracle = "implement_trie"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Add and Search Words"
+category = "Tries"
+phase = 7
+ordering = "Tree"
+primitives = "ResourceRegistry(trie) + TraversalEngine::backtrack(wildcard) + Reduction(OR)"
+oracle = "add_search_words"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Word Search II"
+category = "Tries"
+phase = 7
+ordering = "Tree"
+primitives = "TraversalEngine::backtrack(grid,paired-undo) + ResourceRegistry(trie+visited)"
+oracle = "word_search_ii"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Number of Islands"
+category = "Graphs"
+phase = 7
+ordering = "Tree"
+primitives = "TraversalEngine::dfs + ResourceRegistry(visited) + Reduction(count)"
+oracle = "number_of_islands"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Clone Graph"
+category = "Graphs"
+phase = 7
+ordering = "Tree"
+primitives = "TraversalEngine::bfs + ResourceRegistry(visited/clone-map) + ActuationPass"
+oracle = "clone_graph"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Pacific Atlantic"
+category = "Graphs"
+phase = 7
+ordering = "Tree"
+primitives = "TraversalEngine::bfs*2 + ResourceRegistry*2 + Reduction(intersect)"
+oracle = "pacific_atlantic"
+equiv = "SetOfIntLists"
+
+[[algorithm]]
+name = "Course Schedule"
+category = "Graphs"
+phase = 7
+ordering = "DAG"
+primitives = "TraversalEngine::bfs(Kahn) + ResourceRegistry(in-deg+adj) + Reduction(count)"
+oracle = "course_schedule"
+equiv = "BoolEq"
+
+[[algorithm]]
+name = "Maximum Subarray"
+category = "Greedy"
+phase = 8
+ordering = "Linear"
+primitives = "Reduction (running aggregate)"
+oracle = "maximum_subarray"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Jump Game"
+category = "Greedy"
+phase = 8
+ordering = "Linear"
+primitives = "Reduction (running aggregate)"
+oracle = "jump_game"
+equiv = "BoolEq"
+
+[[algorithm]]
+name = "Gas Station"
+category = "Greedy"
+phase = 8
+ordering = "Linear"
+primitives = "Reduction (running aggregate)"
+oracle = "gas_station"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Hand of Straights"
+category = "Greedy"
+phase = 8
+ordering = "Linear"
+primitives = "SortThenSweep: (sort) + ResourceRegistry(card counts)"
+oracle = "hand_of_straights"
+equiv = "BoolEq"
+
+[[algorithm]]
+name = "Merge Intervals"
+category = "Intervals"
+phase = 8
+ordering = "Tree"
+primitives = "Reduction (merge-or-emit over sorted intervals)"
+oracle = "merge_intervals"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Insert Interval"
+category = "Intervals"
+phase = 8
+ordering = "Linear"
+primitives = "Reduction (merge-or-emit over sorted intervals)"
+oracle = "insert_interval"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Non-overlapping Intervals"
+category = "Intervals"
+phase = 8
+ordering = "Tree"
+primitives = "Reduction (merge-or-emit over sorted intervals)"
+oracle = "non_overlapping_intervals"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Meeting Rooms II"
+category = "Intervals"
+phase = 8
+ordering = "Linear"
+primitives = "PriorityQueue (CompetitiveSelection-hard, min-heap of end times)"
+oracle = "meeting_rooms_ii"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Rotate Image"
+category = "Math & Geometry"
+phase = 8
+ordering = "Tree"
+primitives = "ActuationPass (two-pass in-place)"
+oracle = "rotate_image"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Spiral Matrix"
+category = "Math & Geometry"
+phase = 8
+ordering = "Linear"
+primitives = "TraversalEngine (bounded-state spiral walk; bounds are cursor state)"
+oracle = "spiral_matrix"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Set Matrix Zeroes"
+category = "Math & Geometry"
+phase = 8
+ordering = "Tree"
+primitives = "ActuationPass (two-pass in-place)"
+oracle = "set_matrix_zeroes"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Pow(x,n)"
+category = "Math & Geometry"
+phase = 8
+ordering = "Linear"
+primitives = "Bisection (over exponent bits) + Reduction (product)"
+oracle = "pow_xn"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Happy Number"
+category = "Math & Geometry"
+phase = 8
+ordering = "Linear"
+primitives = "Floyd cycle detection (structural; no catalog primitive)"
+oracle = "happy_number"
+equiv = "BoolEq"
+
+[[algorithm]]
+name = "Number of 1 Bits"
+category = "Bit Manipulation"
+phase = 8
+ordering = "Linear"
+primitives = "Reduction (count over iterated bit-strip)"
+oracle = "hamming_weight"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Single Number"
+category = "Bit Manipulation"
+phase = 8
+ordering = "Tree"
+primitives = "Reduction (XOR)"
+oracle = "single_number"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Missing Number"
+category = "Bit Manipulation"
+phase = 8
+ordering = "Tree"
+primitives = "Reduction (XOR)"
+oracle = "missing_number"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Counting Bits"
+category = "Bit Manipulation"
+phase = 8
+ordering = "DAG"
+primitives = "Memoization = ResourceRegistry + Reduction (DAG: bit-shift dependency)"
+oracle = "counting_bits"
+equiv = "Exact"
+
+[[algorithm]]
+name = "Reverse Bits"
+category = "Bit Manipulation"
+phase = 8
+ordering = "Linear"
+primitives = "Reduction (fold over 32 bit positions)"
+oracle = "reverse_bits"
+equiv = "Exact"

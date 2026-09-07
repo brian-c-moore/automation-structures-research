@@ -1,0 +1,18 @@
+name = "GitHub_Actions"
+tier = 1
+modality = "StepGraph"
+evidence = "direct_comparison"
+workload = "scientific_workflow"
+
+[policies]
+invocation = "VCS_Event"
+topology = "Declared_DAG"
+dependencies = "Fixed"
+lifecycle = "Rerun_Job"
+
+[trace_properties]
+predecessor_before_successor = true
+
+citations = [
+    "GitHub Actions documentation",
+]
