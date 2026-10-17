@@ -18,10 +18,12 @@ import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
 import time
+import tomllib
 from pathlib import Path
 from typing import Iterable, Sequence
 
@@ -299,6 +301,8 @@ class RunResult:
     signature: str
     command: list[str]
     output: str
+    environment: dict[str, str] = dataclasses.field(default_factory=dict)
+    verification_partition: dict[str, object] = dataclasses.field(default_factory=dict)
 
     def record(self, repository_root: Path) -> dict[str, object]:
         record = self.item.record(repository_root)
@@ -331,12 +335,19 @@ class RunResult:
             )
             if matches:
                 verus_verified, verus_errors = (int(value) for value in matches[-1])
+            mutants = self.verification_partition.get("mutants", [])
+            if mutants:
+                verus_verified = mutants[-1]["verified"]
+                verus_errors = mutants[-1]["errors"]
         record.update(
             {
                 "status": self.status,
                 "seconds": round(self.seconds, 3),
                 "signature": self.signature,
                 "command": self.command,
+                "environment": self.environment,
+                "verification_partition": self.verification_partition,
+                "output": self.output,
                 "generated_states": generated_states,
                 "distinct_states": distinct_states,
                 "tlaps_obligations": tlaps_obligations,
@@ -346,6 +357,22 @@ class RunResult:
             }
         )
         return record
+
+
+@dataclasses.dataclass(frozen=True)
+class VerusPrecondition:
+    source: str
+    site: str
+    focus: str
+
+
+@dataclasses.dataclass(frozen=True)
+class VerusDiagnostic:
+    message: str
+    source: str
+    site: str
+    focus: str
+    precondition: VerusPrecondition | None = None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -364,6 +391,8 @@ class Mutation:
     anchor_start: str | None = None
     anchor_end: str | None = None
     verification_root: str | None = None
+    partition_verification: bool = False
+    rejection_diagnostics: tuple[VerusDiagnostic, ...] = ()
 
     def record(self) -> dict[str, object]:
         return {
@@ -376,9 +405,12 @@ class Mutation:
             "source": self.source,
             "exact_mutation_site": self.needle,
             "expected_fault": self.expected_fault,
+            "required_rejection_diagnostics": [dataclasses.asdict(value) for value in self.rejection_diagnostics],
             "anchor_start": self.anchor_start,
             "anchor_end": self.anchor_end,
-            "verification_root": self.verification_root or self.source,
+            "verification_root": self.verification_root or "src/lib.rs",
+            "expected_rejection_exit_code": 101 if (self.verification_root or "src/lib.rs") == "src/lib.rs" else 1,
+            "verification_strategy": "disjoint-module-partitions" if self.partition_verification else "whole-library",
         }
 
 
@@ -674,7 +706,7 @@ VERUS_MUTATIONS = (
         "fork-join-stale-snapshot",
         "ForkJoin",
         "src/modalities/fork_join.rs",
-        "            self.output_snapshot = self.wvalue.clone();\n",
+        "                self.output_snapshot.set(i, self.wvalue[i]);\n",
         "",
         "Requires output commit to copy the completed worker snapshot.",
         formal_module="formal/execution/carriers/ForkJoin.tla",
@@ -682,6 +714,9 @@ VERUS_MUTATIONS = (
         carried_obligation="OutputConsistency",
         affected_action="produce_output / ProduceOutput",
         expected_fault="Committed output does not copy the completed worker values.",
+        rejection_diagnostics=(VerusDiagnostic("invariant not satisfied at end of loop body", "src/modalities/fork_join.rs",
+            "forall|j: int| 0 <= j < i ==> #[trigger] self.output_snapshot@[j] == self.wvalue@[j],",
+            "forall|j: int| 0 <= j < i ==> #[trigger] self.output_snapshot@[j] == self.wvalue@[j]"),),
     ),
     Mutation(
         "fork-join-done-observation",
@@ -702,7 +737,7 @@ VERUS_MUTATIONS = (
         "propagation-pass-snapshot-locality",
         "PropagationPass",
         "src/primitives/propagation_pass.rs",
-        "        let next = self.combine_node(n);",
+        "        let next = self.max_value.combine(&self.edges, &self.snapshot, n);",
         "        let next = self.snapshot[n];",
         "Requires each update to apply the declared combine operation to the round snapshot.",
         formal_module="formal/structures/PropagationPass/PropagationPassGraph.tla",
@@ -710,6 +745,15 @@ VERUS_MUTATIONS = (
         carried_obligation="SnapshotLocality",
         affected_action="update_node / UpdateNode",
         expected_fault="A node update bypasses the declared snapshot combine operation.",
+        rejection_diagnostics=(
+            VerusDiagnostic("assertion failed", "src/primitives/propagation_pass.rs",
+                "implies self.values@[i] == self.max_value.combined(self.edges@,self.snapshot@,i as usize) by {",
+                "self.values@[i] == self.max_value.combined(self.edges@,self.snapshot@,i as usize)"),
+            VerusDiagnostic("postcondition not satisfied", "src/primitives/propagation_pass.rs",
+                "accepted ==> final(self).values@ == old(self).values@.update(n as int,\n"
+                "                old(self).max_value.combined(old(self).edges@,old(self).snapshot@,n)),",
+                "accepted ==> final(self).values@ == old(self).values@.update(n as int,\n"
+                "                old(self).max_value.combined(old(self).edges@,old(self).snapshot@,n))")),
     ),
     Mutation(
         "propagation-pass-iteration-bound",
@@ -954,14 +998,17 @@ VERUS_MUTATIONS = (
         "audit-sink-content-binding",
         "AuditSink",
         "src/primitives/audit_sink.rs",
-        "            let entry = AuditEntry {\n                operation,\n",
-        "            let entry = AuditEntry {\n                operation: 0,\n",
-        "Requires the appended record content to match the operation used by the concrete hash.",
+        "        let entry = AuditEntry { operation, prev_hash: self.last_hash, hash: new_hash };\n",
+        "        let entry = AuditEntry { operation, prev_hash: self.last_hash, hash: self.last_hash };\n",
+        "Requires the stored carry to bind the admitted operation and predecessor through the declared operator.",
         formal_module="formal/structures/AuditSink/AuditSink.tla",
         executable_carrier="AuditSink",
         carried_obligation="HashBindsContent through Record",
-        affected_action="record / Record",
-        expected_fault="The stored operation differs from the content hashed into the record.",
+        affected_action="commit_record / Record",
+        expected_fault="The stored carry remains at its predecessor instead of binding the admitted operation.",
+        rejection_diagnostics=(VerusDiagnostic("assertion failed", "src/primitives/audit_sink.rs",
+            "#[trigger] h[i].hash == self.operator.combined(h[i].prev_hash, h[i].operation) by {",
+            "#[trigger] h[i].hash == self.operator.combined(h[i].prev_hash, h[i].operation)"),),
     ),
     Mutation(
         "budget-allocation-credit",
@@ -972,9 +1019,12 @@ VERUS_MUTATIONS = (
         "Requires successful allocation to credit the allocated ledger term.",
         formal_module="formal/structures/Budget/Budget.tla",
         executable_carrier="Budget",
-        carried_obligation="SafetyInvariant through the TryAllocate action relation",
+        carried_obligation="TryAllocate success credit: ok ==> final(self).allocated == old(self).allocated + amount",
         affected_action="try_allocate / TryAllocate",
         expected_fault="The method reports successful allocation without the specified ledger update.",
+        rejection_diagnostics=(VerusDiagnostic("postcondition not satisfied", "src/primitives/budget.rs",
+            "ok ==> final(self).allocated == old(self).allocated + amount,",
+            "ok ==> final(self).allocated == old(self).allocated + amount"),),
     ),
     Mutation(
         "budget-reservation-credit",
@@ -985,9 +1035,12 @@ VERUS_MUTATIONS = (
         "Requires successful reservation to credit the reserved ledger term.",
         formal_module="formal/structures/Budget/Budget.tla",
         executable_carrier="Budget",
-        carried_obligation="SafetyInvariant through the Reserve action relation",
+        carried_obligation="Reserve success credit: ok ==> final(self).reserved == old(self).reserved + amount",
         affected_action="reserve / Reserve",
         expected_fault="The method reports successful reservation without the specified ledger update.",
+        rejection_diagnostics=(VerusDiagnostic("postcondition not satisfied", "src/primitives/budget.rs",
+            "ok ==> final(self).reserved == old(self).reserved + amount,",
+            "ok ==> final(self).reserved == old(self).reserved + amount"),),
     ),
     Mutation(
         "budget-reservation-commit-transfer",
@@ -1016,6 +1069,11 @@ VERUS_MUTATIONS = (
         expected_fault="Release returns without reducing allocated capacity.",
         anchor_start="    pub fn release(&mut self, amount: u64)",
         anchor_end="    // ── MarkEviction",
+        rejection_diagnostics=(VerusDiagnostic("postcondition not satisfied", "src/primitives/budget.rs",
+            "final(self).reserved == old(self).reserved,\n"
+            "            final(self).pending_eviction == old(self).pending_eviction,\n"
+            "            final(self).allocated == old(self).allocated - amount,",
+            "final(self).allocated == old(self).allocated - amount"),),
     ),
     Mutation(
         "budget-mark-eviction-credit",
@@ -1026,9 +1084,12 @@ VERUS_MUTATIONS = (
         "Requires MarkEviction to credit pending eviction for the allocation debit.",
         formal_module="formal/structures/Budget/Budget.tla",
         executable_carrier="Budget",
-        carried_obligation="Ledger conservation through MarkEviction",
+        carried_obligation="MarkEviction pending credit: final(self).pending_eviction == old(self).pending_eviction + amount",
         affected_action="mark_eviction / MarkEviction",
         expected_fault="Marked allocation is removed without entering the pending-eviction ledger.",
+        rejection_diagnostics=(VerusDiagnostic("postcondition not satisfied", "src/primitives/budget.rs",
+            "final(self).pending_eviction == old(self).pending_eviction + amount,",
+            "final(self).pending_eviction == old(self).pending_eviction + amount"),),
     ),
     Mutation(
         "budget-complete-eviction-debit",
@@ -1039,9 +1100,12 @@ VERUS_MUTATIONS = (
         "Requires CompleteEviction to remove the named amount from pending eviction.",
         formal_module="formal/structures/Budget/Budget.tla",
         executable_carrier="Budget",
-        carried_obligation="CompleteEviction action relation",
+        carried_obligation="CompleteEviction pending debit: final(self).pending_eviction == old(self).pending_eviction - amount",
         affected_action="complete_eviction / CompleteEviction",
         expected_fault="Completed eviction leaves the pending-eviction ledger unchanged.",
+        rejection_diagnostics=(VerusDiagnostic("postcondition not satisfied", "src/primitives/budget.rs",
+            "final(self).pending_eviction == old(self).pending_eviction - amount,",
+            "final(self).pending_eviction == old(self).pending_eviction - amount"),),
     ),
     Mutation(
         "budget-facade-reservation-guard",
@@ -1061,8 +1125,8 @@ VERUS_MUTATIONS = (
         "resource-registry-facade-remove-guard",
         "ResourceRegistry",
         "src/api.rs",
-        "        let previous = self.inner.lookup(key);\n",
-        "        let previous = Some(0);\n",
+        "        let removed = carrier.take_query(&key);\n",
+        "        let removed = { carrier.deregister(key); None::<(u64, u64)> };\n",
         "Requires the checked registry facade to call deregistration only for a present key.",
         formal_module="formal/structures/ResourceRegistry/ResourceRegistry.tla",
         executable_carrier="Checked ResourceRegistry facade",
@@ -1129,7 +1193,22 @@ VERUS_MUTATIONS = (
         affected_action="terminate / Terminate",
         expected_fault="Terminate changes the fixed-point flag instead of stuttering.",
         anchor_start="    pub fn terminate(&mut self)",
-        anchor_end="}\n\nfn false_vector",
+        anchor_end="impl PropagationPass {",
+        rejection_diagnostics=(
+            VerusDiagnostic("postcondition not satisfied", "src/primitives/propagation_pass.rs",
+                "final(self).updated@ == old(self).updated@,\n"
+                "            final(self).iteration == old(self).iteration,\n"
+                "            final(self).changed == old(self).changed,\n"
+                "            final(self).round == old(self).round,\n"
+                "            final(self).inv(),",
+                "final(self).changed == old(self).changed"),
+            VerusDiagnostic("postcondition not satisfied", "src/primitives/propagation_pass.rs",
+                "final(self).updated@ == old(self).updated@,\n"
+                "            final(self).iteration == old(self).iteration,\n"
+                "            final(self).changed == old(self).changed,\n"
+                "            final(self).round == old(self).round,\n"
+                "            final(self).inv(),",
+                "final(self).inv()")),
     ),
     Mutation(
         "actuation-facade-finish-guard",
@@ -1494,8 +1573,8 @@ VERUS_MUTATIONS = (
         "resource-registry-removal-commit",
         "ResourceRegistry",
         "src/primitives/resource_registry.rs",
-        "        self.entries = filtered;\n",
-        "        let _ = filtered;\n",
+        "        self.deregister_key(k);\n",
+        "",
         "Requires Deregister to install the sequence with the named key removed.",
         formal_module="formal/structures/ResourceRegistry/ResourceRegistry.tla",
         executable_carrier="ResourceRegistry",
@@ -1504,20 +1583,33 @@ VERUS_MUTATIONS = (
         expected_fault="Deregister computes a filtered sequence but leaves the original registry live.",
         anchor_start="    pub fn deregister(&mut self, k: K)",
         anchor_end="}\n\n}",
+        rejection_diagnostics=(
+            VerusDiagnostic("postcondition not satisfied", "src/primitives/resource_registry.rs",
+                "!final(self).contains_key(k),", "!final(self).contains_key(k)"),
+            VerusDiagnostic("postcondition not satisfied", "src/primitives/resource_registry.rs",
+                "final(self).entries@ == without_key_sequence(old(self).entries@, k),",
+                "final(self).entries@ == without_key_sequence(old(self).entries@, k)")),
     ),
     Mutation(
         "resource-registry-order-preserving-filter",
         "ResourceRegistry",
         "src/primitives/resource_registry.rs",
-        "            let e = entries[i];\n",
-        "            let e = entries[entries.len() - 1 - i];\n",
-        "Requires the shared key-removal helper to preserve the relative order of every surviving binding.",
+        "        if i < self.len() { Some(self.remove(i)) } else { None }\n",
+        "        if i < self.len() { Some(self.swap_remove(i)) } else { None }\n",
+        "Requires the shared Vec storage removal to preserve the relative order of every surviving binding.",
         formal_module="formal/structures/ResourceRegistry/ResourceRegistry.tla",
-        executable_carrier="ResourceRegistry order-preserving filter",
+        executable_carrier="ResourceRegistry Vec storage removal",
         carried_obligation="Deterministic Register and Deregister storage effects",
-        affected_action="without_key / Register and Deregister",
-        expected_fault="Filtering scans the registry in reverse and reorders every surviving binding.",
+        affected_action="RegistryStorage::remove / Register and Deregister",
+        expected_fault="Swap removal moves the final survivor into the removed position instead of retaining survivor order.",
+        anchor_start="impl<K: KeyIdentity, V> RegistryStorage<K, V> for Vec<(K, V)> {",
+        anchor_end="impl<K: KeyIdentity, V, Q: RegistryQuery<K>> RegistrySearch<K, V, Q> for Vec<(K, V)> {",
         verification_root="src/lib.rs",
+        rejection_diagnostics=(VerusDiagnostic("postcondition not satisfied", "src/primitives/resource_registry.rs",
+            "i < old(self)@.len() ==> pair == Some(old(self)@[i as int])\n"
+            "                && final(self)@ == old(self)@.remove(i as int),",
+            "i < old(self)@.len() ==> pair == Some(old(self)@[i as int])\n"
+            "                && final(self)@ == old(self)@.remove(i as int)"),),
     ),
     Mutation(
         "governed-commit-evidence-coupling",
@@ -1615,13 +1707,17 @@ VERUS_MUTATIONS = (
         "BacktrackingTraversal",
         "src/primitives/backtracking_traversal.rs",
         "        self.ledger.push(token);\n",
-        "",
-        "Requires descent to append the undo token paired with the new path element.",
+        "        self.ledger.push(UndoToken { saved: self.aux, delta: d }); self.ledger.push(token);\n",
+        "Requires exactly one undo token paired with each new path element.",
         formal_module="formal/structures/BacktrackingTraversal/BacktrackingTraversalUndo.tla",
         executable_carrier="BacktrackingTraversal",
         carried_obligation="Pairing through Descend",
         affected_action="descend / Descend",
-        expected_fault="The path advances without its matching undo token.",
+        expected_fault="One path element receives two undo tokens, breaking path/ledger pairing.",
+        partition_verification=True,
+        rejection_diagnostics=(VerusDiagnostic("assertion failed", "src/primitives/backtracking_traversal.rs",
+            "assert(self.type_invariant()); assert(self.pairing()); assert(self.state_restoration());",
+            "self.pairing()"),),
     ),
     Mutation(
         "backtracking-leaf-record",
@@ -2496,6 +2592,146 @@ IMPLEMENTATION_CONFORMANCE_FIELDS = (
     "tcb-closure",
 )
 
+DEVELOPMENT_VERUS_SELECTOR_OVERRIDES: dict[str, dict[str, object]] = {
+    # Current owner actions use the admitted physical bindings. Keep the
+    # historical registry intact; these are explicit 0.3.2-profile sites.
+    "actuation-pass-allocation-commit": dict(
+        needle="        self.allocation.set_allocation(&self.effects, s, Some(resource));\n",
+        replacement="",
+    ),
+    "actuation-pass-effect-fidelity": dict(
+        needle="        self.allocation.set_effect(&mut self.effects, s, Some(resource));\n",
+        replacement="        self.effects.set(s, Some(0));\n",
+    ),
+    "actuation-pass-scope-preservation": dict(
+        needle="        self.allocation.set_allocation(&self.effects, s, None);\n",
+        replacement="        self.allocation.set_allocation(&self.effects, s, None);\n"
+            "        self.effects.set(s, Some(0));\n",
+    ),
+    "fork-join-start-state": dict(
+        needle="            self.wstate.set_state(worker, ForkJoinWorkerState::Running);\n",
+        replacement="",
+        anchor_start="    pub fn start_worker(&mut self, worker: usize)",
+        anchor_end="    /// Complete one running worker with an in-domain value.",
+    ),
+    "fork-join-complete-state": dict(
+        needle="            self.wstate.set_state(worker, ForkJoinWorkerState::Complete);\n",
+        replacement="",
+        anchor_start="    pub fn complete_worker(&mut self, worker: usize, value: u64)",
+        anchor_end="    /// Commit the join barrier after every worker completes.",
+    ),
+    "fork-join-stale-snapshot": dict(
+        needle="            self.set(i, worker_values[i]);\n",
+        replacement="",
+        anchor_start="impl ForkJoinSnapshot for Vec<u64> {",
+        anchor_end="/// Checked snapshot layout: initial uniform values, then frozen joined values.",
+        executable_carrier="ForkJoin materialized Vec snapshot binding",
+        affected_action="Vec ForkJoinSnapshot::capture, called by ForkJoin::produce_output / ProduceOutput",
+        expected_fault="The materialized snapshot copy omits a completed worker value; the borrowed JoinedValuesSnapshot profile is outside this mutation.",
+        rejection_diagnostics=(VerusDiagnostic(
+            "invariant not satisfied at end of loop body", "src/modalities/fork_join.rs",
+            "forall|j: int| 0 <= j < i ==> #[trigger] self@[j] == worker_values@[j],",
+            "forall|j: int| 0 <= j < i ==> #[trigger] self@[j] == worker_values@[j]"),),
+    ),
+    "sequential-done-observation": dict(
+        needle="        self.terminal_inactive()\n",
+        replacement="        false\n",
+        anchor_start="    pub fn done_stuttering(&mut self) -> (enabled: bool)",
+        anchor_end="}\n\n}",
+    ),
+    "step-graph-backward-state": dict(
+        needle="            self.nstate.set_state(node, StepGraphNodeState::Complete);\n",
+        replacement="            self.nstate.set_state(node, StepGraphNodeState::NotReady);\n",
+        anchor_start="    pub fn complete_node(&mut self, node: usize)",
+        anchor_end="    /// Observe the canonical owner's all-nodes-complete predicate.",
+    ),
+    "step-graph-start-state": dict(
+        needle="            self.nstate.set_state(node, StepGraphNodeState::Running);\n",
+        replacement="",
+        anchor_start="    pub fn start_running(&mut self, node: usize)",
+        anchor_end="    /// Complete one running node.",
+    ),
+    "step-graph-done-observation": dict(
+        needle="    { self.all_nodes_complete() }\n",
+        replacement="    { false }\n",
+    ),
+    "stream-graph-done-observation": dict(
+        needle="        self.input_drained()\n",
+        replacement="        !self.input_drained()\n",
+        expected_fault="The public terminal action negates its canonical bounded-input and empty-queues observation.",
+    ),
+    "cursor-facade-regression-guard": dict(
+        needle="        if position.less_than(self.inner.position) {\n",
+        replacement="        if false {\n",
+        anchor_start="    pub fn advance_to(&mut self, position: P) -> (result: Result<(), CursorError>)",
+        anchor_end="/// Invalid construction input for a propagation pass.",
+    ),
+    "buffer-pop-head": dict(
+        needle="        self.values.pop_front()\n",
+        replacement="        None\n",
+        anchor_start="    pub fn pop(&mut self) -> (value: Option<T>)",
+        anchor_end="/// Query membership in a retained sequence using its verified equality adapter.",
+    ),
+    "select-then-actuate-seat-frame": dict(
+        needle="            let selection = &mut self.selections[seat];\n",
+        replacement="            let selection = &mut self.selections[0];\n",
+        purpose="Requires Evaluate to mutate exactly the named selection owner and frame every other seat owner.",
+        expected_fault="Evaluate borrows seat zero instead of the named seat, violating the selected-seat effect or untouched-seat frame when they differ.",
+    ),
+    "relationship-graph-remove-pair": dict(
+        # The same omitted Registry deletion now returns Option to its caller.
+        # Preserve the returned key while leaving the governed entries unchanged.
+        replacement="                let _removed = Some((key, ()));\n",
+    ),
+}
+
+
+DEVELOPMENT_VERUS_MUTATIONS = (
+    Mutation(
+        "minimum-selection-tie-publication",
+        "CompetitiveSelection",
+        "src/compositions/minimum_selection.rs",
+        "                    let _pushed = selected.push(item);\n",
+        "                    let _pushed: Result<(), usize> = Ok(());\n",
+        "Requires the joint minimum-selection composition to retain each comparator-equal item through its actual Buffer action.",
+        formal_module="formal/structures/CompetitiveSelection/CompetitiveSelectionHardExclusive.tla",
+        executable_carrier="MinimumSelection: OrderingPass arrangement and inverse -> Hard winner -> Cursor/Buffer complete stable ties",
+        carried_obligation="Joint selected Buffer equals minimum_prefix of the full arrangement; the Hard model alone does not prove complete tie retention",
+        affected_action="MinimumSelection::try_new / canonical Buffer::push",
+        expected_fault="The actual tied item is not published while the schema Cursor advances, violating the selected-prefix loop invariant.",
+        anchor_start="    pub fn try_new(order: C)",
+        anchor_end="    /// Export the retained full arrangement",
+        rejection_diagnostics=(VerusDiagnostic(
+            "invariant not satisfied at end of loop body",
+            "src/compositions/minimum_selection.rs",
+            "                    selected.values@ == selection::minimum_prefix(arrangement.positions_spec(), order, cursor.position as int),",
+            "selected.values@ == selection::minimum_prefix(arrangement.positions_spec(), order, cursor.position as int)",
+        ),),
+    ),
+)
+
+
+def verus_implementation_profile(manifest: dict[str, str]) -> tuple[int, tuple[Mutation, ...]]:
+    """Select implementation semantics by version, separately from source admission."""
+    if manifest.get("crate") != "automation-structures":
+        raise RuntimeError("implementation profile requires automation-structures")
+    if manifest.get("version") == "0.3.2":
+        unknown = set(DEVELOPMENT_VERUS_SELECTOR_OVERRIDES) - {mutation.id for mutation in VERUS_MUTATIONS}
+        if unknown:
+            raise RuntimeError("0.3.2 selector overrides name unknown historical controls: " + ", ".join(sorted(unknown)))
+        return 37, tuple(dataclasses.replace(mutation,
+            **DEVELOPMENT_VERUS_SELECTOR_OVERRIDES.get(mutation.id, {}))
+            for mutation in VERUS_MUTATIONS) + DEVELOPMENT_VERUS_MUTATIONS
+    if manifest.get("version") in {"0.2.3", "0.2.4", "0.3.0", "0.3.1"}:
+        return 36, VERUS_MUTATIONS
+    raise RuntimeError("canonical version has no reviewed implementation profile")
+
+
+def verus_mutations(primary: Path) -> tuple[Mutation, ...]:
+    """Apply the version profile only after reading the declared source role."""
+    return verus_implementation_profile(load_automation_structures_manifest(primary))[1]
+
+
 def repository_paths() -> tuple[Path, Path, Path | None]:
     configured = os.environ.get("AUTOMATION_STRUCTURE_ROOT")
     if configured:
@@ -2884,7 +3120,17 @@ def load_automation_structures_manifest(primary: Path) -> dict[str, str]:
     try:
         manifest = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as error:
-        raise RuntimeError(f"cannot read published-crate manifest {path}: {error}") from error
+        raise RuntimeError(f"cannot read canonical source manifest {path}: {error}") from error
+    if isinstance(manifest, dict) and manifest.get("kind") == "development-copy/1":
+        required_development = {"kind", "crate", "version", "path", "source_locator_prefix"}
+        if (set(manifest) != required_development
+                or any(not isinstance(value, str) or not value for value in manifest.values())
+                or manifest["crate"] != "automation-structures"
+                or manifest["version"] != "0.3.2"
+                or manifest["path"] != "rust/automation-structures"
+                or manifest["source_locator_prefix"] != "development-copy://automation-structures/0.3.2/"):
+            raise RuntimeError("development source must name the sole local automation-structures 0.3.2 copy without publication metadata")
+        return manifest
     required = {
         "crate",
         "version",
@@ -3146,7 +3392,28 @@ def find_verus_root(primary: Path) -> Path:
             "AUTOMATION_STRUCTURES_CRATE_ROOT",
             str(DEFAULT_AUTOMATION_STRUCTURES_CRATE_ROOT),
         )
-    ).resolve()
+    )
+    if manifest.get("kind") == "development-copy/1":
+        declared = primary.parent / manifest["path"]
+        if root.absolute() != declared.absolute():
+            raise RuntimeError("development canonical root must be the existing workspace rust/automation-structures path")
+        for component in (declared, declared.parent):
+            if component.is_symlink() or getattr(component, "is_junction", lambda: False)():
+                raise RuntimeError("development canonical root cannot follow a link or junction")
+        if declared.resolve() != declared.absolute():
+            raise RuntimeError("development canonical root must resolve within its declared workspace path")
+        root = declared
+        required = (root / "Cargo.toml", root / "src/lib.rs", root / "verification/run_verus_gate.sh")
+        if any(not path.is_file() for path in required):
+            raise RuntimeError("development canonical input closure is incomplete")
+        package = tomllib.loads((root / "Cargo.toml").read_text(encoding="utf-8")).get("package", {})
+        if package.get("name") != manifest["crate"] or package.get("version") != manifest["version"]:
+            raise RuntimeError("development canonical package name/version differs from its source role")
+        expected = os.environ.get("AUTOMATION_STRUCTURES_SOURCE_FINGERPRINT", "")
+        if re.fullmatch(r"[0-9a-f]{64}", expected) is None or source_fingerprint(root) != expected:
+            raise RuntimeError("development canonical source differs from the reviewed transported package closure")
+        return root
+    root = root.resolve()
     required = (
         root / "Cargo.toml.orig",
         root / ".cargo_vcs_info.json",
@@ -3188,6 +3455,8 @@ def resolve_source_locator(primary: Path, locator: str) -> Path:
         if not suffix or suffix.startswith("/") or ".." in Path(suffix).parts:
             raise ValueError(f"invalid published-crate source locator: {locator}")
         return find_verus_root(primary) / suffix
+    if locator.startswith(("crate://", "development-copy://")):
+        raise ValueError(f"canonical source locator does not match its declared source role: {locator}")
     return primary / locator
 
 
@@ -3205,14 +3474,15 @@ def validate_verus_mutation_registry(primary: Path, root: Path) -> None:
             "verification.rs",
         }
     }
-    if len(registered_sources) != 36:
+    expected_modules, mutations = verus_implementation_profile(load_automation_structures_manifest(primary))
+    if len(registered_sources) != expected_modules:
         raise RuntimeError(
-            f"expected 36 registered Verus source modules, found {len(registered_sources)}"
+            f"expected {expected_modules} registered Verus source modules, found {len(registered_sources)}"
         )
     mutation_ids: set[str] = set()
     covered_sources: set[str] = set()
     errors: list[str] = []
-    for mutation in VERUS_MUTATIONS:
+    for mutation in mutations:
         if mutation.id in mutation_ids:
             errors.append(f"duplicate mutation id: {mutation.id}")
         mutation_ids.add(mutation.id)
@@ -3300,7 +3570,7 @@ def validate_implementation_refinement_contract(primary: Path) -> str:
     if not isinstance(action_controls, dict):
         errors.append("action-control registry actions must be an object")
         action_controls = {}
-    mutation_by_id = {mutation.id: mutation for mutation in VERUS_MUTATIONS}
+    mutation_by_id = {mutation.id: mutation for mutation in verus_mutations(primary)}
     for subject, methods in action_controls.items():
         if not isinstance(subject, str) or not subject or not isinstance(methods, dict):
             errors.append("action-control registry subject entries must map names to objects")
@@ -3649,7 +3919,7 @@ def discover_implementation_items(primary: Path, purposes: dict[str, str]) -> li
                 related_subjects=KAT_RELATED_SUBJECTS.get(test.stem, ()),
             )
         )
-    for mutation in VERUS_MUTATIONS:
+    for mutation in verus_mutations(primary):
         source = root / mutation.source
         expected_survivor = mutation.id in VERUS_EXPECTED_SURVIVORS
         items.append(
@@ -3971,10 +4241,25 @@ SOURCE_FINGERPRINT_IGNORED_PARTS = frozenset(
 )
 
 
-def source_fingerprint(root: Path) -> str:
+def source_fingerprint(root: Path, relative_paths: Sequence[str] | None = None) -> str:
     """Bind every mounted non-runtime file, including untracked source files."""
     digest = hashlib.sha256()
-    for path in sorted(candidate for candidate in root.rglob("*") if candidate.is_file()):
+    if relative_paths is None:
+        paths = sorted(candidate for candidate in root.rglob("*") if candidate.is_file())
+    else:
+        # The caller supplies the already reviewed package census; this is the same
+        # byte fingerprint over that closure, not another inventory/discovery engine.
+        if len(set(relative_paths)) != len(relative_paths):
+            raise ValueError("source fingerprint census contains duplicate paths")
+        paths = []
+        for relative in sorted(relative_paths):
+            rel = Path(relative)
+            if (not relative or rel.is_absolute() or ".." in rel.parts
+                    or "\\" in relative or not (root / rel).is_file()
+                    or (root / rel).resolve() != root.resolve() / rel):
+                raise ValueError("source fingerprint census contains an unconfined or missing path")
+            paths.append(root / rel)
+    for path in paths:
         rel = path.relative_to(root)
         if any(part in SOURCE_FINGERPRINT_IGNORED_PARTS for part in rel.parts):
             continue
@@ -4488,10 +4773,12 @@ def require_container() -> None:
             )
 
 
-def run_process(command: Sequence[str], cwd: Path, timeout: int) -> tuple[int, str, float]:
+def run_process(
+    command: Sequence[str], cwd: Path, timeout: int,
+    *, environment: dict[str, str] | None = None,
+) -> tuple[int, str, float]:
     started = time.monotonic()
-    try:
-        completed = subprocess.run(
+    with subprocess.Popen(
             list(command),
             cwd=cwd,
             stdout=subprocess.PIPE,
@@ -4499,15 +4786,21 @@ def run_process(command: Sequence[str], cwd: Path, timeout: int) -> tuple[int, s
             text=True,
             encoding="utf-8",
             errors="replace",
-            timeout=timeout,
-            check=False,
-        )
-        return completed.returncode, completed.stdout, time.monotonic() - started
-    except subprocess.TimeoutExpired as error:
-        output = error.stdout or ""
-        if isinstance(output, bytes):
-            output = output.decode("utf-8", errors="replace")
-        return 124, output + f"\nTIMEOUT after {timeout} seconds\n", time.monotonic() - started
+            env=None if environment is None else {**os.environ, **environment},
+            start_new_session=True,
+    ) as process:
+        try:
+            output, _ = process.communicate(timeout=timeout)
+            return process.returncode, output, time.monotonic() - started
+        except subprocess.TimeoutExpired:
+            # Formal execution is container-only. Kill the child session, not
+            # merely Cargo, so its verifier/solver descendants also terminate.
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            output, _ = process.communicate(timeout=10)
+            return 124, output + f"\nTIMEOUT after {timeout} seconds\n", time.monotonic() - started
 
 
 def copy_tla_scope(
@@ -4547,6 +4840,17 @@ def command_self_test() -> int:
     require_container()
     with tempfile.TemporaryDirectory(prefix="runner-self-test-") as tmp:
         root = Path(tmp)
+        child_timeout_command = [
+            sys.executable, "-c",
+            "import subprocess,sys,time; "
+            "subprocess.Popen([sys.executable,'-c','import time; time.sleep(8)']); "
+            "time.sleep(8)",
+        ]
+        timeout_code, timeout_output, timeout_seconds = run_process(
+            child_timeout_command, root, 1
+        )
+        if timeout_code != 124 or "TIMEOUT after 1 seconds" not in timeout_output or timeout_seconds >= 4:
+            raise AssertionError("process timeout did not terminate the descendant holding its output pipe")
         source = root / "source"
         destination = root / "destination"
         (source / "formal").mkdir(parents=True)
@@ -4603,6 +4907,98 @@ def command_self_test() -> int:
         fingerprint_with_untracked_source = source_fingerprint(fingerprint_root)
         if fingerprint_with_untracked_source == fingerprint_before:
             raise AssertionError("untracked non-runtime source escaped the fingerprint")
+        if source_fingerprint(fingerprint_root, ("source.txt",)) != fingerprint_before:
+            raise AssertionError("reviewed package closure changed the existing byte-fingerprint algorithm")
+
+        identity_primary = root / "identity" / "automation-structure-research"
+        identity_path = identity_primary / AUTOMATION_STRUCTURES_MANIFEST
+        identity_path.parent.mkdir(parents=True)
+        published = dict(crate="automation-structures", version="0.3.1",
+            archive_sha256="b0ed618e670735eea7e9cdd96727723a10e2b6db049bca9174a68f08d0b7c5f0",
+            vcs_sha1="f36365280980a65f78c8bc95c787ab4682d63e68",
+            download="https://static.crates.io/crates/automation-structures/automation-structures-0.3.1.crate",
+            source_locator_prefix="crate://automation-structures/0.3.1/")
+        identity_path.write_text(json.dumps(published), encoding="utf-8")
+        if load_automation_structures_manifest(identity_primary) != published or len(verus_mutations(identity_primary)) != len(VERUS_MUTATIONS):
+            raise AssertionError("legacy published source admission or mutation scope changed")
+        development = dict(kind="development-copy/1", crate="automation-structures", version="0.3.2",
+            path="rust/automation-structures", source_locator_prefix="development-copy://automation-structures/0.3.2/")
+        # Version-only metadata exercises dispatch without inventing an archive,
+        # VCS identity or an admitted published 0.3.2 source descriptor.
+        published_version_only = dict(crate="automation-structures", version="0.3.2")
+        current_profile = verus_implementation_profile(development)
+        if (verus_implementation_profile(published_version_only) != current_profile
+                or current_profile[0] != 37 or len(current_profile[1]) != 141
+                or len(DEVELOPMENT_VERUS_SELECTOR_OVERRIDES) != 15):
+            raise AssertionError("local and published 0.3.2 implementation profiles differ")
+        current_remove_pair = next(mutation for mutation in current_profile[1]
+            if mutation.id == "relationship-graph-remove-pair")
+        historical_remove_pair = next(mutation for mutation in VERUS_MUTATIONS
+            if mutation.id == "relationship-graph-remove-pair")
+        if (current_remove_pair.needle != historical_remove_pair.needle
+                or current_remove_pair.replacement != "                let _removed = Some((key, ()));\n"
+                or historical_remove_pair.replacement != "                let _removed = (key, ());\n"):
+            raise AssertionError("Registry deletion omission lost its version-bound return shape")
+        for retained_version in ("0.2.3", "0.2.4", "0.3.0", "0.3.1"):
+            if verus_implementation_profile(dict(crate="automation-structures", version=retained_version)) != (36, VERUS_MUTATIONS):
+                raise AssertionError("historical implementation profile changed")
+        identity_path.write_text(json.dumps(published_version_only), encoding="utf-8")
+        try:
+            load_automation_structures_manifest(identity_primary)
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError("version profile admitted an incomplete published source identity")
+        try:
+            verus_implementation_profile(dict(crate="automation-structures", version="0.3.3"))
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError("unknown canonical version silently selected a legacy profile")
+        for invalid in (dict(development, path="other/copy"), dict(development, version="0.3.3"),
+                        dict(development, archive_sha256="0" * 64),
+                        dict(development, source_locator_prefix="crate://automation-structures/0.3.2/")):
+            identity_path.write_text(json.dumps(invalid), encoding="utf-8")
+            try:
+                load_automation_structures_manifest(identity_primary)
+            except RuntimeError:
+                pass
+            else:
+                raise AssertionError("invalid development role admitted")
+        identity_path.write_text(json.dumps(development), encoding="utf-8")
+        identity_crate = identity_primary.parent / development["path"]
+        (identity_crate / "src").mkdir(parents=True)
+        (identity_crate / "verification").mkdir()
+        (identity_crate / "Cargo.toml").write_text('[package]\nname="automation-structures"\nversion="0.3.2"\n', encoding="utf-8")
+        (identity_crate / "src/lib.rs").write_text("", encoding="utf-8")
+        (identity_crate / "verification/run_verus_gate.sh").write_text("", encoding="utf-8")
+        identity_environment = {name: os.environ.get(name) for name in (
+            "AUTOMATION_STRUCTURES_CRATE_ROOT", "AUTOMATION_STRUCTURES_SOURCE_FINGERPRINT")}
+        try:
+            os.environ["AUTOMATION_STRUCTURES_CRATE_ROOT"] = str(identity_crate)
+            os.environ["AUTOMATION_STRUCTURES_SOURCE_FINGERPRINT"] = source_fingerprint(identity_crate)
+            if find_verus_root(identity_primary) != identity_crate or len(verus_mutations(identity_primary)) != len(VERUS_MUTATIONS) + 1:
+                raise AssertionError("exact development source or explicit joint-profile control was not admitted")
+            (identity_crate / "src/lib.rs").write_text("changed", encoding="utf-8")
+            try:
+                find_verus_root(identity_primary)
+            except RuntimeError:
+                pass
+            else:
+                raise AssertionError("changed development source escaped its transported identity")
+            os.environ["AUTOMATION_STRUCTURES_CRATE_ROOT"] = str(root / "unrelated")
+            try:
+                find_verus_root(identity_primary)
+            except RuntimeError:
+                pass
+            else:
+                raise AssertionError("foreign development root admitted")
+        finally:
+            for name, value in identity_environment.items():
+                if value is None:
+                    os.environ.pop(name, None)
+                else:
+                    os.environ[name] = value
 
         backend_contract = root / "proof-backend-contract"
         backend_contract.mkdir()
@@ -4702,6 +5098,7 @@ def command_self_test() -> int:
         json.dumps(
             {
                 "runner_self_test": "pass",
+                "descendant_timeout_cleanup": 1,
                 "source_modules": 1,
                 "overlay_modules": 2,
                 "scratch_directories_rejected": 3,
@@ -5015,32 +5412,19 @@ def execute_tlaps(item: WorkItem, work: Path, timeout: int) -> RunResult:
 
 
 def execute_verus(item: WorkItem, crate: Path, timeout: int) -> RunResult:
-    command = [
-        "verus",
-        "src/lib.rs",
-        "--cfg",
-        'feature="proof-api"',
-        "--crate-name",
-        "automation_structures",
-        "--crate-type=lib",
-        "--triggers-mode",
-        "silent",
-        "--multiple-errors",
-        "24",
-    ]
-    code, output, seconds = run_process(command, crate, timeout)
+    command, code, output, seconds = verify_verus_source(crate, "src/lib.rs", timeout)
     matches = re.findall(r"verification results::\s*([0-9]+) verified,\s*([0-9]+) errors", output)
     signature = "FAILED"
     status = "fail"
     if matches:
         verified, errors = matches[-1]
         signature = f"VERUS|verified={verified}|errors={errors}"
-        status = "pass" if errors == "0" and code == 0 else "fail"
+        status = "pass" if int(verified) > 0 and errors == "0" and code == 0 else "fail"
     if code != 0:
         signature += f"|rc={code}"
     if code == 124:
         status = "timeout"
-    return RunResult(item, status, seconds, signature, command, output)
+    return RunResult(item, status, seconds, signature, command, output, canonical_build_environment())
 
 
 def verus_result(output: str) -> tuple[int, int] | None:
@@ -5051,25 +5435,302 @@ def verus_result(output: str) -> tuple[int, int] | None:
     return int(verified), int(errors)
 
 
-def verify_verus_source(crate: Path, source: str, timeout: int) -> tuple[list[str], int, str, float]:
-    command = ["verus", source, "--crate-type=lib", "--triggers-mode", "silent"]
+def verus_diagnostic_expectations(crate: Path, mutation: Mutation) -> list[dict[str, object]]:
+    """Resolve reviewed predicate spans from the actual source used in this phase."""
+    if not mutation.rejection_diagnostics:
+        raise RuntimeError("control has no reviewed intended-diagnostic binding: " + mutation.id)
+    def predicate(binding) -> dict[str, object]:
+        relative = Path(binding.source)
+        if (relative.is_absolute() or ".." in relative.parts or not relative.parts
+                or not binding.site or not binding.focus or binding.site.count(binding.focus) != 1):
+            raise RuntimeError("invalid intended-diagnostic binding: " + mutation.id)
+        try:
+            data = (crate / relative).read_bytes()
+            text = data.decode("utf-8")
+        except (OSError, UnicodeError) as error:
+            raise RuntimeError("intended-diagnostic source is unreadable: " + mutation.id) from error
+        if text.count(binding.site) != 1:
+            raise RuntimeError("intended-diagnostic site is not unique: " + mutation.id)
+        start = text.index(binding.site) + binding.site.index(binding.focus)
+        end = start + len(binding.focus)
+        def position(offset: int) -> tuple[int, int]:
+            line_start = text.rfind("\n", 0, offset) + 1
+            # The reviewed initial registrations are ASCII. Do not guess a
+            # verifier's column convention for a future non-ASCII source span.
+            if not text[line_start:offset].isascii():
+                raise RuntimeError("non-ASCII diagnostic column requires a reviewed binding")
+            return text.count("\n", 0, offset) + 1, offset - line_start + 1
+        return dict(source=relative.as_posix(),
+            source_sha256=hashlib.sha256(data).hexdigest(), focus=binding.focus,
+            start=list(position(start)), end=list(position(end)))
+    required: list[dict[str, object]] = []
+    for binding in mutation.rejection_diagnostics:
+        is_precondition = binding.message == "precondition not satisfied"
+        if (binding.message not in {"assertion failed", "postcondition not satisfied",
+                                    "precondition not satisfied", "invariant not satisfied at end of loop body"}
+                or is_precondition != isinstance(binding.precondition, VerusPrecondition)
+                or not is_precondition and binding.precondition is not None):
+            raise RuntimeError("invalid intended-diagnostic kind or precondition binding: " + mutation.id)
+        row = dict(message=binding.message, **predicate(binding))
+        if is_precondition:
+            row['precondition'] = predicate(binding.precondition)
+        required.append(row)
+    if len({(row['message'], row['source'], tuple(row['start']), tuple(row['end']))
+            for row in required}) != len(required):
+        raise RuntimeError("duplicate intended-diagnostic binding: " + mutation.id)
+    return required
+
+
+def match_verus_diagnostics(
+    crate: Path, mutation: Mutation, output: str, *,
+    source_aliases: dict[str, str] | None = None,
+    package_name: str = "automation-structures",
+) -> dict[str, object]:
+    """Require every error diagnostic to match exactly one reviewed predicate span."""
+    required = verus_diagnostic_expectations(crate, mutation)
+    # An isolated consumer can have a different physical crate root. Its
+    # qualifier must establish copy custody before declaring exact source aliases;
+    # a basename, arbitrary prefix or suffix match cannot establish that binding.
+    aliases = {} if source_aliases is None else dict(source_aliases)
+    required_sources = {row['source'] for row in required} | {
+        row['precondition']['source'] for row in required if 'precondition' in row}
+    if package_name not in {"automation-structures", "automation-structures-downstream-verus"}:
+        raise RuntimeError("unreviewed diagnostic package identity")
+    for physical, logical in aliases.items():
+        if (not isinstance(physical, str) or not physical or "\\" in physical
+                or len(physical.lstrip("/").split("/")) < 2 or any(ord(character) < 32 for character in physical)
+                or any(part in {"", ".", ".."} for part in physical.lstrip("/").split("/"))
+                or logical not in required_sources):
+            raise RuntimeError("invalid exact diagnostic source alias")
+    clean = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", output)
+    headers = list(re.finditer(r"(?m)^error(?:\[[A-Za-z][0-9]+\])?: ([^\r\n]+)\r?$", clean))
+    observed: list[dict[str, object]] = []
+    summaries: list[str] = []
+    summary_errors: list[int] = []
+    matched: set[int] = set()
+    def source_identity(physical: str) -> str:
+        source = physical.replace("\\", "/")
+        prefix = crate.as_posix().rstrip("/") + "/"
+        if source.startswith(prefix):
+            source = source[len(prefix):]
+        elif source.startswith("./"):
+            source = source[2:]
+        return aliases.get(source, source)
+
+    def matches_precondition(row, block: str) -> bool:
+        requirement = row.get('precondition')
+        if requirement is None:
+            return True
+        locations = list(re.finditer(r"(?m)^\s*:::\s+(.+):([0-9]+):([0-9]+)\s*$", block))
+        if len(locations) != 1:
+            return False
+        location = locations[0]
+        point = (int(location.group(2)), int(location.group(3)))
+        if (source_identity(location.group(1)) != requirement['source']
+                or not tuple(requirement['start']) <= point < tuple(requirement['end'])):
+            return False
+        excerpts = re.findall(r"(?m)^\s*([0-9]+)\s+\| ?([^\r\n]*)\r?\n"
+            r"\s*\|\s*[-^]+\s+failed precondition\s*$", block[location.end():])
+        lines = (crate / requirement['source']).read_text(encoding='utf-8').splitlines()
+        return (len(excerpts) == 1 and int(excerpts[0][0]) == point[0]
+                and excerpts[0][1] == lines[point[0] - 1])
+    for ordinal, header in enumerate(headers):
+        message = header.group(1)
+        summary = re.fullmatch(r"(?:could not compile `" + re.escape(package_name) + r"` \(lib\) due to|aborting due to) "
+                              r"([0-9]+) previous errors?", message)
+        if summary is not None:
+            summaries.append(message)
+            summary_errors.append(int(summary.group(1)))
+            continue
+        block = clean[header.end():headers[ordinal + 1].start() if ordinal + 1 < len(headers) else len(clean)]
+        location = re.search(r"(?m)^\s*-->\s+(.+):([0-9]+):([0-9]+)\s*$", block)
+        source = None
+        point = None
+        if location is not None:
+            source = source_identity(location.group(1))
+            point = (int(location.group(2)), int(location.group(3)))
+        candidates = [index for index, row in enumerate(required)
+            if row['message'] == message and row['source'] == source and point is not None
+            and tuple(row['start']) <= point < tuple(row['end']) and matches_precondition(row, block)]
+        accepted = len(candidates) == 1 and candidates[0] not in matched
+        if accepted:
+            matched.add(candidates[0])
+        observed.append(dict(message=message, source=source, position=point,
+            required_index=candidates[0] if accepted else None, accepted=accepted))
+    return dict(required=required, observed=observed, compiler_summaries=summaries,
+                source_aliases=aliases, package_name=package_name,
+                accepted=len(observed) == len(required) and len(matched) == len(required)
+                         and len(summary_errors) <= 1 and all(count == len(observed) for count in summary_errors)
+                         and all(row['accepted'] for row in observed))
+
+
+def canonical_build_environment() -> dict[str, str]:
+    target = os.environ.get("CARGO_TARGET_DIR")
+    if not target or not Path(target).is_absolute():
+        raise RuntimeError("implementation checks require a stable mounted CARGO_TARGET_DIR")
+    # Cargo needs writable lock/cache metadata even with an immutable offline
+    # registry. Bind that registry without copying it or creating another target.
+    cargo_home = RUNTIME_ROOT / "cargo-home"
+    cargo_home.mkdir(parents=True, exist_ok=True)
+    registry = cargo_home / "registry"
+    if not registry.exists():
+        registry.symlink_to(Path("/usr/local/cargo/registry"), target_is_directory=True)
+    return {
+        "CARGO_HOME": str(cargo_home),
+        "CARGO_TARGET_DIR": target,
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_NET_OFFLINE": "true",
+        "RUST_TEST_THREADS": "1",
+        "RAYON_NUM_THREADS": "2",
+    }
+
+
+def verify_verus_source(
+    crate: Path, source: str, timeout: int, *, modules: tuple[str, ...] | None = None,
+) -> tuple[list[str], int, str, float]:
+    environment = canonical_build_environment()
     if source == "src/lib.rs":
-        command.extend(
-            [
-                "--cfg",
-                'feature="proof-api"',
-                "--crate-name",
-                "automation_structures",
-                "--multiple-errors",
-                "24",
-            ]
-        )
-    code, output, seconds = run_process(command, crate, timeout)
+        # A warm Cargo build can finish without invoking Verus. Refresh only the
+        # subject package; retain dependency output in the one mounted cache.
+        gate = 'sh verification/run_verus_gate.sh "$CARGO_TARGET_DIR"'
+        if modules is not None:
+            if not modules or any(name and re.fullmatch(r"[a-z_][a-z0-9_]*(?:::[a-z_][a-z0-9_]*)*", name) is None for name in modules):
+                raise RuntimeError("partition verification requires exact module identifiers")
+            # Same published Cargo binding, with the documented selection flags.
+            # No function, specification, lifetime or erasure check is disabled.
+            gate = ('cargo verus build --offline --locked --all-features '
+                    '--fwd-verus-args-to roots -- --triggers-mode silent --multiple-errors 24')
+            gate += ''.join(' --verify-module ' + name if name else ' --verify-root' for name in modules)
+        command = [
+            "sh", "-c",
+            'cargo clean --offline --locked -p automation-structures && ' + gate,
+        ]
+    else:
+        manifest = tomllib.loads((crate / "Cargo.toml").read_text(encoding="utf-8"))
+        edition = manifest.get("package", {}).get("edition")
+        if not isinstance(edition, str) or edition not in {"2015", "2018", "2021", "2024"}:
+            raise RuntimeError("isolated proof module lacks an explicit supported package edition")
+        command = ["verus", source, "--edition", edition, "--crate-type=lib", "--triggers-mode", "silent"]
+    code, output, seconds = run_process(command, crate, timeout, environment=environment)
     return command, code, output, seconds
 
 
+def execute_partitioned_verus_control(
+    item: WorkItem, crate: Path, mutation: Mutation, timeout: int,
+    full_positive: tuple[int, int], positive_output: str, positive_seconds: float,
+    positive_command: list[str],
+) -> RunResult:
+    """Check one complete module and its complete complement on identical sources."""
+    target = "primitives::backtracking_traversal"
+    root_text = (crate / "src/lib.rs").read_text(encoding="utf-8")
+    parent_text = (crate / "src/primitives/mod.rs").read_text(encoding="utf-8")
+    declarations = r"(?m)^(?:pub )?mod ([a-z_][a-z0-9_]*);\s*$"
+    roots = set(re.findall(declarations, root_text))
+    children = set(re.findall(declarations, parent_text))
+    # This pinned parent contains declarations/docs only, hence has no omitted body.
+    parent_remainder = re.sub(r"(?m)^\s*//[^\n]*", "", parent_text)
+    parent_remainder = re.sub(declarations, "", parent_remainder).strip()
+    if (mutation.source != "src/primitives/backtracking_traversal.rs"
+            or "primitives" not in roots or "backtracking_traversal" not in children
+            or parent_remainder or "fn commit_visit(" not in (crate / mutation.source).read_text(encoding="utf-8")):
+        raise RuntimeError("complete Backtracking partition declaration is not satisfied")
+    # Verus accepts proof-bearing modules, not declaration-only containers.
+    # Ask this exact compiler for its selectable module inventory; a deliberately
+    # absent selector is a diagnostic refusal, never a positive proof result.
+    sentinel = "auditoad_missing_verification_module_inventory"
+    inventory_command, inventory_code, inventory_output, inventory_seconds = verify_verus_source(
+        crate, "src/lib.rs", timeout, modules=(sentinel,))
+    listed = re.search(r"available modules are:\n(.*?)(?:\n\s*or use --verify-root)",
+                      inventory_output, flags=re.DOTALL)
+    available = sorted(set(re.findall(
+        r"(?m)^\s*-\s+([a-z_][a-z0-9_]*(?:::[a-z_][a-z0-9_]*)*)\s*$",
+        "" if listed is None else listed.group(1))))
+    inventory = dict(command=inventory_command, exit_code=inventory_code,
+        seconds=inventory_seconds, available_modules=available,
+        expected_refusal="could not find module " + sentinel)
+    if (inventory_code != 101 or inventory["expected_refusal"] not in inventory_output
+            or target not in available or any(name.split("::")[0] not in roots for name in available)):
+        return RunResult(item, "timeout" if inventory_code == 124 else "fail",
+            positive_seconds + inventory_seconds, "PARTITION_MODULE_INVENTORY_FAILED",
+            inventory_command, positive_output + "\nModule inventory diagnostic:\n" + inventory_output,
+            verification_partition=dict(full_positive_verified=full_positive[0],
+                full_positive_command=positive_command, module_inventory=inventory))
+    complement = tuple([name for name in available
+        if name != target and not name.startswith(target + "::")])
+    groups = ((target,), complement)
+    metadata: dict[str, object] = dict(full_positive_verified=full_positive[0],
+        full_positive_command=positive_command,
+        target_modules=[target], complement_modules=list(complement),
+        root_source_sha256=hashlib.sha256(root_text.encode()).hexdigest(),
+        parent_source_sha256=hashlib.sha256(parent_text.encode()).hexdigest(),
+        module_inventory=inventory, steps=[], positive=[], mutants=[])
+    combined = [positive_output, "\nModule inventory diagnostic:\n" + inventory_output]
+    total_seconds = positive_seconds + inventory_seconds
+    command: list[str] = []
+
+    def verify_group(phase: str, modules: tuple[str, ...]) -> tuple[int, tuple[int, int] | None]:
+        nonlocal total_seconds, command
+        command, code, output, seconds = verify_verus_source(crate, "src/lib.rs", timeout, modules=modules)
+        total_seconds += seconds
+        observed = verus_result(output)
+        combined.append(f"\nPartition {phase}: {json.dumps(list(modules))}\n" + output)
+        step = dict(phase=phase, modules=list(modules), command=command,
+            exit_code=code, verified=None if observed is None else observed[0],
+            errors=None if observed is None else observed[1], seconds=seconds)
+        if phase.startswith("mutant-"):
+            step['source_stable'] = source_fingerprint(crate) == metadata['mutant_source_sha256']
+            if modules == (target,):
+                step['diagnostics'] = (match_verus_diagnostics(crate, mutation, output)
+                    if step['source_stable'] else dict(accepted=False, reason='mutant source changed'))
+        metadata["steps"].append(step)
+        return code, observed
+
+    def finish(status: str, signature: str) -> RunResult:
+        return RunResult(item, status, total_seconds, signature, command,
+            "\n".join(combined), verification_partition=metadata)
+
+    for ordinal, modules in enumerate(groups):
+        print(f"  positive partition {ordinal + 1}/2", file=sys.stderr, flush=True)
+        code, observed = verify_group(f"positive-{ordinal + 1}", modules)
+        if code != 0 or observed is None or observed[0] <= 0 or observed[1] != 0:
+            return finish("timeout" if code == 124 else "fail", f"PARTITION_POSITIVE_FAILED|group={ordinal + 1}|rc={code}")
+        metadata["positive"].append(observed[0])
+    if sum(metadata["positive"]) != full_positive[0]:
+        return finish("fail", f"PARTITION_COVERAGE_DIFFERS|full={full_positive[0]}|parts={metadata['positive']}")
+    try:
+        apply_exact_mutation(crate / mutation.source, mutation)
+        verus_diagnostic_expectations(crate, mutation)
+    except RuntimeError as error:
+        combined.append(str(error))
+        return finish("fail", "MUTATION_SETUP_FAILED")
+    metadata['mutant_source_sha256'] = source_fingerprint(crate)
+    signatures: list[str] = []
+    for repetition in range(2):
+        total_verified, total_errors = 0, 0
+        for ordinal, modules in enumerate(groups):
+            print(f"  mutant repetition {repetition + 1}/2, partition {ordinal + 1}/2", file=sys.stderr, flush=True)
+            code, observed = verify_group(f"mutant-{repetition + 1}-{ordinal + 1}", modules)
+            expected_errors = 1 if ordinal == 0 else 0
+            expected_code = 101 if ordinal == 0 else 0
+            if (code != expected_code or observed is None or observed[1] != expected_errors
+                    or observed[0] + observed[1] != metadata["positive"][ordinal]
+                    or not metadata['steps'][-1]['source_stable']
+                    or (ordinal == 0 and not metadata['steps'][-1]['diagnostics']['accepted'])):
+                return finish("timeout" if code == 124 else "fail",
+                    f"PARTITION_REJECTION_NOT_ISOLATED|group={ordinal + 1}|observed={observed}|rc={code}")
+            total_verified += observed[0]
+            total_errors += observed[1]
+        metadata["mutants"].append(dict(verified=total_verified, errors=total_errors))
+        signatures.append(f"VERUS|verified={total_verified}|errors={total_errors}|rc=101")
+    stable = signatures[0] == signatures[1]
+    return finish("pass" if stable else "fail",
+        f"REJECTED_PARTITIONED|{signatures[0]}|stable={str(stable).lower()}|dependency-closure={full_positive[0] - 1}")
+
+
 def apply_exact_mutation(path: Path, mutation: Mutation) -> None:
-    text = path.read_text(encoding="utf-8")
+    # Diagnostic bindings and custody refer to physical UTF-8 bytes. Text-mode
+    # newline conversion would change every line when this owner runs on Windows.
+    text = path.read_bytes().decode("utf-8")
     if mutation.anchor_start is None:
         if text.count(mutation.needle) != 1:
             raise RuntimeError(
@@ -5090,7 +5751,7 @@ def apply_exact_mutation(path: Path, mutation: Mutation) -> None:
             )
         segment = segment.replace(mutation.needle, mutation.replacement, 1)
         updated = text[:start] + segment + text[end:]
-    path.write_text(updated, encoding="utf-8")
+    path.write_bytes(updated.encode("utf-8"))
 
 
 def execute_verus_control(
@@ -5101,8 +5762,43 @@ def execute_verus_control(
     timeout: int,
 ) -> RunResult:
     source_before = source_fingerprint(mounted_source)
+    canonical_before = source_fingerprint(source_crate)
 
     def with_custody(result: RunResult) -> RunResult:
+        if result.status == "pass":
+            # Every current control mutates exactly this one source, including
+            # the detector self-test's contract/body pair. Restore bytes from
+            # the immutable input, then rerun the original positive root.
+            original = (source_crate / mutation.source).read_bytes()
+            (crate / mutation.source).write_bytes(original)
+            root = mutation.source if item.module == MUTATION_DETECTOR_SELF_TEST_ID else verification_root
+            restored_command, restored_code, restored_output, restored_seconds = verify_verus_source(
+                crate, root, timeout,
+            )
+            restored = verus_result(restored_output)
+            original_fingerprint = source_fingerprint(source_crate)
+            restored_fingerprint = source_fingerprint(crate)
+            restored_ok = (restored_code == 0 and restored == positive and positive[0] > 0
+                and canonical_before == original_fingerprint == restored_fingerprint)
+            phases = copy.deepcopy(result.verification_partition)
+            # Appending a restored proof must not turn a rejected mutant's
+            # recorded error count into zero in RunResult.record().
+            if not phases.get("mutants"):
+                mutant = verus_result(result.output)
+                if mutant is not None:
+                    phases["mutants"] = [dict(verified=mutant[0], errors=mutant[1])]
+            phases["restoration"] = dict(command=restored_command, root=root,
+                exit_code=restored_code, verified=None if restored is None else restored[0],
+                errors=None if restored is None else restored[1], seconds=restored_seconds,
+                expected_verified=positive[0], original_source_sha256=canonical_before,
+                input_source_after_sha256=original_fingerprint,
+                restored_source_sha256=restored_fingerprint, accepted=restored_ok)
+            result = dataclasses.replace(result,
+                status=result.status if restored_ok else "timeout" if restored_code == 124 else "fail",
+                seconds=result.seconds + restored_seconds,
+                signature=result.signature + f"|restoration={'passed' if restored_ok else 'failed'}",
+                output=result.output + "\nRestored positive:\n" + restored_output,
+                verification_partition=phases)
         source_after = source_fingerprint(mounted_source)
         if source_after != source_before:
             return dataclasses.replace(
@@ -5115,7 +5811,10 @@ def execute_verus_control(
                     + f"after={source_after}\n"
                 ),
             )
-        return dataclasses.replace(result, signature=f"{result.signature}|source-custody=stable")
+        return dataclasses.replace(
+            result, signature=f"{result.signature}|source-custody=stable",
+            environment=canonical_build_environment(),
+        )
 
     if item.module == MUTATION_DETECTOR_SELF_TEST_ID:
         mutation = next(value for value in VERUS_MUTATIONS if value.id == "budget-allocation-credit")
@@ -5199,14 +5898,28 @@ def execute_verus_control(
             )
         )
 
-    mutation = next(value for value in VERUS_MUTATIONS if value.id == item.module)
+    mutation = item.mutation
+    if mutation is None or mutation.id != item.module:
+        return with_custody(RunResult(item, "fail", 0.0,
+            "CONTROL_MUTATION_BINDING_INVALID", [],
+            "Discovered control lacks its exact source-role mutation binding"))
+    if mutation.id not in VERUS_EXPECTED_SURVIVORS and not mutation.rejection_diagnostics:
+        return with_custody(RunResult(item, "fail", 0.0,
+            "CONTROL_DIAGNOSTIC_BINDING_UNDECLARED", [],
+            "No reviewed intended-diagnostic binding for " + mutation.id))
     controls_root = work_root / "verus-controls"
     controls_root.mkdir(parents=True, exist_ok=True)
     crate = Path(tempfile.mkdtemp(prefix=f"{mutation.id}-", dir=controls_root))
     shutil.copytree(source_crate, crate, dirs_exist_ok=True)
+    if mutation.id not in VERUS_EXPECTED_SURVIVORS:
+        try:
+            verus_diagnostic_expectations(crate, mutation)
+        except RuntimeError as error:
+            return with_custody(RunResult(item, "fail", 0.0,
+                "CONTROL_DIAGNOSTIC_BINDING_INVALID", [], str(error)))
     verification_root = mutation.verification_root or "src/lib.rs"
     command, positive_code, positive_output, positive_seconds = verify_verus_source(
-        crate, verification_root, timeout
+        crate, verification_root, timeout,
     )
     positive = verus_result(positive_output)
     if positive_code != 0 or positive is None or positive[1] != 0:
@@ -5220,6 +5933,12 @@ def execute_verus_control(
                 positive_output,
             )
         )
+    print(f"  positive baseline: {positive[0]} verified, 0 errors", file=sys.stderr, flush=True)
+    if mutation.partition_verification:
+        return with_custody(execute_partitioned_verus_control(
+            item, crate, mutation, timeout, positive, positive_output, positive_seconds,
+            command,
+        ))
     try:
         apply_exact_mutation(crate / mutation.source, mutation)
     except RuntimeError as error:
@@ -5239,7 +5958,7 @@ def execute_verus_control(
         total_seconds = positive_seconds
         for _ in range(2):
             command, mutant_code, mutant_output, mutant_seconds = verify_verus_source(
-                crate, verification_root, timeout
+                crate, verification_root, timeout,
             )
             combined.append(mutant_output)
             total_seconds += mutant_seconds
@@ -5283,19 +6002,28 @@ def execute_verus_control(
     signatures: list[str] = []
     combined = [positive_output]
     total_seconds = positive_seconds
-    for _ in range(2):
+    diagnostic_steps: list[dict[str, object]] = []
+    mutant_before = source_fingerprint(crate)
+    for repetition in range(2):
+        print(f"  mutant repetition {repetition + 1}/2", file=sys.stderr, flush=True)
         mutant_command, mutant_code, mutant_output, mutant_seconds = verify_verus_source(
-            crate, verification_root, timeout
+            crate, verification_root, timeout,
         )
         command = mutant_command
         combined.append(mutant_output)
         total_seconds += mutant_seconds
         result = verus_result(mutant_output)
+        source_stable = source_fingerprint(crate) == mutant_before
+        diagnostics = (match_verus_diagnostics(crate, mutation, mutant_output)
+            if source_stable else dict(accepted=False, reason='mutant source changed'))
+        diagnostic_steps.append(dict(repetition=repetition + 1, command=mutant_command,
+            exit_code=mutant_code, diagnostics=diagnostics, source_stable=source_stable))
         isolated_rejection = (
-            mutant_code == 1
+            mutant_code == (101 if verification_root == "src/lib.rs" else 1)
             and result is not None
             and result[1] == 1
             and result[0] + result[1] == positive[0]
+            and diagnostics['accepted'] and source_stable
         )
         if not isolated_rejection:
             observed = (
@@ -5312,6 +6040,8 @@ def execute_verus_control(
                     f"|mutant={observed}|rc={mutant_code}",
                     command,
                     "\n".join(combined),
+                    verification_partition=dict(mutant_source_sha256=mutant_before,
+                                                diagnostic_steps=diagnostic_steps),
                 )
             )
         signatures.append(
@@ -5327,62 +6057,28 @@ def execute_verus_control(
             f"|dependency-closure={positive[0] - 1}",
             command,
             "\n".join(combined),
+            verification_partition=dict(mutant_source_sha256=mutant_before,
+                                        diagnostic_steps=diagnostic_steps),
         )
     )
 
 
-def compile_verus_library(crate: Path, timeout: int) -> tuple[bool, str, float]:
-    command = [
-        "verus",
-        "src/lib.rs",
-        "--cfg",
-        'feature="proof-api"',
-        "--crate-type=lib",
-        "--compile",
-        "--crate-name",
-        "automation_structures",
-        "--out-dir",
-        ".",
-        "--triggers-mode",
-        "silent",
-        "--multiple-errors",
-        "24",
-    ]
-    code, output, seconds = run_process(command, crate, timeout)
-    return code == 0 and (crate / "libautomation_structures.rlib").is_file(), output, seconds
-
-
 def execute_rust_test(item: WorkItem, crate: Path, timeout: int) -> RunResult:
-    verus_dir = Path(os.environ.get("VERUS_BIN", "/opt/verus/verus-x86-linux/verus")).parent
-    executable = crate / f"{item.source.stem}.exe"
-    command = [
-        os.environ.get("RUSTUP_BIN", "rustup"),
-        "run",
-        "1.95.0",
-        "rustc",
-        str(crate / "verification" / "known-answer" / item.source.name),
-        "--extern",
-        f"automation_structures={crate / 'libautomation_structures.rlib'}",
-        "--extern",
-        f"vstd={verus_dir / 'libvstd.rlib'}",
-        "-L",
-        f"dependency={verus_dir}",
-        "-o",
-        str(executable),
-    ]
-    code, output, build_seconds = run_process(command, crate, timeout)
-    if code != 0 or not executable.is_file():
-        return RunResult(item, "fail", build_seconds, "RUSTC_FAILED", command, output)
-    run_code, run_output, run_seconds = run_process([str(executable)], crate, timeout)
-    status = "pass" if run_code == 0 and "KAT_RESULT: FAIL" not in run_output else "fail"
+    environment = canonical_build_environment()
+    command = ["env", f"KNOWN_ANSWER_CASE={item.source.stem}", "sh", "verification/run_known_answer.sh"]
+    code, output, seconds = run_process(command, crate, timeout, environment=environment)
+    status = "pass" if code == 0 and "KAT_RESULT: FAIL" not in output else "fail"
+    if code == 124:
+        status = "timeout"
     signature = "KAT_PASS" if status == "pass" else "KAT_FAIL"
     return RunResult(
         item,
         status,
-        build_seconds + run_seconds,
+        seconds,
         signature,
-        command + ["&&", str(executable)],
-        output + run_output,
+        command,
+        output,
+        environment,
     )
 
 
@@ -5449,7 +6145,6 @@ def execute_items(
             verus_work = work_root / "primary" / "verus"
             shutil.copytree(source_verus, verus_work)
 
-        rust_library_ready = False
         for index, item in enumerate(selected, start=1):
             print(f"[{index}/{len(selected)}] {item.id}", file=sys.stderr)
             tla_group = "primary" if item.scope == "primary" else item.area
@@ -5473,15 +6168,6 @@ def execute_items(
                 )
             elif item.engine == "rust":
                 assert verus_work is not None
-                if not rust_library_ready:
-                    ok, output, seconds = compile_verus_library(verus_work, args.timeout)
-                    if not ok:
-                        result = RunResult(item, "fail", seconds, "VERUS_COMPILE_FAILED", [], output)
-                        results.append(result)
-                        if args.fail_fast:
-                            break
-                        continue
-                    rust_library_ready = True
                 result = execute_rust_test(item, verus_work, args.timeout)
             else:
                 raise RuntimeError(f"unsupported engine: {item.engine}")
@@ -5645,18 +6331,26 @@ def command_doctor(primary: Path) -> int:
             hashlib.sha256(tla_jar.read_bytes()).hexdigest() if tla_jar.is_file() else "unavailable"
         ),
     }
+    canonical = find_verus_root(primary)
+    tools["canonical_source"] = dict(load_automation_structures_manifest(primary),
+        source_root=canonical.as_posix(), source_fingerprint=source_fingerprint(canonical))
     commands = {
         "java": ["java", "-version"],
         "tlc": ["java", "-cp", "/opt/tlaplus/tla2tools.jar", "tlc2.TLC", "-help"],
         "tlaps": ["tlapm", "--version"],
         "verus": ["verus", "--version"],
         "rust": ["rustc", "--version"],
+        "cargo": ["cargo", "--version"],
+        "rustfmt": ["rustfmt", "--version"],
+        "clippy": ["clippy-driver", "--version"],
         "python": [sys.executable, "--version"],
     }
+    healthy = True
     for name, command in commands.items():
         executable = shutil.which(command[0])
         if executable is None:
             tools[name] = "unavailable"
+            healthy = False
             continue
         code, output, _ = run_process(command, Path.cwd(), 30)
         first = next((line.strip() for line in output.splitlines() if line.strip()), "no output")
@@ -5666,9 +6360,12 @@ def command_doctor(primary: Path) -> int:
         elif name == "verus":
             match = re.search(r"^\s*Version:\s*(.+)$", output, re.M)
             first = f"Verus {match.group(1).strip()}" if match else first
-        tools[name] = first if code in {0, 1} else f"error {code}: {first}"
+        allowed_codes = {0, 1} if name == "tlc" else {0}
+        if code not in allowed_codes:
+            healthy = False
+        tools[name] = first if code in allowed_codes else f"error {code}: {first}"
     print(json.dumps(tools, indent=2))
-    return 0
+    return 0 if healthy else 1
 
 
 def command_run(
@@ -5694,6 +6391,9 @@ def command_run(
         print_item_table(selected, repository_root)
     print(f"\nselected {len(selected)} work items")
     source_before = source_fingerprint(primary)
+    canonical_root = find_verus_root(primary)
+    canonical_before = source_fingerprint(canonical_root)
+    canonical_role = load_automation_structures_manifest(primary)
     selection_fingerprint = hashlib.sha256(
         json.dumps(
             [item.record(repository_root) for item in selected],
@@ -5713,6 +6413,8 @@ def command_run(
         return 2
     source_after = source_fingerprint(primary)
     source_stable = source_before == source_after
+    canonical_after = source_fingerprint(canonical_root)
+    canonical_stable = canonical_before == canonical_after
     observed: dict[str, set[tuple[str, str]]] = {}
     for result in results:
         observed.setdefault(result.item.id, set()).add((result.status, result.signature))
@@ -5723,12 +6425,16 @@ def command_run(
         "source_fingerprint_before": source_before,
         "source_fingerprint_after": source_after,
         "source_stable": source_stable,
+        "canonical_source_binding": dict(canonical_role,
+            source_root=canonical_root.as_posix(),
+            source_fingerprint_before=canonical_before,
+            source_fingerprint_after=canonical_after, source_stable=canonical_stable),
         "selection_fingerprint": selection_fingerprint,
         "runner_sha256": runner_sha256,
         "selection_count": len(selected),
         "execution_count": len(results),
         "repeat": args.repeat,
-        "stable": not unstable and source_stable,
+        "stable": not unstable and source_stable and canonical_stable,
         "unstable": unstable,
         "results": [result.record(repository_root) for result in results],
     }
@@ -5753,10 +6459,13 @@ def command_run(
             print(f"  {item_id}: {values}")
     if not source_stable:
         print(f"source changed during execution: before={source_before} after={source_after}")
+    if not canonical_stable:
+        print(f"canonical source changed during execution: before={canonical_before} after={canonical_after}")
     return 0 if (
         failed == 0
         and not unstable
         and source_stable
+        and canonical_stable
         and len(results) == len(repeated)
     ) else 1
 

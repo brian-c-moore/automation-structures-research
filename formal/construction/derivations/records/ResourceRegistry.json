@@ -105,7 +105,7 @@
   "executable_pointers": [
     "formal/structures/ResourceRegistry/refinement/ResourceRegistryImplRefinesSpec.tla",
     "formal/structures/ResourceRegistry/refinement/ResourceRegistryImplRefinesSpec_Proof.tla",
-    "crate://automation-structures/0.2.3/src/primitives/resource_registry.rs",
+    "development-copy://automation-structures/0.3.2/src/primitives/resource_registry.rs",
     "formal/structures/ResourceRegistry/ResourceRegistry.tla",
     "formal/structures/ResourceRegistry/ResourceRegistry_Proof.tla"
   ],
@@ -205,7 +205,7 @@
       "contains": ["THEOREM UniqueMappingSafety"]
     },
     {
-      "path": "crate://automation-structures/0.2.3/src/primitives/resource_registry.rs",
+      "path": "development-copy://automation-structures/0.3.2/src/primitives/resource_registry.rs",
       "contains": ["pub struct ResourceRegistry", "pub fn register", "pub fn deregister", "pub open spec fn unique_mapping"]
     }
   ],

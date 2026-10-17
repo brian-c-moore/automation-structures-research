@@ -100,7 +100,7 @@
     "formal/structures/CompetitiveSelection/refinement/CompetitiveSelectionSoftImplRefinesSpec_NEG.tla",
     "formal/structures/CompetitiveSelection/refinement/CompetitiveSelectionMutableImplRefinesSpec_NEG.tla",
     "formal/structures/CompetitiveSelection/refinement/CompetitiveSelectionRankedImplRefinesSpec_NEG.tla",
-    "crate://automation-structures/0.2.3/src/primitives/competitive_selection.rs", "formal/structures/CompetitiveSelection/CompetitiveSelectionRanked.tla", "formal/structures/CompetitiveSelection/CompetitiveSelectionHardExclusive.tla", "formal/structures/CompetitiveSelection/CompetitiveSelectionSoftMutableScores.tla"],
+    "development-copy://automation-structures/0.3.2/src/primitives/competitive_selection.rs", "formal/structures/CompetitiveSelection/CompetitiveSelectionRanked.tla", "formal/structures/CompetitiveSelection/CompetitiveSelectionHardExclusive.tla", "formal/structures/CompetitiveSelection/CompetitiveSelectionSoftMutableScores.tla", "development-copy://automation-structures/0.3.2/src/compositions/minimum_selection.rs"],
   "library_premises": [
     "CompetitiveSelection-written-contract-refinement-profile","canonical-ranked-selection-machine", "canonical-hard-exclusive-selection-machine", "canonical-soft-mutable-score-machine", "three-canonical-selection-safety-theorems", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification"],
   "deployment_premises": ["finite-candidate-and-seat-domains", "variant-specific-score-and-weight-bounds", "stable-finite-enumeration-for-tie-breaks", "serialized-variant-state-mutation", "score-writers-reset-dependent-selection-state"],
@@ -160,7 +160,8 @@
     {"path": "formal/structures/CompetitiveSelection/CompetitiveSelectionHardExclusive_Proof.tla", "contains": ["THEOREM Safety", "THEOREM MutualExclusionSafety", "THEOREM WinnerTieBreakSafety"]},
     {"path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoftMutableScores.tla", "contains": ["UpdateScore(c, v)", "MutableScoreNext ==", "MutableScoreSpec =="]},
     {"path": "formal/structures/CompetitiveSelection/CompetitiveSelectionSoftMutableScores_Proof.tla", "contains": ["THEOREM MutableScoreSafety", "THEOREM MutableScoreNormalizationSafety", "THEOREM MutableScoreTieBoundednessSafety"]},
-    {"path": "crate://automation-structures/0.2.3/src/primitives/competitive_selection.rs", "contains": ["pub struct CompetitiveSelectionRanked", "pub struct CompetitiveSelectionHardExclusive", "pub struct CompetitiveSelectionSoft", "pub max_score: u64", "pub fn assign_next", "pub fn select", "pub fn update_scores"]}
+    {"path": "development-copy://automation-structures/0.3.2/src/primitives/competitive_selection.rs", "contains": ["pub struct CompetitiveSelectionRanked", "pub struct CompetitiveSelectionHardExclusive", "pub struct CompetitiveSelectionSoft", "pub max_score: u64", "pub fn assign_next", "pub fn select", "pub fn update_scores"]},
+    {"path": "development-copy://automation-structures/0.3.2/src/compositions/minimum_selection.rs", "contains": ["pub struct MinimumSelection", "arrangement: IndexArrangement", "hard: selection::CompetitiveSelectionHard", "selected: Buffer<usize>", "hard.evaluate()", "selected.push(item)", "pub proof fn expose_minima"]}
   ],
   "proof_binding": {"canonical_directory": "formal/structures/CompetitiveSelection", "proof_module": "CompetitiveSelectionRanked_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
   "proof_constants": ["HardSeats", "HardNULL", "SoftWeightTotal"],

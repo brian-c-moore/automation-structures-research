@@ -770,10 +770,8 @@ fn apply_next_write(
     let actual_index = pass.actuate_with(
         seat,
         heap,
-        |cell, _, _| {
-            cell.value = value;
-            Ok(())
-        },
+        |_, _, _| Ok(value),
+        |cell, value| cell.value = value,
         trace,
         subject,
     )?;

@@ -108,7 +108,7 @@
     "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
   ],
   "executable_pointers": [
-    "crate://automation-structures/0.2.3/src/modalities/sequential.rs",
+    "development-copy://automation-structures/0.3.2/src/modalities/sequential.rs",
     "formal/execution/carriers/Sequential.tla",
     "formal/execution/carriers/Sequential_Proof.tla",
     "formal/execution/carriers/refinement/Sequential/SequentialImplRefinesSpec.tla",
@@ -213,7 +213,7 @@
       "contains": ["THEOREM RefinementThm"]
     },
     {
-      "path": "crate://automation-structures/0.2.3/src/modalities/sequential.rs",
+      "path": "development-copy://automation-structures/0.3.2/src/modalities/sequential.rs",
       "contains": ["pub struct Sequential", "pub fn begin_step", "pub fn complete_step", "pub fn done_stuttering"]
     }
   ],

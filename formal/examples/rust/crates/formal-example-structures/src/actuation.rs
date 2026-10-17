@@ -4,7 +4,7 @@ use automation_structures::ActuationPass as PublishedActuationPass;
 /// Trace adapter over the published `ActuationPass` implementation.
 ///
 /// Transition admission and carrier state are owned by
-/// `crate://automation-structures/0.2.3/src/primitives/actuation_pass.rs`.
+/// the published `automation_structures::ActuationPass` facade and its carrier.
 pub struct ActuationPass {
     inner: PublishedActuationPass,
 }
@@ -103,11 +103,16 @@ impl ActuationPass {
             .map_err(|_| StructureError::new("actuation resource does not fit usize"))
     }
 
-    pub fn actuate_with<T>(
+    /// Prepare against an immutable target, then publish under the same exclusive borrow.
+    /// Preparation must not mutate through aliases/captures; publication must be total
+    /// domain wiring. This does not provide crash or remote transaction recovery.
+    #[allow(clippy::too_many_arguments)]
+    pub fn actuate_with<T, P>(
         &mut self,
         seat: usize,
         resources: &mut [T],
-        operation: impl FnOnce(&mut T, &mut TraceLog, &str) -> Result<(), StructureError>,
+        prepare: impl FnOnce(&T, &mut TraceLog, &str) -> Result<P, StructureError>,
+        publish: impl FnOnce(&mut T, P),
         trace: &mut TraceLog,
         subject: &str,
     ) -> Result<usize, StructureError> {
@@ -132,10 +137,11 @@ impl ActuationPass {
             subject,
             format!("seat={seat} resource={resource}"),
         );
-        operation(target, trace, subject)?;
+        let prepared = prepare(target, trace, subject)?;
         self.inner
             .actuate(seat)
             .map_err(|error| structure_error("actuate", error))?;
+        publish(target, prepared);
         trace.emit(
             Structure::ActuationPass,
             "Commit",
@@ -153,7 +159,7 @@ impl ActuationPass {
             Structure::ActuationPass,
             "Finish",
             subject,
-            format!("effects={}", self.inner.effects().iter().flatten().count()),
+            format!("complete={}", self.inner.is_complete()),
         );
         Ok(())
     }
@@ -200,6 +206,94 @@ mod tests {
     use super::*;
 
     #[test]
+    fn preparation_refusal_preserves_live_target_and_allows_retry() -> Result<(), StructureError> {
+        let mut trace = TraceLog::default();
+        let mut resources = [String::from("original")];
+        let mut pass = ActuationPass::new(vec![Some(0)], &mut trace, "staged");
+        let refused = pass.actuate_with(
+            0,
+            &mut resources,
+            |value, _, _| -> Result<String, StructureError> {
+                let mut staged = value.clone();
+                staged.push_str(" modified");
+                Err(StructureError::new(format!("refused {staged}")))
+            },
+            |value, staged| *value = staged,
+            &mut trace,
+            "staged",
+        );
+        assert!(refused.is_err());
+        assert_eq!(resources, ["original"]);
+        assert_eq!(pass.effects(), &[None]);
+        assert!(!trace.events().iter().any(|event| event.action == "Commit"));
+        pass.actuate_with(
+            0,
+            &mut resources,
+            |_, _, _| Ok(String::from("accepted")),
+            |value, staged| *value = staged,
+            &mut trace,
+            "staged",
+        )?;
+        assert_eq!(resources, ["accepted"]);
+        assert_eq!(pass.effects(), &[Some(0)]);
+        let called = std::cell::Cell::new(false);
+        let forbidden = |_: &String, _: &mut TraceLog, _: &str| -> Result<String, StructureError> {
+            called.set(true);
+            Ok(String::new())
+        };
+        assert!(pass
+            .actuate_with(
+                0,
+                &mut resources,
+                forbidden,
+                |_, _| {},
+                &mut trace,
+                "staged"
+            )
+            .is_err());
+        pass.finish(&mut trace, "staged")?;
+        assert!(pass
+            .actuate_with(
+                0,
+                &mut resources,
+                forbidden,
+                |_, _| {},
+                &mut trace,
+                "staged"
+            )
+            .is_err());
+        assert_eq!(resources, ["accepted"]);
+        assert!(!called.get());
+        Ok(())
+    }
+
+    #[test]
+    fn invalid_target_refuses_before_preparation() {
+        let mut trace = TraceLog::default();
+        let mut resources = [0u64];
+        let mut pass = ActuationPass::new(vec![Some(1), None], &mut trace, "invalid");
+        for seat in [0, 1, 2] {
+            let calls = std::cell::Cell::new(false);
+            assert!(pass
+                .actuate_with(
+                    seat,
+                    &mut resources,
+                    |_, _, _| {
+                        calls.set(true);
+                        Ok(9)
+                    },
+                    |value, prepared| *value = prepared,
+                    &mut trace,
+                    "invalid"
+                )
+                .is_err());
+            assert!(!calls.get());
+            assert_eq!(resources, [0]);
+            assert_eq!(pass.effects(), &[None, None]);
+        }
+    }
+
+    #[test]
     fn records_the_live_allocated_resource() {
         let mut trace = TraceLog::default();
         let mut resources = [0u64, 0, 0];
@@ -208,10 +302,8 @@ mod tests {
             .actuate_with(
                 0,
                 &mut resources,
-                |value, _, _| {
-                    *value = 7;
-                    Ok(())
-                },
+                |_, _, _| Ok(7),
+                |value, prepared| *value = prepared,
                 &mut trace,
                 "test",
             )

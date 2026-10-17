@@ -130,7 +130,7 @@
   "executable_pointers": [
     "formal/structures/ActuationPass/refinement/ActuationPassImplRefinesSpec.tla",
     "formal/structures/ActuationPass/refinement/ActuationPassImplRefinesSpec_Proof.tla",
-    "crate://automation-structures/0.2.3/src/primitives/actuation_pass.rs",
+    "development-copy://automation-structures/0.3.2/src/primitives/actuation_pass.rs",
     "formal/structures/ActuationPass/ActuationPass.tla",
     "formal/structures/ActuationPass/ActuationPass_Proof.tla"
   ],
@@ -236,7 +236,7 @@
       "contains": ["THEOREM EffectFidelitySafety", "THEOREM PassCompletenessSafety", "THEOREM ActuationScopeSafety"]
     },
     {
-      "path": "crate://automation-structures/0.2.3/src/primitives/actuation_pass.rs",
+      "path": "development-copy://automation-structures/0.3.2/src/primitives/actuation_pass.rs",
       "contains": ["pub struct ActuationPass", "pub fn allocate", "pub fn deallocate", "pub fn actuate", "pub fn finish"]
     }
   ],

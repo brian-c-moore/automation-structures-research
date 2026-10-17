@@ -35,7 +35,7 @@
   "failure_ceilings": ["no-modeled-operator-crash-retry-or-recovery", "no-modeled-torn-queue-counter-commit", "fanout-merge-and-arbitrary-graph-topologies-outside-specified-carrier"],
   "execution_carriers": ["StreamGraph"],
   "local_theorems": ["StreamGraph_Proof!Safety", "StreamGraph_Proof!BackpressureSafety", "StreamGraph_Proof!OccupancyCountConservationSafety", "StreamGraph_Proof!SomeActionEnabledSafety", "StreamGraphImplRefinesSpec_Proof!RefinementThm", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"],
-  "executable_pointers": ["formal/execution/carriers/StreamGraph.tla", "formal/execution/carriers/StreamGraph_Proof.tla", "formal/execution/carriers/refinement/StreamGraph/StreamGraphImplRefinesSpec.tla", "formal/execution/carriers/refinement/StreamGraph/StreamGraphImplRefinesSpec_Proof.tla", "crate://automation-structures/0.2.3/src/modalities/stream_graph.rs"],
+  "executable_pointers": ["formal/execution/carriers/StreamGraph.tla", "formal/execution/carriers/StreamGraph_Proof.tla", "formal/execution/carriers/refinement/StreamGraph/StreamGraphImplRefinesSpec.tla", "formal/execution/carriers/refinement/StreamGraph/StreamGraphImplRefinesSpec_Proof.tla", "development-copy://automation-structures/0.3.2/src/modalities/stream_graph.rs"],
   "library_premises": ["canonical-linear-stream-carrier", "StreamGraph-Safety", "SomeActionEnabledSafety", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification"],
   "deployment_premises": ["specified-chain-length-three-or-four", "positive-finite-queue-capacity", "bounded-input-count-and-nonempty-record-domain", "serialized-atomic-queue-and-counter-mutation", "complete-stream-state-writer-inventory"],
   "residuals": ["no-fanout-merge-or-arbitrary-graph-conservation", "OccupancyCountConservation-is-not-durability-or-exactly-once-delivery", "state-level-enabledness-does-not-imply-eventual-consumption-or-drain", "no-scheduler-fairness-throughput-latency-or-time-bound"],
@@ -64,7 +64,7 @@
     {"path": "formal/execution/carriers/StreamGraph.tla", "contains": ["VARIABLES q1, q2, q3, ingested, emitted", "SourceIngest ==", "Middle2Fire ==", "Middle3Fire ==", "SinkConsume3 ==", "SinkConsume4 ==", "BackpressureCorrect ==", "OccupancyCountConservation ==", "SomeActionEnabled =="]},
     {"path": "formal/execution/carriers/StreamGraph_Proof.tla", "contains": ["THEOREM Safety", "THEOREM BackpressureSafety", "THEOREM OccupancyCountConservationSafety", "THEOREM SomeActionEnabledSafety"]},
     {"path": "formal/execution/carriers/refinement/StreamGraph/StreamGraphImplRefinesSpec_Proof.tla", "contains": ["THEOREM RefinementThm"]},
-    {"path": "crate://automation-structures/0.2.3/src/modalities/stream_graph.rs", "contains": ["pub struct StreamGraph", "pub fn source_ingest", "pub fn middle2_fire", "pub fn middle3_fire", "pub fn sink_consume", "pub fn done_stuttering"]}
+    {"path": "development-copy://automation-structures/0.3.2/src/modalities/stream_graph.rs", "contains": ["pub struct StreamGraph", "pub fn source_ingest", "pub fn middle2_fire", "pub fn middle3_fire", "pub fn sink_consume", "pub fn done_stuttering"]}
   ],
   "proof_binding": {"canonical_directory": "formal/execution/carriers", "proof_module": "StreamGraph_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
   "additional_proof_bindings": [{"theorem": "SomeActionEnabledSafety", "statement": "Spec => []SomeActionEnabled"}],

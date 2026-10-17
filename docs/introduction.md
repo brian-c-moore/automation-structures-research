@@ -227,6 +227,7 @@ line.
 
 | Document | What it helps you do |
 |---|---|
+| [Frequently Asked Questions](faq.md) | Resolve common questions about the structures, construction method, and evidence |
 | [Automation Structures](automation-structures.md) | Follow the theory and use its construction procedure |
 | [Automation Structures Reference](reference.md) | Look up structures, connections, and execution modes |
 | [Domain Abstraction Collapse](domain-abstraction-collapse.md) | Compare systems after removing domain vocabulary |

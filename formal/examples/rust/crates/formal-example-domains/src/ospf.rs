@@ -263,13 +263,18 @@ fn compute_ospf(
         vertex: working.root.clone(),
         cost: 0,
     };
-    let mut traversal = TraversalEngine::new(root, &mut trace, &subject);
+    let candidate_ceiling = graph
+        .edges()
+        .len()
+        .checked_add(1)
+        .ok_or_else(|| StructureError::new("OSPF traversal work count overflow"))?;
+    let mut traversal = TraversalEngine::new(root, candidate_ceiling, &mut trace, &subject)?;
     let mut settled = BTreeSet::new();
 
     while !traversal.frontier().is_empty() {
         let index = CompetitiveSelection::select_min_index(
             traversal.frontier(),
-            |item| {
+            |(_, item)| {
                 (
                     item.payload().cost,
                     item.payload().vertex.clone(),
@@ -301,13 +306,15 @@ fn compute_ospf(
             ) {
                 Relaxation::Install | Relaxation::Replace => {
                     distances.insert(edge.to.clone(), candidate);
-                    traversal.enqueue(
-                        QueueEntry {
-                            vertex: edge.to.clone(),
-                            cost: candidate,
-                        },
-                        &mut trace,
-                    );
+                    traversal
+                        .enqueue(
+                            QueueEntry {
+                                vertex: edge.to.clone(),
+                                cost: candidate,
+                            },
+                            &mut trace,
+                        )
+                        .map_err(|(error, _)| error)?;
                 }
                 Relaxation::Equal | Relaxation::Reject => {}
             }

@@ -44,7 +44,7 @@
     "ReductionImplRefinesSpec_Proof!RefinementThm", "ReductionStream_Proof!Safety", "ReductionStream_Proof!ConsumedPrefixFoldSafety", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"],
   "executable_pointers": [
     "formal/structures/Reduction/refinement/ReductionImplRefinesSpec.tla",
-    "formal/structures/Reduction/refinement/ReductionImplRefinesSpec_Proof.tla","crate://automation-structures/0.2.3/src/compositions/reduction.rs", "formal/structures/Reduction/ReductionStream.tla", "formal/structures/Reduction/ReductionStream_Proof.tla"],
+    "formal/structures/Reduction/refinement/ReductionImplRefinesSpec_Proof.tla","development-copy://automation-structures/0.3.2/src/compositions/reduction.rs", "formal/structures/Reduction/ReductionStream.tla", "formal/structures/Reduction/ReductionStream_Proof.tla"],
   "library_premises": [
     "Reduction-written-contract-refinement-profile","canonical-ordered-stream-reduction-machine", "ReductionStream-Safety", "ConsumedPrefixFoldSafety", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification"],
   "deployment_premises": ["IdentityType", "SrcLen", "SrcNat", "OpType", "immutable-ordered-source", "serialized-result-position-mutation"],
@@ -79,7 +79,7 @@
     },
     {"path": "formal/structures/Reduction/ReductionStream.tla", "contains": ["VARIABLES result", "ConsumedPrefixFold ==", "Consume ==", "Spec == Init"]},
     {"path": "formal/structures/Reduction/ReductionStream_Proof.tla", "contains": ["THEOREM Safety", "THEOREM ConsumedPrefixFoldSafety", "ASSUME OpType"]},
-    {"path": "crate://automation-structures/0.2.3/src/compositions/reduction.rs", "contains": ["pub struct Reducer", "pub fn process", "pub fn reduce_sum", "pub fn reduce_max", "pub open spec fn aggregate"]}
+    {"path": "development-copy://automation-structures/0.3.2/src/compositions/reduction.rs", "contains": ["pub struct Reducer", "pub fn process", "pub fn reduce_sum", "pub fn reduce_max", "pub open spec fn aggregate"]}
   ],
   "proof_binding": {"canonical_directory": "formal/structures/Reduction", "proof_module": "ReductionStream_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
   "witness": {

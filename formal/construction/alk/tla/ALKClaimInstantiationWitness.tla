@@ -1,5 +1,5 @@
 ---- MODULE ALKClaimInstantiationWitness ----
-EXTENDS ALKClaimFrameData
+EXTENDS ALKClaimFrameData, CommonSemanticSchema
 
 VARIABLES budget_capacity, budget_allocated, budget_reserved,
           budget_pending_eviction,
@@ -122,6 +122,32 @@ ObservedValuesOfFrame ==
 
 SelectedClauseEvaluationHeld ==
     \A clause \in SelectedClauseOccurrences : SelectedPredicateHolds[clause]
+
+\* At each state, the singleton is the truth interpretation of the actual
+\* catalog predicates above. The fixed domain is not chosen from safe states.
+SelectedClauseMeaning ==
+    [clause \in SelectedClauseOccurrences |->
+        IF SelectedPredicateHolds[clause] THEN {TRUE} ELSE {}]
+
+SelectedClauseRoles(schema) ==
+    [clause \in RegistrySchemaClauses[schema] |->
+        RegistryClauseStatusOf[clause]]
+
+SelectedResponsibilityHolds ==
+    [schema \in SelectedSchemas |->
+        IF schema = "AS-BUD-CAP"
+          THEN BudgetContract!SafetyInvariant
+        ELSE SequentialContract!HistoryPositionAgreement]
+
+SelectedSchemaClauseBindingHeld ==
+    \A schema \in SelectedSchemas :
+      SemanticClauseBinding(
+          "state-safety", {TRUE}, RegistrySchemaClauses[schema],
+          SelectedClauseRoles(schema),
+          [clause \in RegistrySchemaClauses[schema] |->
+              SelectedClauseMeaning[clause]],
+          IF SelectedResponsibilityHolds[schema] THEN {TRUE} ELSE {},
+          {TRUE}, [clause \in {} |-> {}], [clause \in {} |-> {}])
 
 ClaimInstantiationHeld ==
     /\ SelectedCatalogBindingHeld

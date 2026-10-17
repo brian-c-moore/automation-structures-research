@@ -45,7 +45,7 @@
     "BisectionImplRefinesSpec_Proof!RefinementThm", "Bisection_Proof!Safety", "Bisection_Proof!HalvingProperty", "Bisection_Proof!EventualConvergenceProved", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "ProgressKernel_Proof!RankedProgress", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"],
   "executable_pointers": [
     "formal/structures/Bisection/refinement/BisectionImplRefinesSpec.tla",
-    "formal/structures/Bisection/refinement/BisectionImplRefinesSpec_Proof.tla","crate://automation-structures/0.2.3/src/compositions/bisection.rs", "formal/structures/Bisection/Bisection.tla", "formal/structures/Bisection/Bisection_Proof.tla"],
+    "formal/structures/Bisection/refinement/BisectionImplRefinesSpec_Proof.tla","development-copy://automation-structures/0.3.2/src/compositions/bisection.rs", "formal/structures/Bisection/Bisection.tla", "formal/structures/Bisection/Bisection_Proof.tla"],
   "library_premises": [
     "Bisection-written-contract-refinement-profile","canonical-bisection-machine", "Bisection-Safety", "HalvingProperty", "EventualConvergenceProved", "ObligationPreservation", "CheckActStability", "RankedProgress", "OwnershipAssuranceClassification"],
   "deployment_premises": ["DomainSizeType", "MaxProbesType", "ThresholdType", "DomainFitsProbes", "weak-fair-probe-scheduling", "serialized-interval-mutation"],
@@ -80,7 +80,7 @@
     },
     {"path": "formal/structures/Bisection/Bisection.tla", "contains": ["VARIABLES", "ProbeLeft ==", "ProbeRight ==", "WF_vars(ProbeLeft \\/ ProbeRight)", "EventualConvergence =="]},
     {"path": "formal/structures/Bisection/Bisection_Proof.tla", "contains": ["THEOREM Safety", "THEOREM HalvingProperty", "THEOREM EventualConvergenceProved"]},
-    {"path": "crate://automation-structures/0.2.3/src/compositions/bisection.rs", "contains": ["pub struct Bisection", "pub fn probe", "pub fn converged", "pub open spec fn probe_bound"]}
+    {"path": "development-copy://automation-structures/0.3.2/src/compositions/bisection.rs", "contains": ["pub struct Bisection", "pub fn probe", "pub fn converged", "pub open spec fn probe_bound"]}
   ],
   "proof_binding": {"canonical_directory": "formal/structures/Bisection", "proof_module": "Bisection_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
   "additional_proof_bindings": [{"theorem": "HalvingProperty", "statement": "Spec => Halving"}],

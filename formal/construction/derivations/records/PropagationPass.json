@@ -129,7 +129,7 @@
   "executable_pointers": [
     "formal/structures/PropagationPass/refinement/PropagationPassImplRefinesSpec.tla",
     "formal/structures/PropagationPass/refinement/PropagationPassImplRefinesSpec_Proof.tla",
-    "crate://automation-structures/0.2.3/src/primitives/propagation_pass.rs",
+    "development-copy://automation-structures/0.3.2/src/primitives/propagation_pass.rs",
     "formal/structures/PropagationPass/PropagationPassGraph.tla",
     "formal/structures/PropagationPass/PropagationPassGraph_Proof.tla"
   ],
@@ -237,7 +237,7 @@
       "contains": ["THEOREM IterationBoundSafety", "THEOREM SnapshotLocalitySafety", "THEOREM EventualSettledOrIterationLimitProved"]
     },
     {
-      "path": "crate://automation-structures/0.2.3/src/primitives/propagation_pass.rs",
+      "path": "development-copy://automation-structures/0.3.2/src/primitives/propagation_pass.rs",
       "contains": ["pub struct PropagationPass", "pub fn start_round", "pub fn update_node", "pub fn end_round", "pub fn terminate", "pub open spec fn settled_or_iteration_limit"]
     }
   ],

@@ -65,7 +65,7 @@
     "RateLimitImplRefinesSpec_Proof!RefinementThm", "RateLimit_Proof!Safety", "RateLimit_Proof!WindowCountBoundSafety", "RateLimit_Proof!WindowStartNotFutureSafety", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"],
   "executable_pointers": [
     "formal/structures/RateLimit/refinement/RateLimitImplRefinesSpec.tla",
-    "formal/structures/RateLimit/refinement/RateLimitImplRefinesSpec_Proof.tla","crate://automation-structures/0.2.3/src/compositions/rate_limit.rs", "formal/structures/RateLimit/RateLimit.tla", "formal/structures/RateLimit/RateLimit_Proof.tla"],
+    "formal/structures/RateLimit/refinement/RateLimitImplRefinesSpec_Proof.tla","development-copy://automation-structures/0.3.2/src/compositions/rate_limit.rs", "formal/structures/RateLimit/RateLimit.tla", "formal/structures/RateLimit/RateLimit_Proof.tla"],
   "library_premises": [
     "RateLimit-written-contract-refinement-profile","canonical-window-machine", "RateLimit-Safety", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification"],
   "deployment_premises": ["MaxPerWindowType", "WindowDurationType", "MaxClockType", "monotone-bounded-clock-delivery", "serialized-rate-state-mutation", "atomic-window-guard-and-count-update"],
@@ -100,7 +100,7 @@
     },
     {"path": "formal/structures/RateLimit/RateLimit.tla", "contains": ["VARIABLES count, window_start, clock", "TryAcquire", "Tick", "WindowCountBound"]},
     {"path": "formal/structures/RateLimit/RateLimit_Proof.tla", "contains": ["THEOREM Safety", "THEOREM WindowStartNotFutureSafety"]},
-    {"path": "crate://automation-structures/0.2.3/src/compositions/rate_limit.rs", "contains": ["pub struct RateLimit", "pub fn try_acquire", "pub fn tick", "pub open spec fn window_count_bound"]}
+    {"path": "development-copy://automation-structures/0.3.2/src/compositions/rate_limit.rs", "contains": ["pub struct RateLimit", "pub fn try_acquire", "pub fn tick", "pub open spec fn window_count_bound"]}
   ],
   "proof_binding": {"canonical_directory": "formal/structures/RateLimit", "proof_module": "RateLimit_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
   "witness": {

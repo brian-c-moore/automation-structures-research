@@ -84,10 +84,19 @@ Automation Structures accounts for a composition with four strata:
 |---|---|
 | Runtime givens | Atomicity, time, thread or process execution, memory ordering, durable storage assumptions |
 | Abstraction primitives | Governed state and violable obligations such as budgets, registries, audit chains, convergence rules, and traversal under a cost limit |
-| Connective forms | Obligation-free plumbing such as guards, cursors, windows, projections, markers, and joins |
+| Connective forms | Projection, Cursor, Accumulator, Marker, Counter, Buffer, and OrderingPass, under the responsibility of the structures they connect |
 | Domain parameters | The logic, values, scoring rules, operators, effects, and identities supplied by the application domain |
 
 An execution structure combines control state and transition rules across these strata. The same structure can execute different primitives and domain logic, while one primitive can participate in several execution structures. Its profile describes the observable execution behavior.
+
+The seven forms are the fixed vocabulary in [reference.md](reference.md). Informal
+terms in a recipe must resolve to their actual retained state and governing action:
+
+| Recipe term | Actual construction and deciding action |
+|---|---|
+| Guard | The admission predicate of the owning structure. RateLimit admits an acquisition when its window has expired or its Budget has headroom; ForkJoin admits its barrier only in the fork phase with every worker complete. The corresponding owner commits the update or preserves its state on refusal. Evaluating a predicate creates no additional connective form or admission authority. |
+| Window | A local construction from the admitted forms. RateLimit retains its window start as a Marker against a runtime-provided clock; rollover re-anchors that marker and resets/grants through its Budget in the same modeled transition. ConvergenceGovernor retains a chronological Buffer view, removes the oldest delta when full, appends the new delta and computes the exact resulting mean; its checked history couples that Buffer to the same retained-sum Budget. Signal's pull position is a listener Cursor over AuditSink changes. Each recipe keeps its own capacity, chronology and observation obligations with those owners. |
+| Join | The closure action of ForkJoin or an explicitly named composition with its own contract. The selected canonical ForkJoin barrier requires all workers complete; ProduceOutput then captures their exact values and closes the phase. In the nested CI/CD example, the outer StepGraph node completes only after that joined output is published. Broader quorum or first-result policies need their own selected owner and claim; the word join supplies neither such a policy nor an extra connective form. |
 
 The builder-facing composition is:
 

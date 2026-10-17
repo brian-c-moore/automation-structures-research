@@ -54,6 +54,36 @@ pub struct ExampleRun<T> {
 
 impl<T> ExampleRun<T> {
     pub fn passed(&self) -> bool {
-        self.checks.iter().all(|check| check.passed)
+        !self.checks.is_empty() && !self.trace.events().is_empty()
+            && self.checks.iter().all(|check| check.passed)
+            && evidence::describe(&self.id).is_ok_and(|record| {
+                self.trace.events().iter().all(|event| {
+                    let actual = event.structure.implementation_identity(Some(&event.action));
+                    actual.is_some() && actual == event.implementation_identity
+                        && record.record.construction.nodes.iter().any(|node| {
+                            node.stratum == formal_example_structures::ConstructionStratum::Catalog
+                                && (node.id == event.structure.name()
+                                    || matches!((node.id.as_str(), node.implementation_identity.as_str(), event.structure),
+                                        ("Budget<Bytes>", "formal-example-structures::budget::Budget<Bytes>", formal_example_structures::Structure::Budget)
+                                        | ("Budget<Compute>", "formal-example-structures::budget::Budget<Compute>", formal_example_structures::Structure::Budget)))
+                                && {
+                            let declared = match node.implementation_identity.as_str() {
+                                "formal-example-structures::budget::Budget<Bytes>"
+                                | "formal-example-structures::budget::Budget<Compute>"
+                                | "formal-example-structures::budget::Budget<ExecutionTicks>" =>
+                                    "formal-example-structures::budget::Budget",
+                                "formal-example-structures::resource_registry::ResourceRegistry<TaskSpec>" =>
+                                    "formal-example-structures::resource_registry::ResourceRegistry",
+                                "formal-example-structures::sequential::Sequential<Option<usize>>" =>
+                                    "formal-example-structures::sequential::Sequential",
+                                "formal-example-structures::selection::CompetitiveSelection::select_min_index" =>
+                                    "formal-example-structures::selection::CompetitiveSelection",
+                                identity => identity,
+                            };
+                            actual == Some(declared)
+                                }
+                        })
+                })
+            })
     }
 }

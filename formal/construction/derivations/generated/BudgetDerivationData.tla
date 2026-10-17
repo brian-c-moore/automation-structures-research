@@ -124,7 +124,7 @@ Derivation ==
      failureCeilings |-> {"no-modeled-crash-or-torn-write", "weak-memory-and-nonlinearizable-ledgers-outside-boundary", "u64-call-domain-requires-the-declared-refinement-boundary"},
      executionCarriers |-> {"Sequential"},
      localTheorems |-> {"Budget_Proof!SafetyInvariantSafety", "BudgetImplRefinesSpec_Proof!RefinementThm", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"},
-     executablePointers |-> {"crate://automation-structures/0.2.3/src/primitives/budget.rs", "formal/structures/Budget/refinement/BudgetImplRefinesSpec.tla", "formal/structures/Budget/refinement/BudgetImplRefinesSpec_Proof.tla"},
+     executablePointers |-> {"development-copy://automation-structures/0.3.2/src/primitives/budget.rs", "formal/structures/Budget/refinement/BudgetImplRefinesSpec.tla", "formal/structures/Budget/refinement/BudgetImplRefinesSpec_Proof.tla"},
      libraryPremises |-> {"canonical-six-action-ledger", "SafetyInvariantSafety", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification", "Budget-contract-refinement"},
      deploymentPremises |-> {"CapacityType", "serialized-exclusive-ledger-mutation", "atomic-guard-and-update", "u64-arithmetic-agrees-with-Nat-inside-the-invariant", "complete-ledger-tcb-with-no-bypass"},
      residuals |-> {"no-distributed-or-concurrent-ledger-protocol", "no-durability-or-recovery-result", "zero-and-over-capacity-executable-calls-refine-stutter-only-under-the-written-Budget-mapping"},

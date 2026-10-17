@@ -65,7 +65,7 @@
     "RelationshipGraphImplRefinesSpec_Proof!RefinementThm", "RelationshipGraph_Proof!Safety", "RelationshipGraph_Proof!AdjacencyConsistencySafety", "RelationshipGraph_Proof!NoSelfLoopsSafety", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"],
   "executable_pointers": [
     "formal/structures/RelationshipGraph/refinement/RelationshipGraphImplRefinesSpec.tla",
-    "formal/structures/RelationshipGraph/refinement/RelationshipGraphImplRefinesSpec_Proof.tla","crate://automation-structures/0.2.3/src/compositions/relationship_graph.rs", "formal/structures/RelationshipGraph/RelationshipGraph.tla", "formal/structures/RelationshipGraph/RelationshipGraph_Proof.tla"],
+    "formal/structures/RelationshipGraph/refinement/RelationshipGraphImplRefinesSpec_Proof.tla","development-copy://automation-structures/0.3.2/src/compositions/relationship_graph.rs", "formal/structures/RelationshipGraph/RelationshipGraph.tla", "formal/structures/RelationshipGraph/RelationshipGraph_Proof.tla"],
   "library_premises": [
     "RelationshipGraph-written-contract-refinement-profile","canonical-directed-graph-machine", "RelationshipGraph-Safety", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification"],
   "deployment_premises": ["NodesFinite", "WeightsTyped", "serialized-edge-adjacency-mutation", "atomic-dual-view-commit", "complete-graph-writer-inventory"],
@@ -84,14 +84,14 @@
   "transfer_classes": ["safety"],
   "refinement_status": "mechanized",
   "conformance_details": {
-    "initialization": "RelationshipGraph::new maps both executable lists to the empty edge and adjacency sets.",
-    "step-simulation": "add_edge maps to AddEdge and remove_edge maps to RemoveEdge; rejected duplicate, self-loop, or absent wrappers stutter.",
-    "observation-agreement": "The weighted edge list and endpoint adjacency list project to the complete canonical sets with no hidden reciprocal edge.",
-    "commit-agreement": "Each accepted mutation updates both views in one graph-authority commit.",
+    "initialization": "The field maps above describe the written two-list transcription. Current development-copy RelationshipGraph::new initializes one empty triple-key Registry, whose weighted-key set and endpoint projection yield empty primary edges and adjacency.",
+    "step-simulation": "Current add_edge inserts one missing (source,target,weight) key; an identical duplicate stutters. remove_edge removes every weight for its endpoint pair while framing other edges; an absent pair stutters. Raw invalid/self-loop inputs are excluded by their preconditions; checked wrapper refusals are separate.",
+    "observation-agreement": "Current edges are the Registry's weighted-key set and adjacency[source] is the endpoint projection of that same set. Different weights for one endpoint pair are retained. Adjacency is derived, not a second stored authority, and no reciprocal edge is inferred. The older pair-key/weight-set construction theorem is related but is not literal identity of physical Registry states.",
+    "commit-agreement": "Each accepted complete-call Registry mutation changes the edge set and its derived adjacency together under exclusive mutation; no second adjacency write is required.",
     "failure-persistence-agreement": "No crash, torn dual-view write, retry, or recovery action is modeled; one must be added before such a path transfers.",
     "rely-discharge": "Deployment supplies finite indices, serialized mutation, and complete edge/adjacency writer inventory.",
     "liveness-preservation": "No path discovery, reachability, or eventual update guarantee is transferred.",
-    "tcb-closure": "Every path able to mutate either graph view is inventoried as add_edge or remove_edge."
+    "tcb-closure": "The selected trace admits add_edge and remove_edge over the single Registry, under its identity/storage laws, invariant-respecting serialized calls and no raw constituent bypass. The written transcription does not establish that deployment writer premise globally."
   },
   "source_checks": [
     {
@@ -100,7 +100,7 @@
     },
     {"path": "formal/structures/RelationshipGraph/RelationshipGraph.tla", "contains": ["VARIABLES edges, adjacency", "AddEdge(src, dst, weight)", "RemoveEdge(src, dst)", "AdjacencyConsistency"]},
     {"path": "formal/structures/RelationshipGraph/RelationshipGraph_Proof.tla", "contains": ["THEOREM Safety", "THEOREM NoSelfLoopsSafety"]},
-    {"path": "crate://automation-structures/0.2.3/src/compositions/relationship_graph.rs", "contains": ["pub struct RelationshipGraph", "pub fn add_edge", "pub fn remove_edge", "pub open spec fn adjacency_consistency"]}
+    {"path": "development-copy://automation-structures/0.3.2/src/compositions/relationship_graph.rs", "contains": ["pub struct RelationshipGraph", "pub fn add_edge", "pub fn remove_edge", "pub open spec fn adjacency_consistency"]}
   ],
   "proof_binding": {"canonical_directory": "formal/structures/RelationshipGraph", "proof_module": "RelationshipGraph_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
   "witness": {

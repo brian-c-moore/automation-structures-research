@@ -1,8 +1,36 @@
 # Reproducibility Guide
 
-The formal artifact has one reviewer entrypoint: `verification/run_proofs.py`. Formal execution occurs only in the pinned Docker image. The checkout remains read-only during a normal run, temporary work is deleted, and optional result data is written only to a reviewer-selected output mount. Keep the image entrypoint intact and pass the documented subcommand and proof options after the image name. Do not invoke TLC, TLAPS, Verus, Rust checks, or the Python runner directly on the host.
+Current workspace development runs ordinary Cargo, Verus and selected formal-tool
+commands directly against the existing source. Formal execution uses the pinned
+Docker toolchain with the image entrypoint overridden by the selected tool. Reuse
+the existing shared `rust/target` and Cargo cache, keep source read-only during
+verification, and record the actual command, source identity, selected profile and
+outcome. Audits run directly in AudiToad with reviewed baselines. No source
+transport, disposable checkout or qualification harness is part of this workflow.
+
+The research Rust workspace consumes `automation-structures =0.4.0` from crates.io.
+Native examples use `formal/examples/rust/Cargo.toml` and the shared `../rust/target`.
+The canonical descriptor pins the published archive's checksum and source commit;
+the Dockerfile installs that archive at `/opt/automation-structures`.
+Collection inputs can pin the actual source/model bytes in AudiToad before audit dispatch.
+The [verification input roles](../verification/README.md) describe the archive
+identity and proof source bindings.
+
+## Rust workspace checks
+
+From `formal/examples/rust`, fetch the locked dependencies once with network access,
+then run the checks offline:
+
+```text
+cargo fetch --locked
+cargo test --locked --offline --workspace
+cargo clippy --locked --offline --workspace --all-targets -- -D warnings
+```
 
 ## Build the verifier image
+
+The image provides the pinned formal tools and published canonical archive. Run
+selected formal tools directly by overriding its entrypoint.
 
 From the repository root:
 
@@ -12,7 +40,7 @@ docker build --pull=false --tag automation-structures-proofs verification
 
 The Dockerfile pins its base images and downloaded tool artifacts by digest. The exact recorded TLA+ Tools JAR is included at `verification/toolchain/tla2tools.jar` because the upstream v1.8.0 pre-release asset is replaced by later builds. The build verifies its SHA-256 before using it. Its version, hash, source tag, and embedded license locations are recorded in `verification/toolchain/THIRD_PARTY_NOTICES.txt` and `verification/toolchain/SHA256SUMS`.
 
-The JDK, Verus, and TLAPS packages are fetched automatically during an uncached build and verified against the checksums in the Dockerfile. A reviewer does not download or install those packages manually. The build requires network access only when the pinned base-image layers, those three tool packages, or the checksum-pinned published crate archive are not already present. Formal runs use `--network none`.
+The JDK, Verus, and TLAPS packages are fetched automatically during an uncached build and verified against the checksums in the Dockerfile. A reviewer does not download or install those packages manually. Verifier 0.5.2 also installs Rustfmt and Clippy for the pinned Rust toolchain and fetches the published crate's locked dependencies. The build requires network access when these pinned inputs are not already cached. Formal runs use `--network none`.
 
 ## Host requirements and platform notes
 
@@ -68,12 +96,23 @@ Supplementary studies are included under `supplementary-research/` and use the s
 Create a host output directory outside the source repository and mount it separately:
 
 ```text
-docker run --rm --init --network none --read-only --cap-drop ALL --security-opt no-new-privileges --cpus 1 --memory 3g --memory-swap 3g --pids-limit 256 --volume "${PWD}:/source/automation-structure-research:ro" --volume "$PWD/../automation-structures-reviewer-output:/out" --tmpfs /work:rw,exec,nosuid,nodev,size=2g,mode=1777 automation-structures-proofs run --subject Budget --repeat 2 --json /out/budget.json
+docker run --rm --init --network none --read-only --user 0:0 --cap-drop ALL --security-opt no-new-privileges --cpus 1 --memory 3g --memory-swap 3g --pids-limit 256 --volume "${PWD}:/source/automation-structure-research:ro" --volume "$PWD/../automation-structures-reviewer-output:/out" --volume automation-structures-proof-target:/target --env CARGO_TARGET_DIR=/target --tmpfs /work:rw,exec,nosuid,nodev,size=2g,mode=1777 automation-structures-proofs run --subject Budget --repeat 2 --json /out/budget.json
 ```
 
 Reviewer output is not part of the source artifact. The runner refuses a JSON destination inside the mounted source tree. Do not copy result output into the repository.
 
 ## Execution rules
+
+Implementation proofs and known-answer checks require an absolute `CARGO_TARGET_DIR`
+bound to one persistent Docker volume, as in the result command above. Reuse that
+volume across runs. Discovery and TLA-only selections need no Cargo target. Root
+proofs use the selected source's existing Cargo gate and its manifest edition/dependencies;
+each proof refresh removes only the subject package's compiled output so a warm
+cache cannot masquerade as a new verification. Known-answer checks use the
+published native runner and its declared fixture edition and lint policy. Cargo
+lock metadata stays in temporary writable storage while the image's registry is
+read-only. The explicit container user in the example can write the target volume;
+the source and image remain read-only and networking remains disabled.
 
 The runner copies selected TLA sources into temporary container storage before invoking static checks, SANY, TLC, or TLAPS. Verus mutations are also applied only to temporary copies. Each source mutant must leave exactly one Verus error while preserving the other positive verification results, repeat with the same result, and leave the complete mounted research-source fingerprint unchanged. Temporary work is always removed when the command exits.
 

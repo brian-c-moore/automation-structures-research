@@ -203,12 +203,16 @@ where
         let value = if control == MemoizationControl::BypassReduction {
             candidates.into_iter().fold(identity.clone(), &combine)
         } else {
-            Reduction::fold(candidates, identity.clone(), &combine, trace, subject)
+            Reduction::fold(candidates, identity.clone(), &combine, trace, subject)?
         };
         if control == MemoizationControl::BypassRegistry {
-            values.insert(id.to_string(), value, detached, subject)
+            values
+                .insert(id.to_string(), value, detached, subject)
+                .map_err(StructureError::from)
         } else {
-            values.insert(id.to_string(), value, trace, subject)
+            values
+                .insert(id.to_string(), value, trace, subject)
+                .map_err(StructureError::from)
         }
     };
 
@@ -254,10 +258,12 @@ where
                 "memoization dependency graph has no root",
             ));
         };
-        let mut traversal = TraversalEngine::new(first.clone(), trace, subject);
+        let mut traversal = TraversalEngine::new(first.clone(), definitions.len(), trace, subject)?;
         let mut queued: BTreeSet<String> = roots.iter().cloned().collect();
         for root in rest {
-            traversal.enqueue(root.clone(), trace);
+            traversal
+                .enqueue(root.clone(), trace)
+                .map_err(|(error, _)| error)?;
         }
         while !traversal.frontier().is_empty() {
             let item = traversal.visit_at(0, trace)?;
@@ -280,7 +286,9 @@ where
                 .collect();
             for candidate in ready {
                 queued.insert(candidate.clone());
-                traversal.enqueue(candidate, trace);
+                traversal
+                    .enqueue(candidate, trace)
+                    .map_err(|(error, _)| error)?;
             }
         }
         traversal.finish(trace)?;

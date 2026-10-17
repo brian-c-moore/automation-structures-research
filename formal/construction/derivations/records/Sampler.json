@@ -65,7 +65,7 @@
     "SamplerImplRefinesSpec_Proof!RefinementThm", "Sampler_Proof!Safety", "Sampler_Proof!BoundedSampleSafety", "Sampler_Proof!SupportConsistencySafety", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"],
   "executable_pointers": [
     "formal/structures/Sampler/refinement/SamplerImplRefinesSpec.tla",
-    "formal/structures/Sampler/refinement/SamplerImplRefinesSpec_Proof.tla","crate://automation-structures/0.2.3/src/compositions/sampler.rs", "formal/structures/Sampler/Sampler.tla", "formal/structures/Sampler/Sampler_Proof.tla"],
+    "formal/structures/Sampler/refinement/SamplerImplRefinesSpec_Proof.tla","development-copy://automation-structures/0.3.2/src/compositions/sampler.rs", "formal/structures/Sampler/Sampler.tla", "formal/structures/Sampler/Sampler_Proof.tla"],
   "library_premises": [
     "Sampler-written-contract-refinement-profile","canonical-sample-zero-machine", "Sampler-Safety", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification"],
   "deployment_premises": ["ItemsFinite", "SampleSizeType", "MaxProbType", "serialized-distribution-selection-mutation", "atomic-support-check-and-selection"],
@@ -100,7 +100,7 @@
     },
     {"path": "formal/structures/Sampler/Sampler.tla", "contains": ["VARIABLES distribution, selected", "Sample ==", "Zero(i)", "SupportConsistency"]},
     {"path": "formal/structures/Sampler/Sampler_Proof.tla", "contains": ["THEOREM Safety", "THEOREM SupportConsistencySafety"]},
-    {"path": "crate://automation-structures/0.2.3/src/compositions/sampler.rs", "contains": ["pub struct Sampler", "pub fn sample", "pub fn zero", "pub fn draw_weighted", "pub open spec fn support_consistency"]}
+    {"path": "development-copy://automation-structures/0.3.2/src/compositions/sampler.rs", "contains": ["pub struct Sampler", "pub fn sample", "pub fn zero", "pub fn draw_weighted", "pub open spec fn support_consistency"]}
   ],
   "proof_binding": {"canonical_directory": "formal/structures/Sampler", "proof_module": "Sampler_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
   "witness": {

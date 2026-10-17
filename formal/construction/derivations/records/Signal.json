@@ -44,7 +44,7 @@
     "SignalImplRefinesSpec_Proof!RefinementThm", "Signal_Proof!Safety", "Signal_Proof!PendingNotifiedDisjointnessSafety", "Signal_Proof!NotificationProvenanceSafety", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"],
   "executable_pointers": [
     "formal/structures/Signal/refinement/SignalImplRefinesSpec.tla",
-    "formal/structures/Signal/refinement/SignalImplRefinesSpec_Proof.tla","crate://automation-structures/0.2.3/src/compositions/signal.rs", "formal/structures/Signal/Signal.tla", "formal/structures/Signal/Signal_Proof.tla"],
+    "formal/structures/Signal/refinement/SignalImplRefinesSpec_Proof.tla","development-copy://automation-structures/0.3.2/src/compositions/signal.rs", "formal/structures/Signal/Signal.tla", "formal/structures/Signal/Signal_Proof.tla"],
   "library_premises": [
     "Signal-written-contract-refinement-profile","canonical-signal-machine", "Signal-Safety", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification"],
   "deployment_premises": ["finite-value-and-listener-domains", "serialized-signal-state-mutation", "atomic-pending-notified-partition-update", "complete-signal-writer-inventory"],
@@ -63,14 +63,14 @@
   "transfer_classes": ["safety"],
   "refinement_status": "mechanized",
   "conformance_details": {
-    "initialization": "Signal::new maps its supplied current value, false change marker, and empty pending/notified vectors to canonical Init.",
-    "step-simulation": "set_value maps to SetValue and notify_listener maps to NotifyListener; rejected values and listener guards may only stutter.",
-    "observation-agreement": "The scalar value and change marker map identically while duplicate-free listener vectors project to canonical pending/notified sets.",
+    "initialization": "The state and observation field maps above describe the written SignalImplRefinesSpec transcription. Current development-copy Signal::new instead initializes an empty AuditSink and zero-position listener Cursors; value is initial_value and both derived delivery sets are empty, yielding the same primary Init observation.",
+    "step-simulation": "For the current fixed-listener owner, a changed set_value records one value change and notify_listener advances only its selected Cursor to the audit head. These complete-call projections map to SetValue and NotifyListener; reads and checked refusals stutter.",
+    "observation-agreement": "Let h be the retained audit length and c the selected Cursor position. Current value is initial_value at h=0 and the last operation otherwise; change_observed is h>0; pending is c<h; notified is h>0 and c=h. Pending/notified are derived observations, not retained vectors. SummarySignal is a separate compact profile with fixed registration before the first change and its declared logical-history normalization.",
     "commit-agreement": "Each accepted value change or listener notification updates the complete delivery partition in one signal-authority commit.",
     "failure-persistence-agreement": "No crash, lost delivery, retry, durable queue, or recovery action is modeled; any such path needs an added abstraction.",
     "rely-discharge": "Deployment supplies finite domains, serialized mutation, atomic partition changes, and complete writer inventory.",
     "liveness-preservation": "No eventual listener notification, fairness, exactly-once delivery, or latency guarantee is transferred.",
-    "tcb-closure": "Every executable writer of current value, change marker, pending, or notified state is inventoried as set_value or notify_listener."
+    "tcb-closure": "The selected current trace uses set_value and notify_listener as its complete-call writers. Raw public constituent access is excluded by the invariant-respecting, serialized, no-bypass premise; the written transcription does not prove that premise for arbitrary callers."
   },
   "source_checks": [
     {
@@ -79,7 +79,7 @@
     },
     {"path": "formal/structures/Signal/Signal.tla", "contains": ["VARIABLES current_value, change_observed, pending_notifications, notified", "SetValue(v)", "NotifyListener(l)", "NotificationProvenance"]},
     {"path": "formal/structures/Signal/Signal_Proof.tla", "contains": ["THEOREM Safety", "THEOREM PendingNotifiedDisjointnessSafety", "THEOREM NotificationProvenanceSafety"]},
-    {"path": "crate://automation-structures/0.2.3/src/compositions/signal.rs", "contains": ["pub struct Signal", "pub fn set_value", "pub fn notify_listener", "pub open spec fn model_valid", "pub open spec fn pending_spec", "pub open spec fn notified_spec"]}
+    {"path": "development-copy://automation-structures/0.3.2/src/compositions/signal.rs", "contains": ["pub struct Signal", "pub fn set_value", "pub fn notify_listener", "pub open spec fn model_valid", "pub open spec fn pending_spec", "pub open spec fn notified_spec"]}
   ],
   "proof_binding": {"canonical_directory": "formal/structures/Signal", "proof_module": "Signal_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
   "witness": {

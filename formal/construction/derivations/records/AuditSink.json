@@ -110,7 +110,7 @@
   "executable_pointers": [
     "formal/structures/AuditSink/refinement/AuditSinkImplRefinesSpec.tla",
     "formal/structures/AuditSink/refinement/AuditSinkImplRefinesSpec_Proof.tla",
-    "crate://automation-structures/0.2.3/src/primitives/audit_sink.rs",
+    "development-copy://automation-structures/0.3.2/src/primitives/audit_sink.rs",
     "formal/structures/AuditSink/AuditSink.tla",
     "formal/structures/AuditSink/AuditSink_Proof.tla"
   ],
@@ -215,7 +215,7 @@
       "contains": ["ASSUME HashCR ==", "THEOREM SafetyOriginal", "THEOREM TamperEvident"]
     },
     {
-      "path": "crate://automation-structures/0.2.3/src/primitives/audit_sink.rs",
+      "path": "development-copy://automation-structures/0.3.2/src/primitives/audit_sink.rs",
       "contains": ["pub struct AuditSink", "pub fn record", "pub fn validate", "pub open spec fn hash_binds_content", "pub struct BoundedHash"]
     }
   ],

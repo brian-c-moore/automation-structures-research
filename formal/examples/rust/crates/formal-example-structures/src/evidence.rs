@@ -1,3 +1,4 @@
+use crate::Structure;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, BTreeSet};
@@ -669,6 +670,61 @@ fn validate_construction(account: &ConstructionAccount) -> Result<(), String> {
     for node in &account.nodes {
         require_text("implementation identity", &node.implementation_identity)?;
         require_text("construction responsibility", &node.responsibility)?;
+        if node.stratum == ConstructionStratum::Catalog {
+            let structures = [
+                Structure::ActuationPass,
+                Structure::AllocationSnapshot,
+                Structure::Budget,
+                Structure::CompetitiveSelection,
+                Structure::ForkJoin,
+                Structure::QualityHierarchy,
+                Structure::Reduction,
+                Structure::RelationshipGraph,
+                Structure::ResourceRegistry,
+                Structure::Sequential,
+                Structure::StepGraph,
+                Structure::TraversalEngine,
+            ];
+            let structure_name = match (node.id.as_str(), node.implementation_identity.as_str()) {
+                ("Budget<Bytes>", "formal-example-structures::budget::Budget<Bytes>")
+                | ("Budget<Compute>", "formal-example-structures::budget::Budget<Compute>") => {
+                    "Budget"
+                }
+                (name, _) => name,
+            };
+            let named_structure = structures
+                .iter()
+                .find(|structure| structure.name() == structure_name);
+            let identity = match node.implementation_identity.as_str() {
+                "formal-example-structures::budget::Budget<Bytes>"
+                | "formal-example-structures::budget::Budget<Compute>"
+                | "formal-example-structures::budget::Budget<ExecutionTicks>" => {
+                    "formal-example-structures::budget::Budget"
+                }
+                "formal-example-structures::resource_registry::ResourceRegistry<TaskSpec>" => {
+                    "formal-example-structures::resource_registry::ResourceRegistry"
+                }
+                "formal-example-structures::sequential::Sequential<Option<usize>>" => {
+                    "formal-example-structures::sequential::Sequential"
+                }
+                "formal-example-structures::selection::CompetitiveSelection::select_min_index" => {
+                    "formal-example-structures::selection::CompetitiveSelection"
+                }
+                identity => identity,
+            };
+            let resolved = structures.iter().any(|structure| {
+                named_structure == Some(structure)
+                    && [None, Some("Commit"), Some("Compare")]
+                        .into_iter()
+                        .any(|action| structure.implementation_identity(action) == Some(identity))
+            });
+            if !resolved {
+                return Err(format!(
+                    "catalog node {} has an unresolved or wrong implementation identity {}",
+                    node.id, node.implementation_identity
+                ));
+            }
+        }
     }
     for edge in &account.edges {
         if !nodes.contains(edge.before.as_str()) || !nodes.contains(edge.after.as_str()) {
@@ -983,10 +1039,15 @@ mod tests {
     use super::*;
 
     fn node(id: &str, stratum: ConstructionStratum) -> ConstructionNode {
+        let implementation_identity = if stratum == ConstructionStratum::Catalog {
+            "formal-example-structures::budget::Budget".to_string()
+        } else {
+            format!("crate::{id}")
+        };
         ConstructionNode {
             id: id.to_string(),
             stratum,
-            implementation_identity: format!("crate::{id}"),
+            implementation_identity,
             responsibility: "test responsibility".to_string(),
         }
     }
@@ -996,11 +1057,11 @@ mod tests {
         let account = ConstructionAccount {
             outcome: ConstructionOutcome::CatalogComposition,
             nodes: vec![
-                node("known", ConstructionStratum::Catalog),
+                node("Budget", ConstructionStratum::Catalog),
                 node("unknown", ConstructionStratum::NewGeneric),
             ],
             edges: vec![ConstructionEdge {
-                before: "known".to_string(),
+                before: "Budget".to_string(),
                 after: "unknown".to_string(),
                 obligation: "ordered".to_string(),
             }],
@@ -1016,17 +1077,62 @@ mod tests {
     }
 
     #[test]
+    fn catalog_identity_rejects_foreign_module_type_method_and_profile() {
+        let mut account = ConstructionAccount {
+            outcome: ConstructionOutcome::CatalogComposition,
+            nodes: vec![node("ResourceRegistry", ConstructionStratum::Catalog)],
+            edges: vec![ConstructionEdge {
+                before: "ResourceRegistry".to_string(),
+                after: "ResourceRegistry".to_string(),
+                obligation: "same canonical owner".to_string(),
+            }],
+            execution_carrier: "Sequential".to_string(),
+            governed_commit_points: vec!["ResourceRegistry.Store".to_string()],
+            permitted_host_material: vec!["domain content".to_string()],
+            scope_delta: Vec::new(),
+            candidate_assessment: None,
+        };
+        account.nodes[0].implementation_identity =
+            "formal-example-structures::resource_registry::ResourceRegistry".to_string();
+        validate_construction(&account).expect("actual Registry module/type");
+        for (case, identity) in [
+            ("foreign", "foreign::resource_registry::ResourceRegistry"),
+            (
+                "nonexistent module",
+                "formal-example-structures::registry::ResourceRegistry",
+            ),
+            (
+                "wrong type",
+                "formal-example-structures::reduction::Reduction::fold",
+            ),
+            (
+                "wrong method",
+                "formal-example-structures::resource_registry::ResourceRegistry::nonexistent",
+            ),
+            (
+                "wrong profile",
+                "formal-example-structures::resource_registry::ResourceRegistry<Foreign>",
+            ),
+        ] {
+            account.nodes[0].implementation_identity = identity.to_string();
+            assert!(validate_construction(&account)
+                .expect_err(case)
+                .contains("unresolved or wrong implementation"));
+        }
+    }
+
+    #[test]
     fn candidate_outcome_requires_scope_delta_and_generic_node() {
         let account = ConstructionAccount {
             outcome: ConstructionOutcome::AbstractionLayerLocalShapeCandidate,
-            nodes: vec![node("known", ConstructionStratum::Catalog)],
+            nodes: vec![node("Budget", ConstructionStratum::Catalog)],
             edges: vec![ConstructionEdge {
-                before: "known".to_string(),
-                after: "known".to_string(),
+                before: "Budget".to_string(),
+                after: "Budget".to_string(),
                 obligation: "repeat".to_string(),
             }],
             execution_carrier: "Sequential".to_string(),
-            governed_commit_points: vec!["known".to_string()],
+            governed_commit_points: vec!["Budget".to_string()],
             permitted_host_material: vec!["Vec".to_string()],
             scope_delta: vec!["layer boundary".to_string()],
             candidate_assessment: None,
@@ -1041,11 +1147,11 @@ mod tests {
         let account = ConstructionAccount {
             outcome: ConstructionOutcome::UnidentifiedShapeCandidate,
             nodes: vec![
-                node("known", ConstructionStratum::Catalog),
+                node("Budget", ConstructionStratum::Catalog),
                 node("candidate", ConstructionStratum::NewGeneric),
             ],
             edges: vec![ConstructionEdge {
-                before: "known".to_string(),
+                before: "Budget".to_string(),
                 after: "candidate".to_string(),
                 obligation: "candidate edge".to_string(),
             }],
@@ -1073,11 +1179,11 @@ mod tests {
         let account = ConstructionAccount {
             outcome: ConstructionOutcome::AbstractionLayerLocalShapeCandidate,
             nodes: vec![
-                node("known", ConstructionStratum::Catalog),
+                node("Budget", ConstructionStratum::Catalog),
                 node("candidate", ConstructionStratum::NewGeneric),
             ],
             edges: vec![ConstructionEdge {
-                before: "known".to_string(),
+                before: "Budget".to_string(),
                 after: "candidate".to_string(),
                 obligation: "candidate edge".to_string(),
             }],

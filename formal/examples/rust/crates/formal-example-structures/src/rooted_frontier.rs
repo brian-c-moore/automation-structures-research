@@ -128,9 +128,11 @@ fn discover_frontier<T>(
 
     let mut discovered = BTreeSet::new();
     if let Some((first, remaining)) = roots.split_first() {
-        let mut traversal = TraversalEngine::new(first.clone(), trace, subject);
+        let mut traversal = TraversalEngine::new(first.clone(), hierarchy.len(), trace, subject)?;
         for root in remaining {
-            traversal.enqueue(root.clone(), trace);
+            traversal
+                .enqueue(root.clone(), trace)
+                .map_err(|(error, _)| error)?;
         }
         while !traversal.frontier().is_empty() {
             let index = traversal.frontier().len() - 1;
@@ -143,7 +145,9 @@ fn discover_frontier<T>(
                 )));
             }
             for child in hierarchy.children(&node_id) {
-                traversal.enqueue(child, trace);
+                traversal
+                    .enqueue(child, trace)
+                    .map_err(|(error, _)| error)?;
             }
             traversal.accept(work_id, trace)?;
         }
@@ -234,7 +238,22 @@ where
         records: Vec::new(),
         budget: Budget::<U>::new(capacity, trace, subject),
     };
-    let mut traversal = TraversalEngine::new(root, trace, subject);
+    let mut prefix = 1usize;
+    let mut candidate_ceiling = 1usize;
+    for target in &discovered.targets {
+        let alternatives = target
+            .candidates
+            .len()
+            .checked_add(1)
+            .ok_or_else(|| StructureError::new("bounded frontier alternatives overflow"))?;
+        prefix = prefix
+            .checked_mul(alternatives)
+            .ok_or_else(|| StructureError::new("bounded frontier prefix count overflow"))?;
+        candidate_ceiling = candidate_ceiling
+            .checked_add(prefix)
+            .ok_or_else(|| StructureError::new("bounded frontier work count overflow"))?;
+    }
+    let mut traversal = TraversalEngine::new(root, candidate_ceiling, trace, subject)?;
     let mut plans = Vec::new();
     while !traversal.frontier().is_empty() {
         let index = traversal.frontier().len() - 1;
@@ -250,7 +269,9 @@ where
         let target = &discovered.targets[state.target_index];
         let mut skipped = state.clone();
         skipped.target_index += 1;
-        traversal.enqueue(skipped, trace);
+        traversal
+            .enqueue(skipped, trace)
+            .map_err(|(error, _)| error)?;
         for candidate in &target.candidates {
             let mut next = state.clone();
             next.target_index += 1;
@@ -263,7 +284,7 @@ where
                 continue;
             }
             next.records.push(candidate.record.clone());
-            traversal.enqueue(next, trace);
+            traversal.enqueue(next, trace).map_err(|(error, _)| error)?;
         }
     }
     traversal.finish(trace)?;

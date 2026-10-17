@@ -6,8 +6,8 @@ FROM --platform=linux/amd64 docker.io/library/python:3.13.7-bookworm@sha256:dff7
 
 ARG VERUS_VERSION=0.2026.05.24.ecee80a
 
-ADD --checksum=sha256:eda15f767f52ff94ac4528daa25ab674c87b0e1df7ca91b1730b1d5c1336a087 \
-    https://static.crates.io/crates/automation-structures/automation-structures-0.2.3.crate \
+ADD --checksum=sha256:f9bfc2c35622b41bf64a99c2885e2de0b9a134219479fdb0d6bc2c3849b82719 \
+    https://static.crates.io/crates/automation-structures/automation-structures-0.4.0.crate \
     /tmp/automation-structures.crate
 RUN mkdir -p /opt/automation-structures \
     && tar -xzf /tmp/automation-structures.crate -C /opt/automation-structures --strip-components=1 \
@@ -78,10 +78,17 @@ ENV JAVA_HOME=/opt/java \
     AUTOMATION_STRUCTURE_ROOT=/source/automation-structure-research \
     AUTOMATION_STRUCTURES_CRATE_ROOT=/opt/automation-structures \
     AUTOMATION_STRUCTURE_PROOF_CONTAINER=1 \
-    AUTOMATION_STRUCTURE_VERIFIER_VERSION=0.5.1 \
+    AUTOMATION_STRUCTURE_VERIFIER_VERSION=0.5.2 \
     PATH=/opt/java/bin:/opt/tlaps/bin:/opt/verus/verus-x86-linux:/usr/local/cargo/bin:/usr/local/bin:/usr/bin:/bin
 
-RUN rustc --version \
+RUN rustup component add rustfmt clippy --toolchain 1.95.0-x86_64-unknown-linux-gnu \
+    && cargo fetch --locked --manifest-path /opt/automation-structures/Cargo.toml \
+    && cargo metadata --locked --offline --all-features --manifest-path /opt/automation-structures/Cargo.toml --format-version 1 > /dev/null \
+    && chmod -R a+rX /usr/local/cargo/registry \
+    && install -d -m 0755 -o 65532 -g 65532 /target \
+    && rustc --version \
+    && rustfmt --version \
+    && clippy-driver --version \
     && python3 --version \
     && java -version \
     && tlapm --version \
@@ -91,12 +98,12 @@ COPY --chmod=0555 run_proofs.py /usr/local/bin/run_proofs.py
 
 LABEL org.opencontainers.image.title="Automation Structure formal verifier" \
       org.opencontainers.image.description="Pinned, offline runtime for TLC, TLAPS, Verus, and executable cross-checks" \
-      org.opencontainers.image.version="0.5.1" \
+      org.opencontainers.image.version="0.5.2" \
       org.opencontainers.image.source="automation-structure-research/verification/Dockerfile" \
       io.automation-structures.verus.version="${VERUS_VERSION}" \
-      io.automation-structures.crate.version="0.2.3" \
-      io.automation-structures.crate.sha256="eda15f767f52ff94ac4528daa25ab674c87b0e1df7ca91b1730b1d5c1336a087" \
-      io.automation-structures.crate.vcs-sha1="3dfa26979e3feb655b548236f341258a23e4ab87" \
+      io.automation-structures.crate.version="0.4.0" \
+      io.automation-structures.crate.sha256="f9bfc2c35622b41bf64a99c2885e2de0b9a134219479fdb0d6bc2c3849b82719" \
+      io.automation-structures.crate.vcs-sha1="cd414aaeb4b2b17bcd32d1444f8bb486a6ca4bb2" \
       io.automation-structures.tla-tools.version="2026.08.11.125311" \
       io.automation-structures.tla-tools.sha256="ab323b79802aedc3203b3f9af37c6aca3ed43f4e0225b36f2aa77b26de46c05f" \
       io.automation-structures.tlaps.version="1.5.0" \

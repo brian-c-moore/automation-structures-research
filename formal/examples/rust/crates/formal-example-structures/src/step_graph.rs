@@ -63,12 +63,7 @@ impl StepGraph {
     }
 
     pub fn predecessors_complete(&self, node: usize) -> bool {
-        node < self.num_nodes
-            && self
-                .edges
-                .iter()
-                .filter(|&&(_, target)| target == node)
-                .all(|&(source, _)| self.inner.state(source) == Some(PublishedStepState::Complete))
+        self.inner.predecessors_complete(node) == Some(true)
     }
 
     pub fn become_ready(

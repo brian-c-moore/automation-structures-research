@@ -44,7 +44,7 @@
     "TraversalEngineImplRefinesSpec_Proof!RefinementThm", "TraversalEngine_Proof!Safety", "TraversalEngine_Proof!AcceptedCostAccountingSafety", "TraversalEngine_Proof!AcceptedSubsetVisitedSafety", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"],
   "executable_pointers": [
     "formal/structures/TraversalEngine/refinement/TraversalEngineImplRefinesSpec.tla",
-    "formal/structures/TraversalEngine/refinement/TraversalEngineImplRefinesSpec_Proof.tla","crate://automation-structures/0.2.3/src/compositions/traversal_engine.rs", "formal/structures/TraversalEngine/TraversalEngine.tla", "formal/structures/TraversalEngine/TraversalEngine_Proof.tla"],
+    "formal/structures/TraversalEngine/refinement/TraversalEngineImplRefinesSpec_Proof.tla","development-copy://automation-structures/0.3.2/src/compositions/traversal_engine.rs", "formal/structures/TraversalEngine/TraversalEngine.tla", "formal/structures/TraversalEngine/TraversalEngine_Proof.tla"],
   "library_premises": [
     "TraversalEngine-written-contract-refinement-profile","canonical-root-star-traversal-machine", "TraversalEngine-Safety", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification"],
   "deployment_premises": ["MaxBudgetType", "RootInNodes", "finite-node-universe-with-root", "serialized-budget-visited-accepted-queue-mutation", "atomic-visit-admission-and-budget-deduction"],
@@ -79,7 +79,7 @@
     },
     {"path": "formal/structures/TraversalEngine/TraversalEngine.tla", "contains": ["VARIABLES budget_remaining, visited, accepted, queue", "VisitNode(n)", "Skip(n)", "Terminate ==", "AcceptedCostAccounting", "AcceptedSubsetVisited"]},
     {"path": "formal/structures/TraversalEngine/TraversalEngine_Proof.tla", "contains": ["THEOREM Safety", "THEOREM AcceptedCostAccountingSafety", "THEOREM AcceptedSubsetVisitedSafety"]},
-    {"path": "crate://automation-structures/0.2.3/src/compositions/traversal_engine.rs", "contains": ["pub struct TraversalEngine", "pub fn visit_node", "pub fn skip", "pub fn terminate", "pub open spec fn accepted_subset_visited"]}
+    {"path": "development-copy://automation-structures/0.3.2/src/compositions/traversal_engine.rs", "contains": ["pub struct TraversalEngine", "pub fn visit_node", "pub fn skip", "pub fn terminate", "pub open spec fn accepted_subset_visited"]}
   ],
   "proof_binding": {"canonical_directory": "formal/structures/TraversalEngine", "proof_module": "TraversalEngine_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
   "witness": {

@@ -94,13 +94,13 @@
       ]
     }
   },
-  "rust_source": "crate://automation-structures/0.2.3/src/integration/governed_commit.rs",
+  "rust_source": "development-copy://automation-structures/0.3.2/src/integration/governed_commit.rs",
   "rust_source_sha256": "a3f5874a0d40720c55794e457ec6991e688006620978763bdef150de8e1e45c8",
   "schema_version": 1,
   "semantic_bridge_tcb": [
     "Verus Rust parser, verifier, bundled Z3, and source-level contract semantics"
   ],
   "semantic_refinement_logic": "Verus",
-  "semantic_refinement_module": "crate://automation-structures/0.2.3/src/integration/governed_commit.rs",
+  "semantic_refinement_module": "development-copy://automation-structures/0.3.2/src/integration/governed_commit.rs",
   "translation_kind": "direct-verus-proof-and-cross-logic-identity-manifest"
 }

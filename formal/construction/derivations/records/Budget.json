@@ -145,7 +145,7 @@
     "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"
   ],
   "executable_pointers": [
-    "crate://automation-structures/0.2.3/src/primitives/budget.rs",
+    "development-copy://automation-structures/0.3.2/src/primitives/budget.rs",
     "formal/structures/Budget/refinement/BudgetImplRefinesSpec.tla",
     "formal/structures/Budget/refinement/BudgetImplRefinesSpec_Proof.tla"
   ],
@@ -244,7 +244,7 @@
       "contains": ["THEOREM RefinementThm"]
     },
     {
-      "path": "crate://automation-structures/0.2.3/src/primitives/budget.rs",
+      "path": "development-copy://automation-structures/0.3.2/src/primitives/budget.rs",
       "contains": ["pub struct Budget", "pub fn try_allocate", "pub fn complete_eviction", "pub open spec fn safety_invariant"]
     }
   ],

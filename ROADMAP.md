@@ -31,9 +31,12 @@ outcomes. Generation and static checks reject a missing, wrong, duplicate, or cr
 
 Every cataloged structure has an evidence chain from a TLA+ specification through a TLAPS proof to a
 Verus implementation proof, with negative controls for the written clauses. The Rust implementation
-is published separately as
-[`automation-structures` 0.2.3](https://crates.io/crates/automation-structures). The verifier image
-fetches that exact archive by checksum and runs the implementation checks against it.
+is maintained separately as
+[`automation-structures`](https://crates.io/crates/automation-structures). The research examples
+consume the published 0.4.0 release from crates.io. The implementation descriptor and verifier
+image pin that archive's checksum and source commit. Earlier proof and native results retain
+their original source identities; the current verification input roles are described in
+[`verification/README.md`](verification/README.md).
 
 The [reference](docs/reference.md) distinguishes reusable structure contracts from their selected
 executable profiles. Evidence for one profile does not establish every implementation of its schema;

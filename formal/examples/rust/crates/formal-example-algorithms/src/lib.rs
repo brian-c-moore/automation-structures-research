@@ -147,7 +147,21 @@ pub struct AlgorithmRun {
 
 impl AlgorithmRun {
     pub fn passed(&self) -> bool {
-        self.checks.iter().all(|check| check.passed)
+        !self.checks.is_empty()
+            && !self.trace.events().is_empty()
+            && self.checks.iter().all(|check| check.passed)
+            && evidence::describe(&self.id).is_ok_and(|record| {
+                self.trace.events().iter().all(|event| {
+                    let actual = event.structure.implementation_identity(Some(&event.action));
+                    actual.is_some()
+                        && actual == event.implementation_identity
+                        && record.record.construction.nodes.iter().any(|node| {
+                            node.stratum == formal_example_structures::ConstructionStratum::Catalog
+                                && node.id == event.structure.name()
+                                && actual == Some(node.implementation_identity.as_str())
+                        })
+                })
+            })
     }
 }
 
@@ -278,6 +292,32 @@ pub fn run(
             "Runtime and memory-complexity claims are excluded.".to_string(),
         ],
     })
+}
+
+#[cfg(test)]
+#[test]
+fn memoization_rejects_another_reduction_operation_with_unchanged_checks() {
+    let mut run = run(
+        "FEX-ALG-060",
+        None,
+        MemoizationControl::None,
+        AlgorithmFault::None,
+    )
+    .expect("actual Memoization fold");
+    assert!(run.passed());
+    let trace = std::mem::take(&mut run.trace);
+    assert!(!run.passed(), "erased Memoization trace");
+    run.trace = trace;
+    let checks = std::mem::take(&mut run.checks);
+    assert!(!run.passed(), "erased Memoization checks");
+    run.checks = checks;
+    let mut comparison = TraceLog::default();
+    formal_example_structures::PathReduction::compare(None, 1, &mut comparison, "memoization");
+    run.trace = comparison;
+    assert!(
+        !run.passed(),
+        "unchanged result/checks cannot relabel a comparison as a fold"
+    );
 }
 
 #[cfg(test)]

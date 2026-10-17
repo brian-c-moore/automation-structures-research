@@ -69,10 +69,7 @@ impl ForkJoin {
     }
 
     pub fn all_complete(&self) -> bool {
-        self.inner
-            .worker_states()
-            .iter()
-            .all(|state| *state == PublishedWorkerState::Complete)
+        self.inner.all_complete()
     }
 
     pub fn start_worker(

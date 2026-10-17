@@ -573,9 +573,11 @@ fn apply_edit(
         0,
         replicas,
         |replica, _, _| {
-            replica.state.insert(operation.clone());
-            Ok(())
+            let mut state = replica.state.clone();
+            state.insert(operation.clone());
+            Ok(state)
         },
+        |replica, state| replica.state = state,
         trace,
         subject,
     )?;
@@ -625,17 +627,15 @@ fn apply_delivery(
             merge_mode,
             trace,
             subject,
-        )
+        )?
     };
 
     let mut pass = ActuationPass::new(vec![Some(actual_target_index)], trace, subject);
     pass.actuate_with(
         0,
         replicas,
-        |replica, _, _| {
-            replica.state = merged.clone();
-            Ok(())
-        },
+        |_, _, _| Ok(merged.clone()),
+        |replica, state| replica.state = state,
         trace,
         subject,
     )?;
@@ -648,7 +648,7 @@ fn apply_delivery(
             merge_mode,
             trace,
             subject,
-        );
+        )?;
     }
 
     witnesses.push(DeliveryWitness {
@@ -712,7 +712,7 @@ fn reduce_payloads(
     mode: MergeMode,
     trace: &mut TraceLog,
     subject: &str,
-) -> ReplicaState {
+) -> Result<ReplicaState, StructureError> {
     Reduction::fold(
         candidates,
         identity,
@@ -1167,7 +1167,7 @@ mod tests {
     }
 
     #[test]
-    fn multi_input_reduction_commits_the_same_join_in_every_order() {
+    fn multi_input_reduction_commits_the_same_join_in_every_order() -> Result<(), StructureError> {
         let run = run_script(
             &["p", "q", "r"],
             &[
@@ -1199,7 +1199,7 @@ mod tests {
                 MergeMode::Union,
                 &mut trace,
                 &subject,
-            );
+            )?;
             assert_eq!(result, expected_pair);
             let event = trace
                 .require_single_event_for(Structure::Reduction, "Evaluate", &subject)
@@ -1228,7 +1228,7 @@ mod tests {
                 MergeMode::Union,
                 &mut trace,
                 &subject,
-            );
+            )?;
             assert_eq!(result, expected_triple);
             let event = trace
                 .require_single_event_for(Structure::Reduction, "Evaluate", &subject)
@@ -1238,6 +1238,7 @@ mod tests {
                 .require_single_event_for(Structure::Reduction, "Commit", &subject)
                 .unwrap();
         }
+        Ok(())
     }
 
     #[test]
