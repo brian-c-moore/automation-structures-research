@@ -82,8 +82,10 @@ ENV JAVA_HOME=/opt/java \
     PATH=/opt/java/bin:/opt/tlaps/bin:/opt/verus/verus-x86-linux:/usr/local/cargo/bin:/usr/local/bin:/usr/bin:/bin
 
 RUN rustup component add rustfmt clippy --toolchain 1.95.0-x86_64-unknown-linux-gnu \
-    && cargo fetch --locked --manifest-path /opt/automation-structures/Cargo.toml --target x86_64-unknown-linux-gnu \
+    && cargo fetch --locked --manifest-path /opt/automation-structures/Cargo.toml \
+    && cargo metadata --locked --offline --all-features --manifest-path /opt/automation-structures/Cargo.toml --format-version 1 > /dev/null \
     && chmod -R a+rX /usr/local/cargo/registry \
+    && install -d -m 0755 -o 65532 -g 65532 /target \
     && rustc --version \
     && rustfmt --version \
     && clippy-driver --version \
