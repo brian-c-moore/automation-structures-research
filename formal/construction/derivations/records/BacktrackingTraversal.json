@@ -44,7 +44,7 @@
     "BacktrackingTraversalImplRefinesSpec_Proof!RefinementThm", "BacktrackingTraversalUndo_Proof!Safety", "BacktrackingTraversalUndo_Proof!PairingSafety", "BacktrackingTraversalUndo_Proof!StateRestorationSafety", "BacktrackingTraversalUndo_Proof!RecordedLeafValiditySafety", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"],
   "executable_pointers": [
     "formal/structures/BacktrackingTraversal/refinement/BacktrackingTraversalImplRefinesSpec.tla",
-    "formal/structures/BacktrackingTraversal/refinement/BacktrackingTraversalImplRefinesSpec_Proof.tla","crate://automation-structures/0.2.3/src/primitives/backtracking_traversal.rs", "formal/structures/BacktrackingTraversal/BacktrackingTraversalUndo.tla", "formal/structures/BacktrackingTraversal/BacktrackingTraversalUndo_Proof.tla"],
+    "formal/structures/BacktrackingTraversal/refinement/BacktrackingTraversalImplRefinesSpec_Proof.tla","development-copy://automation-structures/0.3.2/src/primitives/backtracking_traversal.rs", "formal/structures/BacktrackingTraversal/BacktrackingTraversalUndo.tla", "formal/structures/BacktrackingTraversal/BacktrackingTraversalUndo_Proof.tla"],
   "library_premises": [
     "BacktrackingTraversal-written-contract-refinement-profile","canonical-paired-do-undo-machine", "BacktrackingTraversalUndo-Safety", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification"],
   "deployment_premises": ["BranchFactorType", "MaxDepthType", "InitAuxType", "MutateClosed", "UndoInverts", "serialized-path-ledger-aux-mutation"],
@@ -79,7 +79,7 @@
     },
     {"path": "formal/structures/BacktrackingTraversal/BacktrackingTraversalUndo.tla", "contains": ["VARIABLES", "Descend(c, d)", "Visit ==", "Ascend ==", "StateRestoration"]},
     {"path": "formal/structures/BacktrackingTraversal/BacktrackingTraversalUndo_Proof.tla", "contains": ["THEOREM Safety", "THEOREM RecordedLeafValiditySafety", "ASSUME UndoInverts"]},
-    {"path": "crate://automation-structures/0.2.3/src/primitives/backtracking_traversal.rs", "contains": ["pub struct BacktrackingTraversal", "pub fn descend", "pub fn visit", "pub fn ascend", "pub open spec fn state_restoration"]}
+    {"path": "development-copy://automation-structures/0.3.2/src/primitives/backtracking_traversal.rs", "contains": ["pub struct BacktrackingTraversal", "pub fn descend", "pub fn visit", "pub fn ascend", "pub open spec fn state_restoration"]}
   ],
   "proof_binding": {"canonical_directory": "formal/structures/BacktrackingTraversal", "proof_module": "BacktrackingTraversalUndo_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
   "witness": {

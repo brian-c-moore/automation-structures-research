@@ -70,7 +70,7 @@ pub struct AdmissionCertificate {
     pub repeating_demand: u64,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[derive(Debug, Eq, PartialEq, Serialize)]
 pub struct AdmissionDecision {
     pub admitted: bool,
     pub certificate: Option<AdmissionCertificate>,
@@ -113,7 +113,7 @@ impl ScheduleResult {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[derive(Debug, Eq, PartialEq, Serialize)]
 pub struct EdfRun {
     pub admission: AdmissionDecision,
     pub schedule: Option<ScheduleResult>,
@@ -528,13 +528,13 @@ fn execute_release_trace(
                     0,
                     &mut jobs,
                     |job, trace, subject| {
-                        if charge_amount == 0 {
-                            Ok(())
-                        } else {
-                            job.execution_budget
-                                .try_reserve(charge_amount, trace, subject)
+                        let mut budget = job.execution_budget.clone();
+                        if charge_amount != 0 {
+                            budget.try_reserve(charge_amount, trace, subject)?;
                         }
+                        Ok(budget)
                     },
+                    |job, budget| job.execution_budget = budget,
                     trace,
                     &subject,
                 )?;
@@ -546,13 +546,13 @@ fn execute_release_trace(
                     &ready,
                     urgency_key,
                     |job, trace, subject| {
-                        if charge_amount == 0 {
-                            Ok(())
-                        } else {
-                            job.execution_budget
-                                .try_reserve(charge_amount, trace, subject)
+                        let mut budget = job.execution_budget.clone();
+                        if charge_amount != 0 {
+                            budget.try_reserve(charge_amount, trace, subject)?;
                         }
+                        Ok(budget)
                     },
+                    |job, budget| job.execution_budget = budget,
                     trace,
                     &subject,
                 )?)

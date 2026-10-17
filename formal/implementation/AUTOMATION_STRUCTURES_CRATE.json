@@ -1,8 +1,8 @@
 {
   "crate": "automation-structures",
-  "version": "0.2.3",
-  "archive_sha256": "eda15f767f52ff94ac4528daa25ab674c87b0e1df7ca91b1730b1d5c1336a087",
-  "vcs_sha1": "3dfa26979e3feb655b548236f341258a23e4ab87",
-  "download": "https://static.crates.io/crates/automation-structures/automation-structures-0.2.3.crate",
-  "source_locator_prefix": "crate://automation-structures/0.2.3/"
+  "version": "0.4.0",
+  "archive_sha256": "f9bfc2c35622b41bf64a99c2885e2de0b9a134219479fdb0d6bc2c3849b82719",
+  "vcs_sha1": "cd414aaeb4b2b17bcd32d1444f8bb486a6ca4bb2",
+  "download": "https://static.crates.io/crates/automation-structures/automation-structures-0.4.0.crate",
+  "source_locator_prefix": "crate://automation-structures/0.4.0/"
 }

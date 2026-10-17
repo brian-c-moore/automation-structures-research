@@ -102,4 +102,38 @@ PROOF
     <2> QED BY <2>map, <2>formal, <2>stutter
   <1> QED BY <1>init, <1>step
 
+CONSTANTS ClauseForm, ClauseDomain, ClauseNames, ClauseRoleOf,
+          ClauseMeaning, ResponsibilityMeaning, ClauseProofDomain,
+          ClauseDerivedBasis, ClausePremiseDomain
+
+ClauseBindingPremises ==
+    SemanticClauseBinding(
+        ClauseForm, ClauseDomain, ClauseNames, ClauseRoleOf,
+        ClauseMeaning, ResponsibilityMeaning, ClauseProofDomain,
+        ClauseDerivedBasis, ClausePremiseDomain)
+
+THEOREM DefiningClauseElimination ==
+    ClauseBindingPremises =>
+      \A evaluation \in ResponsibilityMeaning :
+        \A clause \in DefiningClauses(ClauseNames, ClauseRoleOf) :
+          evaluation \in ClauseMeaning[clause]
+BY SMT DEF ClauseBindingPremises, SemanticClauseBinding, ClauseMeet
+
+THEOREM DefiningClauseIntroduction ==
+    ClauseBindingPremises =>
+      \A evaluation \in ClauseDomain :
+        (\A clause \in DefiningClauses(ClauseNames, ClauseRoleOf) :
+            evaluation \in ClauseMeaning[clause])
+          => evaluation \in ResponsibilityMeaning
+BY SMT DEF ClauseBindingPremises, SemanticClauseBinding, ClauseMeet
+
+THEOREM ConditionalDerivedClauseTransfer ==
+    ClauseBindingPremises =>
+      \A clause \in DerivedClauses(ClauseNames, ClauseRoleOf) :
+        \A evaluation \in ClauseProofDomain \cap ClausePremiseDomain[clause] :
+          (\A basis \in ClauseDerivedBasis[clause] :
+              evaluation \in ClauseMeaning[basis])
+            => evaluation \in ClauseMeaning[clause]
+BY SMT DEF ClauseBindingPremises, SemanticClauseBinding, ClauseMeet
+
 ====

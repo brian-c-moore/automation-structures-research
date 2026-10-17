@@ -44,7 +44,7 @@
     "EquivalenceClassImplRefinesSpec_Proof!RefinementThm", "EquivalenceClass_Proof!Safety", "EquivalenceClass_Proof!RepresentativeIdempotenceSafety", "EquivalenceClass_Proof!RankMonotonicitySafety", "EquivalenceClass_Proof!RepresentativeRootednessSafety", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"],
   "executable_pointers": [
     "formal/structures/EquivalenceClass/refinement/EquivalenceClassImplRefinesSpec.tla",
-    "formal/structures/EquivalenceClass/refinement/EquivalenceClassImplRefinesSpec_Proof.tla","crate://automation-structures/0.2.3/src/compositions/equivalence_class.rs", "formal/structures/EquivalenceClass/EquivalenceClass.tla", "formal/structures/EquivalenceClass/EquivalenceClass_Proof.tla"],
+    "formal/structures/EquivalenceClass/refinement/EquivalenceClassImplRefinesSpec_Proof.tla","development-copy://automation-structures/0.3.2/src/compositions/equivalence_class.rs", "formal/structures/EquivalenceClass/EquivalenceClass.tla", "formal/structures/EquivalenceClass/EquivalenceClass_Proof.tla"],
   "library_premises": [
     "EquivalenceClass-written-contract-refinement-profile","canonical-bounded-union-find-machine", "EquivalenceClass-Safety", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification"],
   "deployment_premises": ["MaxOpsType", "finite-element-domain", "bounded-successful-union-count", "serialized-parent-rank-mutation"],
@@ -63,14 +63,14 @@
   "transfer_classes": ["safety"],
   "refinement_status": "mechanized",
   "conformance_details": {
-    "initialization": "EquivalenceClass::new maps each element to itself with zero ranks and zero completed unions to canonical Init.",
-    "step-simulation": "The written profile maps successful union to Union and bounded rejection to Idle. The 0.2.1 Verus contract binds the result predicate, exact selected-root parent and rank effects, Budget credit, and rejected-call stutter.",
-    "observation-agreement": "The 0.2.1 carrier projects parent and rank through registries and successful-operation count through Budget. It does not expose the written profile's size or max-rank state, so complete observation agreement is not established for that carrier.",
-    "commit-agreement": "The 0.2.1 runtime writes parent, optional rank, and Budget state in one method body, and its Verus postcondition binds each successful rank branch to those exact effects while binding rejection to full stutter.",
+    "initialization": "The seven-field maps above describe the written EquivalenceClassImplRefinesSpec transcription. Current development-copy EquivalenceClass::new uses empty parent/rank Registries defaulted to identity/zero and a zero-allocated Budget, yielding the selected primary parent/rank/ops_done Init projection.",
+    "step-simulation": "Current union maps its exact lower-, higher- or equal-rank root update and one Budget charge to Union. Exhausted-capacity refusal maps to Idle; same-class refusal below capacity is outer stuttering, not the exhausted-capacity Idle action. Find and Same are read-only and do not compress paths.",
+    "observation-agreement": "Map parent through parent_of, rank through rank_of and ops_done through Budget.allocated, with MaxOps=Budget.capacity. Strictly increasing represented ranks bound each parent path and identify Find's terminal root with the bounded primary Rep. No size/max_rank observation or full seven-field correspondence is transferred to this carrier.",
+    "commit-agreement": "The current complete-call contract frames every unselected parent/rank key, binds the selected rank branch and charges exactly one successful union; refusal preserves the entire owner under its invariant.",
     "failure-persistence-agreement": "No crash, torn union, retry, path-compression mutation, or recovery action is modeled.",
     "rely-discharge": "Deployment supplies the finite domain, MaxOps bound, serialized mutation, and complete parent/rank writer inventory.",
     "liveness-preservation": "No eventual merging, operation fairness, complexity, or wait-free progress guarantee is transferred.",
-    "tcb-closure": "The 0.2.1 carrier owns parent and rank registries plus the successful-union Budget. union is the executable writer; find and same are read-only. The exact effect contract closes that writer surface, while size and max-rank observation remain outside this carrier."
+    "tcb-closure": "The current carrier composes parent and rank Registries with the successful-union Budget. The selected trace uses union as writer and find/same as observations, subject to invariant-respecting serialized calls and no public constituent bypass. Size and max-rank observations remain outside this carrier."
   },
   "source_checks": [
     {
@@ -79,7 +79,7 @@
     },
     {"path": "formal/structures/EquivalenceClass/EquivalenceClass.tla", "contains": ["VARIABLES", "Union(a, b)", "Idle ==", "RepresentativeRootedness"]},
     {"path": "formal/structures/EquivalenceClass/EquivalenceClass_Proof.tla", "contains": ["THEOREM Safety", "THEOREM RepresentativeIdempotenceSafety", "THEOREM RepresentativeRootednessSafety"]},
-    {"path": "crate://automation-structures/0.2.3/src/compositions/equivalence_class.rs", "contains": ["pub struct EquivalenceClass", "pub fn union", "pub fn find", "pub open spec fn inv", "fn attach_lower"]}
+    {"path": "development-copy://automation-structures/0.3.2/src/compositions/equivalence_class.rs", "contains": ["pub struct EquivalenceClass", "pub fn union", "pub fn find", "pub open spec fn inv", "fn attach_lower"]}
   ],
   "proof_binding": {"canonical_directory": "formal/structures/EquivalenceClass", "proof_module": "EquivalenceClass_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
   "witness": {

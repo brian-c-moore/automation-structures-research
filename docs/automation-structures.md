@@ -58,10 +58,21 @@ A composition records four strata:
 |---|---|---|---|
 | Runtime givens | the environment | assumptions, not state | atomicity, time |
 | Abstraction primitives | the catalog (Section 3) | a reusable obligation schema | Budget, AuditSink, ConvergenceGovernor |
-| Connective forms | the composition (Section 3.5) | structure or position, no independent obligation schema | cursor, window marker, guard |
+| Connective forms | the composition (Section 3.5) | state or logic role, no independent obligation schema | Projection, Cursor, Accumulator, Marker, Counter, Buffer, OrderingPass |
 | Domain parameters | the domain | content filling form slots | scoring functions, operators, value types |
 
-For example, a VRAM budget uses the Budget contract with a memory resource type. A guard's position in a construction is separate from the predicate it evaluates; the predicate supplies the condition to check. Runtime givens such as atomicity and time are environmental assumptions. A construction must state which of those assumptions its contracts require.
+For example, a VRAM budget uses the Budget contract with a memory resource type.
+A guard is the owning structure's admission predicate and stays coupled to that
+owner's update or refusal. A window names a particular construction: RateLimit
+uses a window-start Marker and runtime clock with Budget accounting, while
+ConvergenceGovernor retains a chronological Buffer view and its checked history
+couples that Buffer to the exact-sum Budget. A join belongs to ForkJoin or an
+explicitly named composition with a selected closure contract. These terms do
+not extend the seven-form vocabulary. Section 2.2 of
+[Execution Structures](execution-structures.md) maps their admitted actions and
+retained state. Runtime givens such as atomicity and time are environmental
+assumptions. A construction must state which of those assumptions its contracts
+require.
 
 ### 2.3 A working definition of automation
 

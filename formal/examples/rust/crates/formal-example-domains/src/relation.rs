@@ -137,7 +137,7 @@ pub fn compare(
                         let binding = contract.implementation_bindings.iter().find(|binding| {
                             binding.member_id == member && binding.node_id == structure.name()
                         });
-                        if !matches!(binding, Some(binding) if binding.implementation_identity == structure.implementation_identity())
+                        if !matches!(binding, Some(binding) if Some(binding.implementation_identity.as_str()) == structure.implementation_identity(None))
                         {
                             errors.push(format!(
                                 "{member} lacks the registered implementation identity for {}",

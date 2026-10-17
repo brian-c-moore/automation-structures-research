@@ -1,4 +1,4 @@
-# Smoke check: the verifier image builds and a focused proof selection runs.
+# Smoke checks for the verifier image, Budget model and published canonical library.
 name: proofs-smoke
 
 on:
@@ -14,19 +14,26 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Build verifier image
         run: docker build --tag automation-structures-proofs verification
-      - name: Discovery dry run
+      - name: Budget model
         run: >
           docker run --rm --init --network none --read-only --cap-drop ALL
           --security-opt no-new-privileges --cpus 2 --memory 4g --memory-swap 4g
           --pids-limit 512 --volume "$PWD:/source/automation-structure-research:ro"
           --tmpfs /work:rw,exec,nosuid,nodev,size=2g,mode=1777
+          --entrypoint timeout
           automation-structures-proofs
-          run --scope all --all --dry-run --no-selection-table
-      - name: Budget subject
+          120s java -Djava.io.tmpdir=/work -XX:+UseParallelGC
+          -cp /source/automation-structure-research/verification/toolchain/tla2tools.jar
+          tlc2.TLC -workers 1 -metadir /work/budget-model
+          -config /source/automation-structure-research/formal/structures/Budget/Budget.cfg
+          /source/automation-structure-research/formal/structures/Budget/Budget.tla
+      - name: Published canonical library proof
         run: >
-          docker run --rm --init --network none --read-only --cap-drop ALL
+          docker run --rm --init --network none --cap-drop ALL
           --security-opt no-new-privileges --cpus 2 --memory 4g --memory-swap 4g
-          --pids-limit 512 --volume "$PWD:/source/automation-structure-research:ro"
-          --tmpfs /work:rw,exec,nosuid,nodev,size=2g,mode=1777
+          --pids-limit 512 --volume automation-structures-proof-target:/target
+          --env CARGO_TARGET_DIR=/target --env CARGO_BUILD_JOBS=2
+          --workdir /opt/automation-structures --entrypoint timeout
           automation-structures-proofs
-          run --subject Budget --workers 1 --fail-fast --no-selection-table
+          600s cargo verus verify --locked --offline --all-features
+          --fwd-verus-args-to roots -- --triggers-mode silent --num-threads 2

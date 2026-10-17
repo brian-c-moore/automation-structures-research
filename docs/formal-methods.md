@@ -1,6 +1,27 @@
 # Formal Methods Directory
 
-This document is the navigation authority for the formal artifact. It answers four questions: what formal work exists, what each part tries to establish, where its source is located, and how a reviewer selects it with `verification/run_proofs.py`.
+This document lists the formal work, what each part tries to establish, its source locations and selectors. Build and verification commands are in [reproducibility](reproducibility.md).
+
+The current canonical descriptor pins the published 0.4.0 archive and source commit.
+The research Rust workspace consumes that release from crates.io. The
+`crate://.../0.2.3/` locations retained in the tables below name the historical
+published profile that those formal packages originally described. Derivation and
+bridge metadata retain their `development-copy://automation-structures/0.3.2/`
+locators at their original source identities. See the
+[verification input roles](../verification/README.md) and
+[reproducibility guide](reproducibility.md) for the current dependency and direct workflow.
+
+The 0.3.2 profile covers 37 registered Verus modules and 141 attributed
+mutations, plus the separate detector self-test. The additional module is
+`MinimumSelection`: the existing OrderingPass arrangement/inverse, Hard selection,
+Cursor and Buffer compose a canonical winner with complete stable minimum ties.
+Its control removes the actual Buffer publication while advancing the Cursor and
+requires rejection at the selected-prefix invariant. This joint contract is
+stronger than the Hard model's single-winner guarantee; its implementation proof
+and control must pass before current-source evidence is credited. Actual published
+0.3.2 selects the same 37-module, 141-mutation implementation profile after publication
+identity checks. Historical 0.2.3, 0.2.4, 0.3.0 and 0.3.1 admission retains the
+36-module, 140-mutation scope.
 
 Each result means exactly what it says. A proof establishes its theorem under its assumptions. A
 model check explores its configured state space. A control shows that its named defect is detected.
@@ -12,6 +33,14 @@ responsibilities, contributing clauses, supporting facts, derived results, selec
 alternative modes. The local proofs remain evidence for their written formulas. The selected
 Budget/Sequential instance below binds two schemas to exact catalog semantics; other selections need
 their own bindings before they receive that credit.
+
+`SemanticClauseBinding` separately relates one selected responsibility to its
+primary, contributing and selected-policy predicates on a fixed interpretation
+domain. Supporting facts have a separately justified proof domain; a derived
+result needs its explicit basis and premise domain. The relation does not infer
+predicate meanings, reachable states, cryptographic assumptions or a common
+lifting of state, action and temporal formulas. Those belong to the selected
+source binding.
 
 Interpretation is a separate check. Supplied owner, controller, timing, or assurance labels do not
 establish real authority. A counterexample changes the theory only when the model contains the
@@ -39,7 +68,7 @@ implementation or deployment conformance.
 | Audit the complete ALK-SPEC boundary | `run_proofs.py run --subject ALK-SPEC-1 --repeat 2 --json /out/alk-spec.json` |
 | Reproduce a two-pass result set | `run_proofs.py run --all --repeat 2 --json /out/results.json` |
 
-`run` requires either an explicit selector or `--all`. Read-only discovery works from a checkout. Proof execution is refused outside the pinned container.
+`run` requires either an explicit selector or `--all`. Proof execution is refused outside the pinned container.
 
 ## Find work by artifact type
 
@@ -127,7 +156,7 @@ The four execution structures also appear in the derivation registry. Their mode
 
 | Kernel or package | What it tries to prove | Main source | Control boundary | Reviewer selection |
 |---|---|---|---|---|
-| Common semantic schema | Can reusable structure contracts distinguish obligation schemas, contributing clauses, support, modes, temporal form, and concern from system-specific ownership and assurance? | `formal/construction/kernels/CommonSemanticSchema*` | The current schema does not make those distinctions. It types generic obligation records and supplied action owners, and its `GuaranteeKinds` mixes prevention/detection/recovery with the qualifier `conditional` and outcome `lost`. | `run_proofs.py run --subject CommonSemanticSchema` |
+| Common semantic schema | Does a selected responsibility equal its defining clause conjunction, with separate support and conditional-derived proof premises? | `formal/construction/kernels/CommonSemanticSchema*` | Parametric introduction, elimination and conditional-derived transfer; the finite witness rejects an omitted contribution, unsupported proof domain and missing derivation premise. Actual predicate meanings and profile lifting are supplied. The legacy `GuaranteeKinds` vocabulary remains separate from clause-role semantics and does not establish deployed authority. | `run_proofs.py run --subject CommonSemanticSchema` |
 | Obligation and check-act kernel | Registered system and environment steps preserve the selected safety clauses, and a separated check licenses a commit only under the stated stability relation. | `formal/construction/kernels/TheoryKernel*` | Broken environment, unstable interference, and bypass controls; this is the safety specialization, not the universal obligation test | `run_proofs.py run --subject TheoryKernel` |
 | Ranked progress kernel | An inhabited natural rank, non-increasing other actions, and owned fairness establish the named progress conclusion. | `formal/construction/kernels/ProgressKernel*` | No-fairness and vacuous-rank controls | `run_proofs.py run --subject ProgressKernel` |
 | Ownership and assurance kernel | Does obligation-decisive authority derive the claim-relative enforcement owner, ownership transfer or unowned gap, owner-issued guarantee, claimant assurance profile, and failure ceiling? | `formal/construction/kernels/OwnershipAssuranceKernel*` | The kernel computes a ceiling from supplied claimant, commit-owner, provider, controller-set, timing, evidence, and recovery inputs. `CommitDelegate` is unused in that ceiling; these artifacts do not establish the authority, issuer, or A0-A5 conclusions. | `run_proofs.py run --subject OwnershipAssuranceKernel` |
@@ -143,7 +172,7 @@ The four execution structures also appear in the derivation registry. Their mode
 | Layer | What it tries to establish | Location | Evidence boundary | Reviewer selection |
 |---|---|---|---|---|
 | ALK semantic interface | Are normalized occurrence keys, predicate records, owner/commit fields, and selected structure/execution records coherent under the model's supplied premises? | `formal/construction/alk/ALK_REGISTRY.json` and `formal/construction/alk/tla/ALKSemanticModel*` | The reusable interface checks predicate path/operator records and supplied owner, provider, path, TCB, failure, and ceiling data. The separate claim integration witness evaluates the selected catalog formulas. | `run_proofs.py run --area alk --contains ALKSemanticModel` |
-| Exact selected catalog instance | Do the Budget capacity and Sequential history/cursor clauses retain their actual state and action semantics at complete frames? | `formal/construction/alk/tla/ALKClaimInstantiation*` and `ALKClaimActionBinding*` | 63 TLAPS obligations, finite positive models, and wrong-predicate, omitted-action, and wrong-frame controls; capacity and steps are two, values are zero or one, and no crash or hidden writer is modeled | Run `run_proofs.py run --contains ALKClaimInstantiation --workers 1`, then `run_proofs.py run --contains ALKClaimActionBinding --workers 1` |
+| Exact selected catalog instance | Do the Budget capacity and Sequential history/cursor clauses retain their actual state and action semantics at complete frames? | `formal/construction/alk/tla/ALKClaimInstantiation*` and `ALKClaimActionBinding*` | The current instantiation proof has 125 TLAPS obligations, including its clause-role relation; finite positive models and retained wrong-predicate, omitted-action and wrong-frame controls cover their selected seams. Capacity and steps are two, values are zero or one, and no crash or hidden writer is modeled | Run `run_proofs.py run --contains ALKClaimInstantiation --workers 1`, then `run_proofs.py run --contains ALKClaimActionBinding --workers 1` |
 | Selected action authority | Do explicit controller gates derive the owner or unowned result and bind actual commits to authorized issuers? | `formal/construction/alk/tla/ALKClaimAuthority*` | 17 TLAPS obligations and 15 TLC cases cover direct control, work, transfer, split, protocol decision, claimant, TCB, and false issuance; actor identity and the closed gate mechanism are model premises | `run_proofs.py run --contains ALKClaimAuthority --workers 1` |
 | Sequential progress ownership | Does the actual two-step carrier finish under weak fairness, and does a writer lack end-to-end ownership when scheduling belongs elsewhere? | `formal/construction/alk/tla/ALKClaimProgress*` | One finite positive temporal check and no-fairness / writer-as-owner controls; no scheduler implementation or wall-clock bound | `run_proofs.py run --contains ALKClaimProgress --workers 1` |
 | Paired execution claim | Do two real Sequential carriers retain equal completed histories under matched actions and coupled values? | `formal/construction/alk/tla/ALKClaimRelational*` | Finite self-composition and an independent-choice control that preserves both individual contracts; no arbitrary trace equivalence or confidentiality result | `run_proofs.py run --contains ALKClaimRelational --workers 1` |

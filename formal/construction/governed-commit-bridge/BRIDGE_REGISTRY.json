@@ -8,13 +8,13 @@
     "ActuationPass",
     "Sequential"
   ],
-  "integrated_executable_module": "crate://automation-structures/0.2.3/src/integration/governed_commit.rs",
+  "integrated_executable_module": "development-copy://automation-structures/0.3.2/src/integration/governed_commit.rs",
   "abstract_transition_module": "formal/construction/governed-commit-bridge/tla/GovernedCommitAbstract.tla",
   "executable_transition_module": "formal/construction/governed-commit-bridge/tla/GovernedCommitExecutable.tla",
   "abstraction_relation": "GovernedCommitExecutable!AbsState",
   "observation_relation": "GovernedCommitExecutable!ConcreteObservation = GovernedCommitAbstract!AbstractObservation(AbsState)",
   "proof_logic": "Verus direct source-level refinement",
-  "proof_module": "crate://automation-structures/0.2.3/src/integration/governed_commit.rs",
+  "proof_module": "development-copy://automation-structures/0.3.2/src/integration/governed_commit.rs",
   "direct_abstraction_relation": "GovernedCommit::abstract_phase and GovernedCommit::abstract_used",
   "direct_observation_relation": "GovernedCommit::abstract_observation_agrees",
   "direct_action_relations": "GovernedCommit::abstract_system_step, abstract_failure_step, abstract_commit_step, and abstract_stutter_step",
@@ -32,11 +32,11 @@
   "existing_component_evidence": [
     "formal/structures/Budget/refinement/BudgetImplRefinesSpec.tla",
     "formal/structures/Budget/refinement/BudgetImplRefinesSpec_Proof.tla",
-    "crate://automation-structures/0.2.3/src/primitives/budget.rs",
-    "crate://automation-structures/0.2.3/src/primitives/propagation_pass.rs",
-    "crate://automation-structures/0.2.3/src/primitives/audit_sink.rs",
-    "crate://automation-structures/0.2.3/src/primitives/resource_registry.rs",
-    "crate://automation-structures/0.2.3/src/primitives/actuation_pass.rs",
-    "crate://automation-structures/0.2.3/src/modalities/sequential.rs"
+    "development-copy://automation-structures/0.3.2/src/primitives/budget.rs",
+    "development-copy://automation-structures/0.3.2/src/primitives/propagation_pass.rs",
+    "development-copy://automation-structures/0.3.2/src/primitives/audit_sink.rs",
+    "development-copy://automation-structures/0.3.2/src/primitives/resource_registry.rs",
+    "development-copy://automation-structures/0.3.2/src/primitives/actuation_pass.rs",
+    "development-copy://automation-structures/0.3.2/src/modalities/sequential.rs"
   ]
 }

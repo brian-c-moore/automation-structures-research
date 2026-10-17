@@ -93,9 +93,13 @@ The stripped process is:
 | `Budget<Compute>` | Rejects aggregate overdraw; a separate identity check requires every declared debit |
 | `ActuationPass` | Applies completed work to the allocated output resource |
 
-The readable `StepGraph` and `ForkJoin` implementations copy the state tags, guards, and transition
-roles from the accepted Verus donors in `crate://automation-structures/0.2.3/src/modalities`. The case adds
-trace emission and ordinary Rust error returns. It does not claim a Rust-to-TLA refinement theorem.
+The example adapters retain the published `automation-structures = "=0.3.1"` `StepGraph` and
+`ForkJoin` instances. Readiness, start and completion call `StepGraph::become_ready`,
+`start` and `complete`; predecessor previews call its `predecessors_complete`.
+The nested epoch calls `ForkJoin::start_worker`, `complete_worker`, `barrier` and `produce_output`,
+and completion previews call its `all_complete`. The adapters add trace emission, readable
+state-tag projections and ordinary Rust error returns. They do not implement another carrier
+state machine or establish a Rust-to-TLA refinement theorem.
 
 The domain module supplies static labels, the frozen edge and charge declarations, event dispatch,
 result projection, and the composition verifier. Those functions bind source content to retained

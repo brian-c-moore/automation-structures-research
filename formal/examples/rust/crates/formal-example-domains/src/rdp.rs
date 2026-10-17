@@ -238,7 +238,7 @@ struct QueryRecord {
     winner_alpha_after: u64,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 struct AccountState {
     account_id: String,
     query_registry: ResourceRegistry<QueryRecord>,
@@ -251,6 +251,19 @@ struct AccountState {
 }
 
 impl AccountState {
+    fn try_clone(&self) -> Result<Self, StructureError> {
+        Ok(Self {
+            account_id: self.account_id.clone(),
+            query_registry: self.query_registry.try_clone()?,
+            order_budgets: self.order_budgets.clone(),
+            reported_budget: self.reported_budget.clone(),
+            reported_epsilon: self.reported_epsilon,
+            winner_alpha: self.winner_alpha,
+            accepted_queries: self.accepted_queries.clone(),
+            released_queries: self.released_queries,
+        })
+    }
+
     fn new(account_id: &str, config: &AccountantConfig, trace: &mut TraceLog) -> Self {
         let query_registry = ResourceRegistry::empty(
             trace,
@@ -300,7 +313,7 @@ pub enum AccountantControl {
     MisorderLaterCommit,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 struct RequestWitness {
     subject: String,
     requested_account: String,
@@ -446,6 +459,17 @@ pub fn run_workload(
     })
 }
 
+fn capture_accounts(accounts: &[AccountState]) -> Result<Vec<AccountState>, StructureError> {
+    let mut captured = Vec::new();
+    captured
+        .try_reserve_exact(accounts.len())
+        .map_err(|_| StructureError::new("privacy account witness reservation refused"))?;
+    for account in accounts {
+        captured.push(account.try_clone()?);
+    }
+    Ok(captured)
+}
+
 #[allow(clippy::too_many_arguments)]
 fn process_request(
     account_registry: &ResourceRegistry<usize>,
@@ -465,7 +489,7 @@ fn process_request(
             StructureError::new(format!("unknown privacy account {}", request.account))
         })?;
     request.query.validate(config)?;
-    let before_accounts = accounts.to_vec();
+    let before_accounts = capture_accounts(accounts)?;
     let before = &before_accounts[requested_index];
 
     let mut effective_query = request.query.clone();
@@ -531,7 +555,7 @@ fn process_request(
     let actual_account = account_ids[actual_index].clone();
 
     let accepted = if within_ceiling || bypass_ceiling {
-        let mut candidate = before.clone();
+        let mut candidate = before.try_clone()?;
         for (index, budget) in candidate.order_budgets.iter_mut().enumerate() {
             let amount = candidate_curve[index]
                 .checked_sub(before.order_budgets[index].spent())
@@ -587,7 +611,7 @@ fn process_request(
             ));
         }
         if mutate_rejection {
-            let mut candidate = before.clone();
+            let mut candidate = before.try_clone()?;
             let amount = effective_query.rdp_costs[0];
             candidate.order_budgets[0].try_reserve(amount, trace, &order_subjects[0])?;
             commit_account_candidate(accounts, actual_index, candidate, trace, subject)?;
@@ -601,7 +625,7 @@ fn process_request(
         actual_account,
         query: effective_query,
         before_accounts,
-        after_accounts: accounts.to_vec(),
+        after_accounts: capture_accounts(accounts)?,
         candidate_curve,
         supplied_candidates,
         proposed_epsilon,
@@ -688,10 +712,8 @@ fn commit_account_candidate(
     pass.actuate_with(
         0,
         accounts,
-        |account, _, _| {
-            *account = candidate;
-            Ok(())
-        },
+        |_, _, _| Ok(candidate),
+        |account, candidate| *account = candidate,
         trace,
         subject,
     )?;

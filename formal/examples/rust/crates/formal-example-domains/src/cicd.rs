@@ -109,7 +109,7 @@ fn traverse_declaration(
     graph: &RelationshipGraph,
     trace: &mut TraceLog,
 ) -> Result<BTreeSet<String>, StructureError> {
-    let mut traversal = TraversalEngine::new(JOBS[0].to_string(), trace, SUBJECT);
+    let mut traversal = TraversalEngine::new(JOBS[0].to_string(), JOBS.len(), trace, SUBJECT)?;
     let mut discovered = BTreeSet::from([JOBS[0].to_string()]);
     let mut covered = BTreeSet::new();
     while !traversal.frontier().is_empty() {
@@ -119,7 +119,9 @@ fn traverse_declaration(
         covered.insert(vertex.clone());
         for edge in graph.outgoing(&vertex) {
             if discovered.insert(edge.to.clone()) {
-                traversal.enqueue(edge.to.clone(), trace);
+                traversal
+                    .enqueue(edge.to.clone(), trace)
+                    .map_err(|(error, _)| error)?;
             }
         }
         traversal.accept(work_id, trace)?;
@@ -167,15 +169,19 @@ fn charge_and_apply(
             target
         };
     let mut pass = ActuationPass::new(vec![Some(actual_target)], trace, &subject);
+    let mut prepared_budget = budget.clone();
     pass.actuate_with(
         0,
         outputs,
-        |slot, trace, subject| {
+        |_, trace, subject| {
             if !(control == CiCdControl::BypassDebit && logical_id == "package") {
-                budget.try_reserve(amount, trace, subject)?;
+                prepared_budget.try_reserve(amount, trace, subject)?;
             }
+            Ok(prepared_budget)
+        },
+        |slot, prepared_budget| {
+            *budget = prepared_budget;
             *slot = true;
-            Ok(())
         },
         trace,
         &subject,

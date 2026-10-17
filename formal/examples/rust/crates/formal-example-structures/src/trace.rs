@@ -37,28 +37,63 @@ impl Structure {
         }
     }
 
-    pub fn implementation_identity(self) -> &'static str {
-        match self {
-            Self::ActuationPass => "formal-example-structures::actuation::ActuationPass",
-            Self::AllocationSnapshot => "formal-example-structures::snapshot::AllocationSnapshot",
-            Self::Budget => "formal-example-structures::budget::Budget",
-            Self::CompetitiveSelection => {
-                "formal-example-structures::selection::CompetitiveSelection"
+    /// Resolve only the reviewed adapter/action pair. Reduction has no unqualified
+    /// identity: a path comparison and an owned fold are different operations.
+    pub fn implementation_identity(self, action: Option<&str>) -> Option<&'static str> {
+        match (self, action) {
+            (
+                Self::ActuationPass,
+                None
+                | Some(
+                    "Initialize" | "Allocate" | "Deallocate" | "Attempt" | "Check" | "Commit"
+                    | "Finish",
+                ),
+            ) => Some("formal-example-structures::actuation::ActuationPass"),
+            (Self::AllocationSnapshot, None | Some("Commit")) => {
+                Some("formal-example-structures::snapshot::AllocationSnapshot")
             }
-            Self::ForkJoin => "formal-example-structures::fork_join::ForkJoin",
-            Self::QualityHierarchy => {
-                "formal-example-structures::quality_hierarchy::QualityHierarchy"
+            (Self::Budget, None | Some("Initialize" | "Check" | "Reject" | "Commit")) => {
+                Some("formal-example-structures::budget::Budget")
             }
-            Self::Reduction => "formal-example-structures::reduction::PathReduction",
-            Self::RelationshipGraph => {
-                "formal-example-structures::relationship_graph::RelationshipGraph"
+            (Self::CompetitiveSelection, None | Some("Evaluate" | "Commit")) => {
+                Some("formal-example-structures::selection::CompetitiveSelection")
             }
-            Self::ResourceRegistry => {
-                "formal-example-structures::resource_registry::ResourceRegistry"
+            (
+                Self::ForkJoin,
+                None
+                | Some(
+                    "Initialize" | "StartWorker" | "CompleteWorker" | "Barrier" | "ProduceOutput"
+                    | "Done",
+                ),
+            ) => Some("formal-example-structures::fork_join::ForkJoin"),
+            (Self::QualityHierarchy, None | Some("Validate" | "Commit")) => {
+                Some("formal-example-structures::quality_hierarchy::QualityHierarchy")
             }
-            Self::Sequential => "formal-example-structures::sequential::Sequential",
-            Self::StepGraph => "formal-example-structures::step_graph::StepGraph",
-            Self::TraversalEngine => "formal-example-structures::traversal::TraversalEngine",
+            (Self::Reduction, Some("Evaluate" | "Commit")) => {
+                Some("formal-example-structures::reduction::Reduction::fold")
+            }
+            (Self::Reduction, Some("Compare")) => {
+                Some("formal-example-structures::reduction::PathReduction::compare")
+            }
+            (Self::RelationshipGraph, None | Some("Commit")) => {
+                Some("formal-example-structures::relationship_graph::RelationshipGraph")
+            }
+            (Self::ResourceRegistry, None | Some("Initialize" | "Commit" | "Store")) => {
+                Some("formal-example-structures::resource_registry::ResourceRegistry")
+            }
+            (Self::Sequential, None | Some("Initialize" | "Begin" | "Complete" | "Done")) => {
+                Some("formal-example-structures::sequential::Sequential")
+            }
+            (
+                Self::StepGraph,
+                None
+                | Some("Initialize" | "BecomeReady" | "StartRunning" | "CompleteNode" | "Done"),
+            ) => Some("formal-example-structures::step_graph::StepGraph"),
+            (
+                Self::TraversalEngine,
+                None | Some("Initialize" | "Enqueue" | "Visit" | "Accept" | "Complete"),
+            ) => Some("formal-example-structures::traversal::TraversalEngine"),
+            _ => None,
         }
     }
 }
@@ -68,6 +103,7 @@ pub struct StructuralEvent {
     pub sequence: u64,
     pub structure: Structure,
     pub action: String,
+    pub implementation_identity: Option<&'static str>,
     pub subject: String,
     pub detail: String,
 }
@@ -94,10 +130,13 @@ impl TraceLog {
         detail: impl Into<String>,
     ) -> u64 {
         let sequence = self.events.len() as u64;
+        let action = action.into();
+        let implementation_identity = structure.implementation_identity(Some(&action));
         self.events.push(StructuralEvent {
             sequence,
             structure,
-            action: action.into(),
+            action,
+            implementation_identity,
             subject: subject.into(),
             detail: detail.into(),
         });
@@ -194,6 +233,16 @@ impl TraceLog {
         required_structures: &[Structure],
         required_edges: &[RecipeEdge],
     ) -> Result<(), StructureError> {
+        for event in &self.events {
+            if event.implementation_identity.is_none()
+                || event.implementation_identity
+                    != event.structure.implementation_identity(Some(&event.action))
+            {
+                return Err(StructureError::new(
+                    "unresolved or incorrect trace implementation identity",
+                ));
+            }
+        }
         let observed = self.structures();
         for structure in required_structures {
             if !observed.contains(structure) {
@@ -225,6 +274,16 @@ impl TraceLog {
         required_structures: &[Structure],
         required_edges: &[RecipeEdge],
     ) -> Result<(), StructureError> {
+        for event in self.events.iter().filter(|event| event.subject == subject) {
+            if event.implementation_identity.is_none()
+                || event.implementation_identity
+                    != event.structure.implementation_identity(Some(&event.action))
+            {
+                return Err(StructureError::new(
+                    "unresolved or incorrect trace implementation identity",
+                ));
+            }
+        }
         for structure in required_structures {
             if !self
                 .events
@@ -264,6 +323,16 @@ impl TraceLog {
         required_structures: &[Structure],
         required_edges: &[RecipeEdge],
     ) -> Result<(), StructureError> {
+        for event in self.events.iter().filter(|event| event.subject == subject) {
+            if event.implementation_identity.is_none()
+                || event.implementation_identity
+                    != event.structure.implementation_identity(Some(&event.action))
+            {
+                return Err(StructureError::new(
+                    "unresolved or incorrect trace implementation identity",
+                ));
+            }
+        }
         for structure in required_structures {
             if !self
                 .events
@@ -296,6 +365,144 @@ impl TraceLog {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn implementation_identities_resolve_compiled_types_and_exact_reduction_actions() {
+        for (structure, compiled) in [
+            (
+                Structure::ActuationPass,
+                std::any::type_name::<crate::ActuationPass>(),
+            ),
+            (
+                Structure::AllocationSnapshot,
+                std::any::type_name::<crate::AllocationSnapshot<u64>>(),
+            ),
+            (
+                Structure::Budget,
+                std::any::type_name::<crate::Budget<crate::Bytes>>(),
+            ),
+            (
+                Structure::CompetitiveSelection,
+                std::any::type_name::<crate::CompetitiveSelection>(),
+            ),
+            (
+                Structure::ForkJoin,
+                std::any::type_name::<crate::ForkJoin>(),
+            ),
+            (
+                Structure::QualityHierarchy,
+                std::any::type_name::<crate::QualityHierarchy>(),
+            ),
+            (
+                Structure::RelationshipGraph,
+                std::any::type_name::<crate::RelationshipGraph>(),
+            ),
+            (
+                Structure::ResourceRegistry,
+                std::any::type_name::<crate::ResourceRegistry<u64>>(),
+            ),
+            (
+                Structure::Sequential,
+                std::any::type_name::<crate::Sequential<u64>>(),
+            ),
+            (
+                Structure::StepGraph,
+                std::any::type_name::<crate::StepGraph>(),
+            ),
+            (
+                Structure::TraversalEngine,
+                std::any::type_name::<crate::TraversalEngine<u64>>(),
+            ),
+        ] {
+            let expected = compiled
+                .split('<')
+                .next()
+                .expect("compiled type prefix")
+                .replacen(
+                    "formal_example_structures::",
+                    "formal-example-structures::",
+                    1,
+                );
+            assert_eq!(
+                structure.implementation_identity(None),
+                Some(expected.as_str())
+            );
+            assert_eq!(
+                structure.implementation_identity(Some("NonexistentAction")),
+                None
+            );
+        }
+        assert_eq!(Structure::Reduction.implementation_identity(None), None);
+        assert_eq!(
+            Structure::Reduction.implementation_identity(Some("Apply")),
+            None
+        );
+        let mut fold = TraceLog::default();
+        assert_eq!(
+            crate::Reduction::fold([1u64, 2], 0, |a, b| a + b, &mut fold, "fold").expect("fold"),
+            3
+        );
+        let fold_identity = format!(
+            "{}::fold",
+            std::any::type_name::<crate::Reduction>().replacen(
+                "formal_example_structures::",
+                "formal-example-structures::",
+                1
+            )
+        );
+        assert!(fold
+            .events()
+            .iter()
+            .all(|event| event.implementation_identity == Some(fold_identity.as_str())));
+        let mut path = TraceLog::default();
+        assert_eq!(
+            crate::PathReduction::compare(None, 3, &mut path, "path"),
+            crate::Relaxation::Install
+        );
+        let path_identity = format!(
+            "{}::compare",
+            std::any::type_name::<crate::PathReduction>().replacen(
+                "formal_example_structures::",
+                "formal-example-structures::",
+                1
+            )
+        );
+        assert_eq!(path.events()[0].action, "Compare");
+        assert_eq!(
+            path.events()[0].implementation_identity,
+            Some(path_identity.as_str())
+        );
+        assert_ne!(fold_identity, path_identity);
+    }
+
+    #[test]
+    fn trace_rejects_wrong_operation_identity_and_unsupported_action() {
+        let mut trace = TraceLog::default();
+        crate::Reduction::fold([1u64], 0, |a, b| a + b, &mut trace, "fold").expect("fold");
+        trace
+            .verify_recipe_for("fold", &[Structure::Reduction], &[])
+            .expect("actual fold binding");
+        trace.events[0].implementation_identity =
+            Structure::Reduction.implementation_identity(Some("Compare"));
+        assert!(trace
+            .verify_recipe_for("fold", &[Structure::Reduction], &[])
+            .is_err());
+        trace.events[0].implementation_identity =
+            Structure::Reduction.implementation_identity(Some("Evaluate"));
+        trace.emit(
+            Structure::Reduction,
+            "NonexistentAction",
+            "fold",
+            "same result",
+        );
+        assert!(trace
+            .verify_recipe_for("fold", &[Structure::Reduction], &[])
+            .is_err());
+        assert!(trace.verify_recipe(&[Structure::Reduction], &[]).is_err());
+        assert!(trace
+            .verify_recipe_instance_for("fold", &[Structure::Reduction], &[])
+            .is_err());
+    }
 
     const EDGE: RecipeEdge = RecipeEdge {
         before: Structure::CompetitiveSelection,

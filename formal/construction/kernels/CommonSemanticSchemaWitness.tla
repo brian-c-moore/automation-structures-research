@@ -167,6 +167,55 @@ PremiseBoundaryHeld ==
         {"library-premise"}, {"deployment-premise"},
         {"library-premise", "deployment-premise"})
 
+\* A fixed domain keeps violating evaluations visible during omission tests.
+ClauseDomain == {"good", "left-only", "right-only", "bad"}
+ClauseNames == {"left", "right", "support", "derived", "policy"}
+ClauseRoleOf ==
+    [clause \in ClauseNames |->
+        CASE clause \in {"left", "right"} -> "contributing"
+          [] clause = "support" -> "support"
+          [] clause = "derived" -> "derived-conditional"
+          [] OTHER -> "selected-policy"]
+ClauseMeaning ==
+    [clause \in ClauseNames |->
+        CASE clause = "left" -> {"good", "left-only"}
+          [] clause = "right" -> {"good", "right-only"}
+          [] clause = "support" -> {"good", "left-only"}
+          [] clause = "derived" -> {"good"}
+          [] OTHER -> {"good", "left-only", "right-only"}]
+ResponsibilityMeaning == {"good"}
+ClauseProofDomain == {"good", "left-only"}
+ClauseDerivedBasis == [clause \in {"derived"} |-> {"left"}]
+ClausePremiseDomain ==
+    [clause \in {"derived"} |-> {"good", "right-only"}]
+
+ClauseBindingHeld ==
+    SemanticClauseBinding(
+        "state-safety", ClauseDomain, ClauseNames, ClauseRoleOf,
+        ClauseMeaning, ResponsibilityMeaning, ClauseProofDomain,
+        ClauseDerivedBasis, ClausePremiseDomain)
+
+\* Each rejected input changes one seam; the domain and responsibility stay fixed.
+OmittedContributingClauseRejected ==
+    ~SemanticClauseBinding(
+        "state-safety", ClauseDomain, ClauseNames, ClauseRoleOf,
+        [ClauseMeaning EXCEPT !["right"] = ClauseDomain],
+        ResponsibilityMeaning, ClauseProofDomain,
+        ClauseDerivedBasis, ClausePremiseDomain)
+
+UnsupportedProofDomainRejected ==
+    ~SemanticClauseBinding(
+        "state-safety", ClauseDomain, ClauseNames, ClauseRoleOf,
+        [ClauseMeaning EXCEPT !["support"] = {"left-only"}],
+        ResponsibilityMeaning, ClauseProofDomain,
+        ClauseDerivedBasis, ClausePremiseDomain)
+
+MissingDerivationPremiseRejected ==
+    ~SemanticClauseBinding(
+        "state-safety", ClauseDomain, ClauseNames, ClauseRoleOf,
+        ClauseMeaning, ResponsibilityMeaning, ClauseProofDomain,
+        ClauseDerivedBasis, [clause \in {"derived"} |-> ClauseDomain])
+
 VARIABLE witness
 
 vars == <<witness>>

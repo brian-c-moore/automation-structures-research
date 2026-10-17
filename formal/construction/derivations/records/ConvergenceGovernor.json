@@ -23,7 +23,7 @@
   "owner_of": {"Update": "governor-authority"},
   "delegate_of": {"Update": ["governor-authority"]},
   "assurance_at": {"Update": "at-commit"},
-  "relies": ["bounded-delta-input", "caller-supplied-exact-post-slide-average", "serialized-governor-state-mutation"],
+  "relies": ["bounded-delta-input", "sealed-history-exact-post-slide-average", "serialized-governor-state-mutation"],
   "guarantees": [
     {
       "id": "convergencegovernor-written-profile-refinement",
@@ -35,28 +35,28 @@
     },
     {"id": "phase-aware-governor-safety", "statement": "Every modeled update preserves phase/history consistency: COOLING is not COLD and COOLING or CONVERGED requires a prior or current threshold peak.", "property_class": "safety", "kind": "prevention", "family": "obligation", "local_theorem": "ConvergenceGovernorPhaseAware_Proof!Safety"},
     {"id": "valid-governor-transition", "statement": "Every update follows the declared ACTIVE, COOLING, CONVERGED, and AWAKENED transition graph.", "property_class": "safety", "kind": "prevention", "family": "obligation", "local_theorem": "ConvergenceGovernorPhaseAware_Proof!ValidTransitionsSafety"},
-    {"id": "atomic-governor-license", "statement": "History slide, phase classification, peak latch, supplied-average check, and state transition occur in one governor update boundary.", "property_class": "safety", "kind": "prevention", "family": "check-act", "local_theorem": "TheoryKernel_Proof!CheckActStability"},
-    {"id": "governor-owner-ceiling", "statement": "Safety depends on the governor authority owning the full update and on the caller supplying the exact average of the post-slide bounded history.", "property_class": "safety", "kind": "conditional", "family": "ownership-assurance", "local_theorem": "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"}
+    {"id": "atomic-governor-license", "statement": "History slide, exact post-slide mean calculation, phase classification, peak latch, and state transition occur in one governor update boundary.", "property_class": "safety", "kind": "prevention", "family": "check-act", "local_theorem": "TheoryKernel_Proof!CheckActStability"},
+    {"id": "governor-owner-ceiling", "statement": "Safety depends on the governor authority owning the complete update and its sealed history realization returning the exact average of the post-slide bounded history.", "property_class": "safety", "kind": "conditional", "family": "ownership-assurance", "local_theorem": "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"}
   ],
-  "runtime_providers": ["governor-authority", "delta-provider", "post-slide-average-provider"],
-  "failure_ceilings": ["no-modeled-crash-or-torn-governor-update", "incorrect-caller-average-outside-rely", "input-sequence-may-stay-active-forever"],
+  "runtime_providers": ["governor-authority", "delta-provider", "sealed-history-realization"],
+  "failure_ceilings": ["no-modeled-crash-or-torn-governor-update", "raw-history-bypass-outside-invariant", "input-sequence-may-stay-active-forever"],
   "execution_carriers": ["Sequential"],
   "local_theorems": [
     "ConvergenceGovernorImplRefinesSpec_Proof!RefinementThm", "ConvergenceGovernorPhaseAware_Proof!Safety", "ConvergenceGovernorPhaseAware_Proof!ValidTransitionsSafety", "ConvergenceGovernorPhaseAware_Proof!ConvergedRequiresPeakSafety", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"],
   "executable_pointers": [
     "formal/structures/ConvergenceGovernor/refinement/ConvergenceGovernorImplRefinesSpec.tla",
-    "formal/structures/ConvergenceGovernor/refinement/ConvergenceGovernorImplRefinesSpec_Proof.tla","crate://automation-structures/0.2.3/src/primitives/convergence_governor_phase_aware.rs", "formal/structures/ConvergenceGovernor/ConvergenceGovernorPhaseAware.tla", "formal/structures/ConvergenceGovernor/ConvergenceGovernorPhaseAware_Proof.tla"],
+    "formal/structures/ConvergenceGovernor/refinement/ConvergenceGovernorImplRefinesSpec_Proof.tla","development-copy://automation-structures/0.3.2/src/primitives/convergence_governor_phase_aware.rs", "formal/structures/ConvergenceGovernor/ConvergenceGovernorPhaseAware.tla", "formal/structures/ConvergenceGovernor/ConvergenceGovernorPhaseAware_Proof.tla"],
   "library_premises": [
     "ConvergenceGovernor-written-contract-refinement-profile","canonical-phase-aware-governor-machine", "ConvergenceGovernor-Safety", "ValidTransitionsSafety", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification"],
-  "deployment_premises": ["ThresholdType", "AwakenThresholdType", "WindowType", "MaxDeltaType", "caller-supplied-exact-post-slide-average", "serialized-governor-state-mutation"],
+  "deployment_premises": ["ThresholdType", "AwakenThresholdType", "WindowType", "MaxDeltaType", "sealed-history-exact-post-slide-average", "serialized-governor-state-mutation"],
   "residuals": [
     "formal-correspondence-is-limited-to-the-written-state-action-and-premise-map", "no-eventual-convergence-or-termination-result", "no-monotone-delta-sequence-claim", "no-time-bound-or-statistical-convergence-theorem"],
   "evidence_ceilings": [
-    "implementation-refinement-covers-only-the-written-bounded-contract-profile","TLAPS-proves-phase-history-and-transition-graph-safety", "Verus-proves-the-written-phase-aware-carrier-under-an-exact-average-precondition", "CONVERGED-is-a-state-label-not-a-liveness-theorem"],
+    "implementation-refinement-covers-only-the-written-bounded-contract-profile","TLAPS-proves-phase-history-and-transition-graph-safety", "Verus-proves-exact-returned-post-slide-average-and-transition-contracts-under-the-numeric-history-invariant", "CONVERGED-is-a-state-label-not-a-liveness-theorem"],
   "cases": {
     "valid": [{"id": "peak-cooling-converged", "description": "A threshold peak arms history, later low post-slide averages permit COOLING and then CONVERGED along the declared graph."}],
     "boundary": [{"id": "awakened-reactivation", "description": "A CONVERGED governor may move to AWAKENED only above the awaken threshold and may later return to CONVERGED on a low mean."}],
-    "misuse": [{"id": "incorrect-post-slide-average", "description": "An executable caller-provided average that is not the exact post-slide history average receives no theorem transfer."}],
+    "misuse": [{"id": "incorrect-post-slide-average", "description": "A raw history mutation or realization violating the numeric/history invariant receives no theorem transfer. Current update(delta) has no caller-supplied average parameter."}],
     "failure": [{"id": "torn-phase-history-state", "description": "Separating history, phase, peak latch, or governor-state updates lies outside the atomic model."}]
   },
   "applicable_families": ["obligation", "check-act", "ownership-assurance", "refinement"],
@@ -65,13 +65,13 @@
   "refinement_status": "mechanized",
   "conformance_details": {
     "initialization": "ConvergenceGovernorPhaseAware::new maps ACTIVE/COLD, empty history, and false peak latch to canonical Init under the supplied thresholds and positive window.",
-    "step-simulation": "update maps to Update(delta) only when its caller-supplied avg equals the exact average of the post-slide bounded history.",
-    "observation-agreement": "Executable state/phase enums, history vector, and peak latch map directly to the four canonical variables.",
+    "step-simulation": "Current update(delta) computes and returns the post-slide average through GovernorHistory::step, then maps history, phase, peak and state to Update(delta). No caller-supplied average parameter or precondition is required.",
+    "observation-agreement": "State/phase enums and peak latch map directly; the sealed Vec or buffered history realization supplies the same chronological sequence and exact floor mean. Buffered storage and sum ownership retain their separate contracts and cost limits.",
     "commit-agreement": "History, phase, peak latch, and governor state change in one governor-authority update commit.",
     "failure-persistence-agreement": "No crash, torn update, retry, persisted history, or recovery action is modeled.",
-    "rely-discharge": "Deployment supplies bounded deltas, exact post-slide average calculation, serialized mutation, and complete governor writer inventory.",
+    "rely-discharge": "Deployment supplies bounded deltas, serialized mutation and admitted writer ownership. The sealed history contract supplies the exact post-slide mean under its numeric/history invariant.",
     "liveness-preservation": "No eventual CONVERGED state, termination, input fairness, statistical convergence, or time bound is transferred.",
-    "tcb-closure": "Every executable state/history writer is update; classify_phase and next_state are pure helpers whose results must match their verified specs."
+    "tcb-closure": "The selected current trace uses update and its sealed history realization as writers; classify_phase and next_state satisfy their pure specifications. Invariant-respecting calls and no raw-field/history bypass are explicit premises, not a global writer-exclusion theorem."
   },
   "source_checks": [
     {
@@ -80,7 +80,7 @@
     },
     {"path": "formal/structures/ConvergenceGovernor/ConvergenceGovernorPhaseAware.tla", "contains": ["VARIABLES", "Update(delta)", "ConvergenceRequiresHistory ==", "ValidTransitionsProp =="]},
     {"path": "formal/structures/ConvergenceGovernor/ConvergenceGovernorPhaseAware_Proof.tla", "contains": ["THEOREM Safety", "THEOREM ConvergenceRequiresHistorySafety", "THEOREM ValidTransitionsSafety"]},
-    {"path": "crate://automation-structures/0.2.3/src/primitives/convergence_governor_phase_aware.rs", "contains": ["pub struct ConvergenceGovernorPhaseAware", "pub fn update", "pub open spec fn convergence_requires_history", "pub fn next_state"]}
+    {"path": "development-copy://automation-structures/0.3.2/src/primitives/convergence_governor_phase_aware.rs", "contains": ["pub struct ConvergenceGovernorPhaseAware", "pub fn update", "pub open spec fn convergence_requires_history", "pub fn next_state"]}
   ],
   "proof_binding": {"canonical_directory": "formal/structures/ConvergenceGovernor", "proof_module": "ConvergenceGovernorPhaseAware_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
   "additional_proof_bindings": [{"theorem": "ValidTransitionsSafety", "statement": "Spec => ValidTransitionsProp"}],

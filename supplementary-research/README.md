@@ -1,5 +1,58 @@
 # Supplementary Research
 
+## Deprecated experiments
+
+This entire directory is deprecated. It preserves experiments that were tried,
+failed methods and exploratory material for historical inspection. There is no
+active repair, expansion or promotion program for these studies. They are outside
+current library, kernel and primary-research acceptance gates and have the lowest
+priority for future work.
+
+The retained files document what was tried. Their presence, a historical passing
+test or an importable crate does not make them supported implementations or current
+evidence for the primary research. Known mistakes are recorded below; the obsolete
+implementations are retained without rehabilitation. Historical results keep their
+original source identities and exact limits.
+
+A study is revisited only when a concrete current requirement needs a particular
+artifact and the current primary artifacts cannot supply it. That decision names
+the requirement, smallest useful artifact, expected evidence and acceptance test.
+An isolated fixture or counterexample can be reused after review without reviving
+the study or copying its automation owners.
+
+### Known mistakes and limitations
+
+| Area | What went wrong | Disposition |
+|---|---|---|
+| Independent automation implementations | Algorithm, crypto and execution-search studies reimplemented owners and carriers instead of binding the published canonical library. | Historical study code; no canonical-library or product-conformance credit. |
+| Algorithm/crypto batch acceptance | `zip` dropped unreturned inputs; `Outcome::ok` could pass a nonempty batch with zero or too few comparisons. | Former all-input acceptance claims are invalid; independent vectors and other comparisons retain only their separate scope. |
+| Algorithm prototype invariants | Zero-level hierarchy construction, unchecked Budget/FederatedBudget arithmetic, incomplete integer share totals, interior-mutable snapshot content and unaccounted DFS/BFS bounds. | Failed prototype contracts; these do not refute the published canonical owners. |
+| Crypto construction account | Bisection was exported/unit-tested without an algorithm caller; Sampler generated fixtures rather than governing the seven algorithms. RSA-PSS was absent from that seven-algorithm subset. | The six-load-bearing-parts account is unsupported for that subset. |
+| RSA DER helper | Advertised raw RSAPublicKey and SubjectPublicKeyInfo support, but only implemented the latter path. | Unsupported format claim retained as a known mistake; no parser repair planned. |
+| Crypto hardware/constant-time comparisons | Several wrappers compared one result with itself or a clone; GHASH hardware validation returned literal true; the advertised bitsliced AES path used secret-indexed tables. | No hardware-realization or constant-time correspondence credit. |
+| Verus KAT linkage | An algorithms primitive KAT imported modules absent from its actual crate root. | That source earns no executable KAT credit. |
+| Reproducibility and quality | Declared Python dependencies omitted cryptography; five crypto corpus tests failed at import. Four supplementary native crates failed strict Clippy; three strict documentation builds had invalid links/markup. | These boundaries are unqualified; no dependency/lint/documentation rehabilitation is planned. |
+| Execution-search comparisons | Self-comparisons, constant-selected properties, ignored modality, environment skips and hand-written trace comparisons did not demonstrate framework reproduction. | Invalidated mechanisms remain historical failed-method records. |
+| Exploratory formal contracts | External-body assumptions and uninterpreted predicates did not establish implementation correspondence. | Written-model and specific finite results keep their original scope; no general conformance or necessity claim. |
+
+### Relationship to current primary artifacts
+
+Current primary Signal and RateLimit reductions have their own artifacts under
+[`formal/structures/Signal/reduction/`](../formal/structures/Signal/reduction/SignalFromAuditSink.tla)
+and [`formal/structures/RateLimit/reduction/`](../formal/structures/RateLimit/reduction/RateLimitFromBudget.tla),
+with proofs and negative controls in those directories. Use their registered
+primary profiles for current verification. Supplementary reduction history does
+not require restarting the deprecated minimality study.
+
+The primary memoization examples retain two provenance locators to the algorithm
+study's `rust/tests.toml`. Those identify prior recipe/test material; they do not
+establish oracle independence or current reconstruction. Preserve that provenance
+and use the primary examples' actual construction and independent comparisons for
+current evidence. A historical citation is not an instruction to rerun the donor.
+
+The sections below describe the retained historical corpus and its original
+limits. They do not restore active standing or create a repair queue.
+
 This public corpus preserves valid negative science, failed experiments that expose a useful boundary, and research artifacts that do not directly support the retained Automation Structures claims. It is included so readers can inspect what was tried, what failed, which boundaries survived, and what remains untested. Failed work is retained when the failure teaches something about the method, model, or claim.
 
 Nothing in this directory establishes completeness, universality, final catalog membership, or acceptance of a retained claim. A passing finite model applies only to its stated configuration. An invalidated experiment documents what was tried and why it did not support its original conclusion.
@@ -27,7 +80,7 @@ The retained working record reports seven connective forms: Projection, Cursor, 
 
 The algorithm and cryptography corpora record reconstruction attempts, execution-structure admission checks, implementation comparisons, and selected refinement models. The out-of-family crate contains term rewriting, computer algebra, and proof-search cases used to challenge the catalog. A result that one examined construction does not require a structure does not generalize to the whole domain.
 
-The cryptography Rust corpus registers exactly seven executable algorithms: SHA-256, SHA-3-256, BLAKE3, ChaCha20, HMAC-SHA-256, HKDF-SHA-256, and PBKDF2-HMAC-SHA-256. Its corpus gate rejects empty groups, requires every registered algorithm to run, and treats a missing Python oracle as failure. The BLAKE3 Python binding is pinned in `rust/python/requirements.txt`; install that file into the interpreter named by `PYTHON` before running the crate tests. The algorithm-corpus Verus source contains 88 `external_body` boundaries and 83 uninterpreted specification functions; the cryptography Verus source contains 127 and 45, respectively. Both trees therefore receive no algorithm-conformance credit. Those boundaries preserve exploratory definitions and contracts, not machine-checked equivalence to the Rust algorithms.
+The cryptography Rust corpus registers exactly seven algorithms: SHA-256, SHA-3-256, BLAKE3, ChaCha20, HMAC-SHA-256, HKDF-SHA-256, and PBKDF2-HMAC-SHA-256. Its intended corpus gate rejected empty groups and missing oracles, but its short-response acceptance defect did not enforce complete comparison of every input. Its declared Python requirements were also insufficient for the selected oracle imports. These gates are deprecated and receive no all-input acceptance credit. The algorithm-corpus Verus source contains 88 `external_body` boundaries and 83 uninterpreted specification functions; the cryptography Verus source contains 127 and 45, respectively. Both trees therefore receive no algorithm-conformance credit. Those boundaries preserve exploratory definitions and contracts, not machine-checked equivalence to the Rust algorithms.
 
 `MemoizationComposition.tla` instantiates the canonical `ResourceRegistry`. Its traversal and reduction steps remain inline because the fixed canonical domains cannot be re-armed for each memo cell. The result covers that registry instance plus the written inline model; it is not a three-component canonical composition theorem.
 
@@ -49,9 +102,11 @@ The corpus keeps unique source, configurations, witnesses, structured data, test
 
 The corpus does not keep caches, build directories, prover binaries, downloaded archives, logs, model-checker state, generated source-tree reports, host launchers, or per-study wrapper scripts. Reviewer behavior belongs in the single container entrypoint at `../verification/run_proofs.py`.
 
-## Reviewer navigation
+## Historical reproduction
 
-Mount the Automation Structures repository once, then use the container entrypoint:
+The existing supplementary selectors remain available for explicitly selected
+historical inspection. They are outside current acceptance gates. Use the
+maintained container entrypoint with the research source mounted once:
 
 ```text
 run_proofs.py list --scope supplementary
@@ -63,9 +118,12 @@ run_proofs.py run --scope supplementary --area execution-structure-search --cont
 
 The current supplementary selectors cover the TLA+ and TLAPS files only. Rust and Verus files are study sources rather than runner work items. Their results depend on the exact crate tests and Python oracle contracts named by each study; invalidated probes are non-executable source and receive no pass credit. The container commands and result interpretation rules are in `../docs/reproducibility.md`. Formal tools should not be invoked directly from study directories, and runs should not write into this tree.
 
-## Promotion into primary evidence
+## Reopening a selected artifact
 
-A study receives primary evidence standing only when all of these conditions are met:
+A concrete current need must first justify revisiting the smallest useful artifact.
+Reopening is lowest priority and requires its own recorded scope; there is no
+standing instruction to repair or promote the full study. A selected artifact
+receives primary evidence standing only when all of these conditions are met:
 
 1. The research question, method, result, assumptions, and falsifier are stated clearly.
 2. The source and structured inputs have been audited for the claimed result.
@@ -74,4 +132,5 @@ A study receives primary evidence standing only when all of these conditions are
 5. The smallest useful source and documentation set has been selected.
 6. Public paths, reviewer selectors, evidence identity, and claim ceilings have been updated together.
 
-Until that gate is complete, this corpus remains supplementary research rather than accepted primary evidence.
+Without that scoped decision and completed gate, the corpus remains deprecated
+historical research and supplies no current primary acceptance.

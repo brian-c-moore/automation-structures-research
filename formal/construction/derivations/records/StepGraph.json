@@ -35,7 +35,7 @@
   "failure_ceilings": ["no-modeled-executor-crash-retry-or-recovery", "no-modeled-topology-mutation", "cyclic-or-unschedulable-graphs-may-stall-without-violating-safety"],
   "execution_carriers": ["StepGraph"],
   "local_theorems": ["StepGraph_Proof!Safety", "StepGraph_Proof!NoRunBeforePredecessorsSafety", "StepGraph_Proof!ProgressMonotonicSafety", "StepGraphImplRefinesSpec_Proof!RefinementThm", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"],
-  "executable_pointers": ["formal/execution/carriers/StepGraph.tla", "formal/execution/carriers/StepGraph_Proof.tla", "formal/execution/carriers/refinement/StepGraph/StepGraphImplRefinesSpec.tla", "formal/execution/carriers/refinement/StepGraph/StepGraphImplRefinesSpec_Proof.tla", "crate://automation-structures/0.2.3/src/modalities/step_graph.rs"],
+  "executable_pointers": ["formal/execution/carriers/StepGraph.tla", "formal/execution/carriers/StepGraph_Proof.tla", "formal/execution/carriers/refinement/StepGraph/StepGraphImplRefinesSpec.tla", "formal/execution/carriers/refinement/StepGraph/StepGraphImplRefinesSpec_Proof.tla", "development-copy://automation-structures/0.3.2/src/modalities/step_graph.rs"],
   "library_premises": ["canonical-step-graph-carrier", "StepGraph-Safety", "NoRunBeforePredecessorsSafety", "ProgressMonotonicSafety", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification"],
   "deployment_premises": ["fixed-node-and-edge-topology", "executable-edge-indices-valid-and-distinct", "serialized-node-state-mutation", "atomic-predecessor-check-and-readiness-commit", "complete-node-state-writer-inventory"],
   "residuals": ["no-acyclicity-or-topological-completeness-theorem", "no-eventual-readiness-running-or-completion", "no-scheduler-fairness-throughput-or-time-bound", "ProgressMonotonic-is-an-action-safety-property-not-kernel-Progress"],
@@ -64,7 +64,7 @@
     {"path": "formal/execution/carriers/StepGraph.tla", "contains": ["VARIABLES nstate", "BecomeReady(n) ==", "StartRunning(n) ==", "CompleteNode(n) ==", "DoneStuttering ==", "NoRunBeforePredecessors ==", "ProgressMonotonic =="]},
     {"path": "formal/execution/carriers/StepGraph_Proof.tla", "contains": ["THEOREM Safety", "THEOREM NoRunBeforePredecessorsSafety", "THEOREM ProgressMonotonicSafety"]},
     {"path": "formal/execution/carriers/refinement/StepGraph/StepGraphImplRefinesSpec_Proof.tla", "contains": ["THEOREM RefinementThm"]},
-    {"path": "crate://automation-structures/0.2.3/src/modalities/step_graph.rs", "contains": ["pub struct StepGraph", "pub fn become_ready", "pub fn start_running", "pub fn complete_node", "pub fn done_stuttering"]}
+    {"path": "development-copy://automation-structures/0.3.2/src/modalities/step_graph.rs", "contains": ["pub struct StepGraph", "pub fn become_ready", "pub fn start_running", "pub fn complete_node", "pub fn done_stuttering"]}
   ],
   "proof_binding": {"canonical_directory": "formal/execution/carriers", "proof_module": "StepGraph_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
   "additional_proof_bindings": [

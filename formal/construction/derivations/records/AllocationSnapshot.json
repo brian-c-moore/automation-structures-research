@@ -88,7 +88,7 @@
   "executable_pointers": [
     "formal/structures/AllocationSnapshot/refinement/AllocationSnapshotImplRefinesSpec.tla",
     "formal/structures/AllocationSnapshot/refinement/AllocationSnapshotImplRefinesSpec_Proof.tla",
-    "crate://automation-structures/0.2.3/src/compositions/allocation_snapshot.rs",
+    "development-copy://automation-structures/0.3.2/src/compositions/allocation_snapshot.rs",
     "formal/structures/AllocationSnapshot/AllocationSnapshot.tla",
     "formal/structures/AllocationSnapshot/AllocationSnapshot_Proof.tla"
   ],
@@ -146,7 +146,7 @@
     },
     {"path": "formal/structures/AllocationSnapshot/AllocationSnapshot.tla", "contains": ["VARIABLES accepted, total_cost, budget_remaining", "AcceptNode(n, node_cost)", "BudgetConsistency"]},
     {"path": "formal/structures/AllocationSnapshot/AllocationSnapshot_Proof.tla", "contains": ["THEOREM Safety", "THEOREM BudgetConsistencySafety"]},
-    {"path": "crate://automation-structures/0.2.3/src/compositions/allocation_snapshot.rs", "contains": ["pub struct AllocationSnapshot", "pub fn accept_node", "pub open spec fn budget_consistency"]}
+    {"path": "development-copy://automation-structures/0.3.2/src/compositions/allocation_snapshot.rs", "contains": ["pub struct AllocationSnapshot", "pub fn accept_node", "pub open spec fn budget_consistency"]}
   ],
   "proof_binding": {
     "canonical_directory": "formal/structures/AllocationSnapshot",

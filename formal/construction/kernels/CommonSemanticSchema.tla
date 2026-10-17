@@ -39,6 +39,62 @@ ObligationTyped(S, ObligationStates, ViolationStates,
     /\ ViolationStates = S \ ObligationStates
     /\ Claimant \in Claimants
 
+\* One call binds one selected profile and one common interpretation domain.
+\* State, action and temporal predicates need an explicit common lifting;
+\* these relations do not infer that lifting or classify arbitrary source text.
+ClauseSemanticForms ==
+    {"state-safety", "action-safety", "liveness", "relational", "evidence"}
+
+ClauseRoles ==
+    {"primary", "contributing", "support", "derived",
+     "derived-conditional", "selected-policy"}
+
+ClausesWithRole(Clauses, RoleOf, Roles) ==
+    {clause \in Clauses : RoleOf[clause] \in Roles}
+
+DefiningClauses(Clauses, RoleOf) ==
+    ClausesWithRole(
+        Clauses, RoleOf, {"primary", "contributing", "selected-policy"})
+
+DerivedClauses(Clauses, RoleOf) ==
+    ClausesWithRole(Clauses, RoleOf, {"derived", "derived-conditional"})
+
+ClauseMeet(D, Meaning, Clauses) ==
+    {evaluation \in D :
+        \A clause \in Clauses : evaluation \in Meaning[clause]}
+
+SemanticClauseBinding(
+        SemanticForm, D, Clauses, RoleOf, Meaning, SchemaMeaning,
+        ProofDomain, DerivedBasis, PremiseDomain) ==
+    /\ SemanticForm \in ClauseSemanticForms
+    /\ D # {}
+    /\ Clauses # {}
+    /\ RoleOf \in [Clauses -> ClauseRoles]
+    /\ Meaning \in [Clauses -> SUBSET D]
+    /\ SchemaMeaning \subseteq D
+    /\ DefiningClauses(Clauses, RoleOf) # {}
+    /\ SchemaMeaning =
+         ClauseMeet(D, Meaning, DefiningClauses(Clauses, RoleOf))
+    \* ProofDomain must be justified by the actual source's premises and
+    \* initialization/preservation proof. Its name is not a reachability proof.
+    /\ ProofDomain \subseteq D
+    /\ ProofDomain # {}
+    /\ \A clause \in ClausesWithRole(Clauses, RoleOf, {"support"}) :
+          ProofDomain \subseteq Meaning[clause]
+    /\ DerivedBasis \in
+         [DerivedClauses(Clauses, RoleOf) ->
+              SUBSET (Clauses \ DerivedClauses(Clauses, RoleOf))]
+    /\ PremiseDomain \in
+         [DerivedClauses(Clauses, RoleOf) -> SUBSET D]
+    /\ \A clause \in DerivedClauses(Clauses, RoleOf) :
+          /\ DerivedBasis[clause] # {}
+          \* No selected derived-result credit from an empty premise/basis cut.
+          /\ ClauseMeet(ProofDomain \cap PremiseDomain[clause],
+                        Meaning, DerivedBasis[clause]) # {}
+          /\ ClauseMeet(ProofDomain \cap PremiseDomain[clause],
+                        Meaning, DerivedBasis[clause])
+               \subseteq Meaning[clause]
+
 OwnershipBoundaryTyped(ActionLabels, Actors, OwnerOf, DelegateOf,
                        CommitActions, AssuranceAt) ==
     /\ OwnerOf \in [ActionLabels -> Actors]

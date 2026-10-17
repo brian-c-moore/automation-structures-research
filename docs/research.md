@@ -20,7 +20,7 @@ The result used by the theory is the reconstruction summarized in the capstone a
 
 ## Supplementary research
 
-The [supplementary research](../supplementary-research/README.md) tree preserves candidate searches, failed experiments, and tests that informed revisions. Each study states how its result relates to the current catalog.
+The [supplementary research](../supplementary-research/README.md) tree is deprecated. It preserves candidate searches, failed experiments, and tests that informed revisions, with their known mistakes and original evidence limits. These studies have no active repair or promotion program.
 
 | Study family | Research question | Retention rule |
 |---|---|---|
@@ -29,7 +29,7 @@ The [supplementary research](../supplementary-research/README.md) tree preserves
 | `studies/irreducibility/` | Which modeled invariants fail after a fused check and act is separated or a defining guard is removed? | Keep the paired model, configuration, violating trace, and exact claim for the tested seam |
 | `studies/minimality/` | Can a target be reconstructed from the remaining catalog, admitted connective forms, and declared relies? | Keep valid and failed reductions, model-degeneracy findings, and the exact target and mapping |
 
-A supplementary result becomes primary evidence only after its question, method, result, limits, and catalog relationship have been reviewed. Copied dependencies, caches, duplicate sources, and wrapper scripts are excluded from the research record.
+A particular artifact is revisited only when a concrete current requirement needs it and the primary artifacts cannot supply it. That review identifies the requirement, selected artifact and acceptance test; it does not revive the study. Copied dependencies, caches, duplicate sources, and wrapper scripts are excluded from the research record.
 
 ## Revision rule
 

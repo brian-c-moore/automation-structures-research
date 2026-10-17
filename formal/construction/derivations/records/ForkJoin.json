@@ -34,7 +34,7 @@
   "failure_ceilings": ["no-modeled-worker-or-coordinator-crash-retry-or-recovery", "no-modeled-torn-completion-barrier-or-output-commit", "inter-worker-communication-during-fork-is-outside-the-representation"],
   "execution_carriers": ["ForkJoin"],
   "local_theorems": ["ForkJoin_Proof!Safety", "ForkJoin_Proof!BarrierCompletenessSafety", "ForkJoin_Proof!OutputConsistencySafety", "ForkJoin_Proof!PhaseOrderingSafety", "ForkJoinImplRefinesSpec_Proof!RefinementThm", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"],
-  "executable_pointers": ["formal/execution/carriers/ForkJoin.tla", "formal/execution/carriers/ForkJoin_Proof.tla", "formal/execution/carriers/refinement/ForkJoin/ForkJoinImplRefinesSpec.tla", "formal/execution/carriers/refinement/ForkJoin/ForkJoinImplRefinesSpec_Proof.tla", "crate://automation-structures/0.2.3/src/modalities/fork_join.rs"],
+  "executable_pointers": ["formal/execution/carriers/ForkJoin.tla", "formal/execution/carriers/ForkJoin_Proof.tla", "formal/execution/carriers/refinement/ForkJoin/ForkJoinImplRefinesSpec.tla", "formal/execution/carriers/refinement/ForkJoin/ForkJoinImplRefinesSpec_Proof.tla", "development-copy://automation-structures/0.3.2/src/modalities/fork_join.rs"],
   "library_premises": ["canonical-fork-join-carrier", "ForkJoin-Safety", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification"],
   "deployment_premises": ["finite-worker-index-set", "nonempty-worker-value-domain", "serialized-carrier-state-mutation", "atomic-completion-barrier-and-output-transitions", "complete-worker-and-coordinator-writer-inventory"],
   "residuals": ["no-inter-worker-noninterference-theorem", "no-eventual-worker-completion-barrier-or-output-availability", "no-scheduler-fairness-throughput-or-time-bound", "no-crash-retry-durability-or-external-effect-result"],
@@ -63,7 +63,7 @@
     {"path": "formal/execution/carriers/ForkJoin.tla", "contains": ["VARIABLES wstate, wvalue, phase, output_ready, output_snapshot", "StartWorker(w) ==", "CompleteWorker(w) ==", "Barrier ==", "ProduceOutput ==", "BarrierCompleteness ==", "OutputConsistency ==", "PhaseOrdering =="]},
     {"path": "formal/execution/carriers/ForkJoin_Proof.tla", "contains": ["THEOREM Safety", "THEOREM BarrierCompletenessSafety", "THEOREM OutputConsistencySafety", "THEOREM PhaseOrderingSafety"]},
     {"path": "formal/execution/carriers/refinement/ForkJoin/ForkJoinImplRefinesSpec_Proof.tla", "contains": ["THEOREM RefinementThm"]},
-    {"path": "crate://automation-structures/0.2.3/src/modalities/fork_join.rs", "contains": ["pub struct ForkJoin", "pub fn start_worker", "pub fn complete_worker", "pub fn barrier", "pub fn produce_output", "pub fn done_stuttering"]}
+    {"path": "development-copy://automation-structures/0.3.2/src/modalities/fork_join.rs", "contains": ["pub struct ForkJoin", "pub fn start_worker", "pub fn complete_worker", "pub fn barrier", "pub fn produce_output", "pub fn done_stuttering"]}
   ],
   "proof_binding": {"canonical_directory": "formal/execution/carriers", "proof_module": "ForkJoin_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
   "witness": {

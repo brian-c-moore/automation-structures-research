@@ -1,8 +1,8 @@
 ---- MODULE ConvergenceGovernorImplRefinesSpec ----
 (***************************************************************************)
 (* Contract transcription for ConvergenceGovernorPhaseAware. Enum values  *)
-(* map to canonical strings; the history Vec maps to a sequence. The avg   *)
-(* argument is bound to the post-slide arithmetic mean by the precondition. *)
+(* map to canonical strings; the sealed history maps to a sequence. Update *)
+(* computes the post-slide arithmetic mean, as does the current Rust owner. *)
 (***************************************************************************)
 \* EXPECT: OK
 EXTENDS Naturals, Sequences

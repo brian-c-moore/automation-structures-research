@@ -42,7 +42,7 @@ pub use memoization::{
 pub use quality_hierarchy::{QualityHierarchy, QualityNode};
 pub use reduction::{PathReduction, Reduction, Relaxation};
 pub use relationship_graph::{Edge, RelationshipGraph};
-pub use resource_registry::ResourceRegistry;
+pub use resource_registry::{RegistryRefusal, ResourceRegistry};
 pub use rooted_frontier::{
     rooted_frontier_subject, run_bounded_frontier, run_minimum_frontier, BoundedFrontierControl,
     BoundedFrontierResult, FrontierCandidate, FrontierTarget, MinimumFrontierResult,

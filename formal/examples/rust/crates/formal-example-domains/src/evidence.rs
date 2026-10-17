@@ -491,7 +491,7 @@ fn ospf_record() -> DacBaseRecord {
         ),
         shared_node(
             "Reduction",
-            "formal-example-structures::reduction::PathReduction",
+            "formal-example-structures::reduction::PathReduction::compare",
             "Record accepted distance improvements in the conventional construction.",
         ),
         node(
@@ -642,7 +642,7 @@ fn ospf_record() -> DacBaseRecord {
                 "RelationshipGraph.Commit",
                 "QualityHierarchy.Commit",
                 "CompetitiveSelection.Commit",
-                "Reduction.Apply",
+                "Reduction.Compare",
                 "AllocationSnapshot.Commit",
             ]),
             permitted_host_material: s(&[
@@ -815,7 +815,7 @@ fn edf_record() -> DacBaseRecord {
         ),
         shared_node(
             "Sequential",
-            "formal-example-structures::sequential::Sequential<Option<JobIndex>>",
+            "formal-example-structures::sequential::Sequential<Option<usize>>",
             "Order one begin and one completion record for every execution quantum.",
         ),
         shared_node(
@@ -1217,12 +1217,12 @@ fn crdt_record() -> DacBaseRecord {
     let nodes = vec![
         shared_node(
             "ResourceRegistry",
-            "formal-example-structures::registry::ResourceRegistry",
+            "formal-example-structures::resource_registry::ResourceRegistry",
             "Register replica, operation, and captured-state identities without replacement.",
         ),
         shared_node(
             "Reduction",
-            "formal-example-structures::reduction::Reduction",
+            "formal-example-structures::reduction::Reduction::fold",
             "Fold the exact local and delivered payloads through the registered join function.",
         ),
         shared_node(
@@ -1488,7 +1488,7 @@ fn rdp_record() -> DacBaseRecord {
     let nodes = vec![
         shared_node(
             "ResourceRegistry",
-            "formal-example-structures::registry::ResourceRegistry",
+            "formal-example-structures::resource_registry::ResourceRegistry",
             "Register account identities and account-local accepted query identities.",
         ),
         shared_node(
@@ -2820,6 +2820,87 @@ mod tests {
         ])
         .expect_err("fabricated implementation identity must fail");
         assert!(error.contains("differs from the member construction account"));
+    }
+
+    #[test]
+    fn equal_false_member_and_relation_identities_are_rejected() {
+        let mut lod = lod_record();
+        let mut ospf = ospf_record();
+        let mut relation = relation_record();
+        let false_identity = "formal-example-structures::missing::QualityHierarchy";
+        for record in [&mut lod, &mut ospf] {
+            record
+                .construction
+                .nodes
+                .iter_mut()
+                .find(|node| node.id == "QualityHierarchy")
+                .expect("quality node")
+                .implementation_identity = false_identity.to_string();
+        }
+        for binding in &mut relation
+            .relation
+            .as_mut()
+            .expect("relation")
+            .implementation_bindings
+        {
+            if binding.node_id == "QualityHierarchy" {
+                binding.implementation_identity = false_identity.to_string();
+            }
+        }
+        let error = EvidenceRegistry::new(vec![
+            RecordDefinition::Base(Box::new(lod)),
+            RecordDefinition::Base(Box::new(ospf)),
+            RecordDefinition::Base(Box::new(relation)),
+        ])
+        .expect_err("matching false strings are not resolved source identities");
+        assert!(error.contains("unresolved or wrong implementation identity"));
+    }
+
+    #[test]
+    fn actual_reduction_operation_must_match_the_declared_caller() {
+        use crate::{Check, ExampleRun};
+        use formal_example_structures::{PathReduction, Reduction, TraceLog};
+        let mut trace = TraceLog::default();
+        let result =
+            Reduction::fold([1u64, 2], 0, |a, b| a + b, &mut trace, "delivery").expect("fold");
+        let mut run = ExampleRun {
+            id: "FEX-DOM-DIST-01".to_string(),
+            scenario: "operation binding".to_string(),
+            output: result,
+            reference: result,
+            checks: vec![Check::pass("unchanged output", "3")],
+            trace,
+            residuals: Vec::new(),
+        };
+        assert!(run.passed(), "actual CRDT fold identity");
+        let trace = std::mem::take(&mut run.trace);
+        assert!(
+            !run.passed(),
+            "an erased trace provides no implementation binding"
+        );
+        run.trace = trace;
+        let checks = std::mem::take(&mut run.checks);
+        assert!(!run.passed(), "an empty check set is not admitted evidence");
+        run.checks = checks;
+        run.trace.emit(
+            formal_example_structures::Structure::Budget,
+            "Initialize",
+            "delivery",
+            "undeclared owner",
+        );
+        assert!(
+            !run.passed(),
+            "an undeclared emitted owner has no matching binding"
+        );
+        let mut comparison = TraceLog::default();
+        PathReduction::compare(None, result, &mut comparison, "delivery");
+        run.trace = comparison;
+        assert!(
+            !run.passed(),
+            "same declared fold and result must reject a path comparison"
+        );
+        run.id = "FEX-OSPF-001".to_string();
+        assert!(run.passed(), "actual OSPF comparison identity");
     }
 
     #[test]

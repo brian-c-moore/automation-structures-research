@@ -2,7 +2,7 @@
 
 This tree holds the formal artifact for Automation Structures: TLA+ models and proofs, TLC configurations, negative controls, correspondence records for the published Rust crate, and executable examples.
 
-[docs/formal-methods.md](../docs/formal-methods.md) lists the formal work, what each part tries to establish, where its source is, and how a reviewer selects it. Formal tools run only through the container entrypoint at [verification/run_proofs.py](../verification/run_proofs.py); build and run instructions are in [docs/reproducibility.md](../docs/reproducibility.md).
+[docs/formal-methods.md](../docs/formal-methods.md) lists the formal work, what each part tries to establish, and where its source is. Run selected formal tools directly in the pinned container; input roles and build instructions are described in [verification/README.md](../verification/README.md) and [docs/reproducibility.md](../docs/reproducibility.md).
 
 | Directory | Contents |
 |---|---|

@@ -44,7 +44,7 @@
     "FederatedBudgetImplRefinesSpec_Proof!RefinementThm", "FederatedBudget_Proof!Safety", "FederatedBudget_Proof!MasterCapacityBoundSafety", "FederatedBudget_Proof!SubPoolCapacityBoundSafety", "FederatedBudget_Proof!CapacityConservationSafety", "TheoryKernel_Proof!ObligationPreservation", "TheoryKernel_Proof!CheckActStability", "OwnershipAssuranceKernel_Proof!OwnershipAssuranceClassification"],
   "executable_pointers": [
     "formal/structures/FederatedBudget/refinement/FederatedBudgetImplRefinesSpec.tla",
-    "formal/structures/FederatedBudget/refinement/FederatedBudgetImplRefinesSpec_Proof.tla","crate://automation-structures/0.2.3/src/compositions/federated_budget.rs", "formal/structures/FederatedBudget/FederatedBudget.tla", "formal/structures/FederatedBudget/FederatedBudget_Proof.tla"],
+    "formal/structures/FederatedBudget/refinement/FederatedBudgetImplRefinesSpec_Proof.tla","development-copy://automation-structures/0.3.2/src/compositions/federated_budget.rs", "formal/structures/FederatedBudget/FederatedBudget.tla", "formal/structures/FederatedBudget/FederatedBudget_Proof.tla"],
   "library_premises": [
     "FederatedBudget-written-contract-refinement-profile","canonical-federated-budget-machine", "FederatedBudget-Safety", "ObligationPreservation", "CheckActStability", "OwnershipAssuranceClassification"],
   "deployment_premises": ["SubPoolNamesFinite", "MasterCapacityType", "serialized-master-and-subpool-mutation", "atomic-delegation-conservation-update", "complete-budget-writer-inventory"],
@@ -79,7 +79,7 @@
     },
     {"path": "formal/structures/FederatedBudget/FederatedBudget.tla", "contains": ["VARIABLES master_allocated, sub_capacities, sub_allocated", "AllocateSubPool(name, amount)", "AllocateFromSubPool(name, amount)", "ReleaseFromSubPool(name, amount)", "CapacityConservation"]},
     {"path": "formal/structures/FederatedBudget/FederatedBudget_Proof.tla", "contains": ["THEOREM Safety", "THEOREM MasterCapacityBoundSafety", "THEOREM CapacityConservationSafety"]},
-    {"path": "crate://automation-structures/0.2.3/src/compositions/federated_budget.rs", "contains": ["pub struct FederatedBudget", "pub fn allocate_sub_pool", "pub fn allocate_from_sub_pool", "pub fn release_from_sub_pool", "pub open spec fn capacity_conservation"]}
+    {"path": "development-copy://automation-structures/0.3.2/src/compositions/federated_budget.rs", "contains": ["pub struct FederatedBudget", "pub fn allocate_sub_pool", "pub fn allocate_from_sub_pool", "pub fn release_from_sub_pool", "pub open spec fn capacity_conservation"]}
   ],
   "proof_binding": {"canonical_directory": "formal/structures/FederatedBudget", "proof_module": "FederatedBudget_Proof", "theorem": "Safety", "statement": "Spec => []Inv"},
   "witness": {

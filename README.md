@@ -121,12 +121,14 @@ Rust implementations. Twenty-three refinement packages relate the implementation
 their specifications. Negative controls deliberately break a named property and must fail while
 an isolated baseline passes.
 
-The [supplementary research](supplementary-research/README.md) keeps failed experiments and negative
+The deprecated [supplementary research](supplementary-research/README.md) keeps failed experiments and negative
 results, including checks later found not to test what they claimed. These are part of the research
 record. The catalog covers the systems examined and remains open to counterexamples.
 
 ## Start Here
 
+- Read the [FAQ](docs/faq.md) for common questions about the structures, their use, and what the
+  formal evidence establishes.
 - Use the [`automation-structures` quick start](https://github.com/brian-c-moore/automation-structures#quick-start)
   for Rust code and the [reference](docs/reference.md) to choose structures by responsibility.
 - Follow the [shared rendering/routing construction](formal/examples/README.md#shared-composition)

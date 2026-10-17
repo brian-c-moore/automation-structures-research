@@ -12,7 +12,10 @@ limits. Each program returns its result together with runtime checks and a typed
 
 ## Run the examples
 
-Run commands from `formal/examples/rust`. The workspace pins four direct crates.io dependencies; on a machine without a populated Cargo cache, run `cargo fetch` once with network access, after which every command below works offline.
+Run commands from `formal/examples/rust`. The checked-in toolchain selects Rust 1.99.1.
+The workspace pins four direct crates.io dependencies, including `automation-structures =0.4.0`.
+On a machine without a populated Cargo cache, run `cargo fetch --locked` once with network
+access, after which every command below works offline.
 
 List or inspect the available artifacts:
 
@@ -170,8 +173,8 @@ generation, measures, coverage, tie handling, and update triggers remain domain 
 Run the Rust workspace checks from `formal/examples/rust`:
 
 ```text
-cargo test --workspace --offline
-cargo clippy --workspace --all-targets --offline -- -D warnings
+cargo test --locked --workspace --offline
+cargo clippy --locked --workspace --all-targets --offline -- -D warnings
 ```
 
 The tests cover named and generated LOD and route inputs, the RFC 2328 fixture, equal-cost next

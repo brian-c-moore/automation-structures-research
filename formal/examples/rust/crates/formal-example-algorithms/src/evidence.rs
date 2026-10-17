@@ -347,7 +347,7 @@ fn schema_record() -> DacBaseRecord {
                 node(
                     "Reduction",
                     ConstructionStratum::Catalog,
-                    "formal-example-structures::reduction::Reduction",
+                    "formal-example-structures::reduction::Reduction::fold",
                     "Combine every state's recurrence candidates under the supplied operation.",
                 ),
                 node(
